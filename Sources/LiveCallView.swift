@@ -15,6 +15,11 @@ struct LiveCallView: View {
     @EnvironmentObject var store: AppStore
     @Environment(\.verticalSizeClass) private var vSize
     @State private var joining = true
+    // Typing: the voice lane's quiet sibling — for when you don't want to
+    // speak. The draft and sent bubbles live in memory only.
+    @State private var typing = false
+    @State private var draft = ""
+    @FocusState private var draftFocused: Bool
 
     private var theater: Bool { vSize == .compact }
 
@@ -71,11 +76,97 @@ struct LiveCallView: View {
             DirectedSpotlight()
                 .padding(.horizontal, 12)
                 .padding(.top, 14)
-            holdStrip
-                .padding(.horizontal, 12)
-                .padding(.top, 14)
-                .padding(.bottom, 8)
+            if !store.sessionMessages.isEmpty {
+                sentBubbles
+                    .padding(.horizontal, 16)
+                    .padding(.top, 10)
+            }
+            Group {
+                if typing { typingBar } else { holdStrip }
+            }
+            .padding(.horizontal, 12)
+            .padding(.top, store.sessionMessages.isEmpty ? 14 : 10)
+            .padding(.bottom, 8)
         }
+    }
+
+    /// The last few typed messages, floating over the plane then gone with
+    /// the session — in memory, never stored.
+    private var sentBubbles: some View {
+        VStack(alignment: .trailing, spacing: 6) {
+            ForEach(store.sessionMessages) { message in
+                Text(message.text)
+                    .scaledFont(12.5)
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 12).padding(.vertical, 8)
+                    .background(DT.violet.opacity(0.55))
+                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .trailing)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Your typed messages: \(store.sessionMessages.map(\.text).joined(separator: ". "))")
+    }
+
+    /// Typing replaces the hold strip; the mic button brings voice back.
+    private var typingBar: some View {
+        HStack(spacing: 9) {
+            Button {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
+                    typing = false
+                    draftFocused = false
+                }
+            } label: {
+                Image(systemName: "mic.fill")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(.white.opacity(0.85))
+                    .frame(width: 46, height: 46)
+                    .background(DT.surface2Dark)
+                    .clipShape(Circle())
+                    .overlay(Circle().strokeBorder(.white.opacity(0.10), lineWidth: 0.8))
+            }
+            .buttonStyle(Pressable())
+            .accessibilityLabel("Back to voice")
+
+            TextField("Type to the room…", text: $draft, axis: .vertical)
+                .scaledFont(14)
+                .lineLimit(1...3)
+                .foregroundStyle(.white)
+                .tint(DT.violet)
+                .focused($draftFocused)
+                .submitLabel(.send)
+                .onSubmit { sendDraft() }
+                .padding(.horizontal, 14).padding(.vertical, 12)
+                .background(DT.surface2Dark)
+                .clipShape(RoundedRectangle(cornerRadius: 17, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 17, style: .continuous)
+                    .strokeBorder(.white.opacity(0.12), lineWidth: 0.8))
+
+            Button { sendDraft() } label: {
+                Image(systemName: "arrow.up")
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundStyle(.white)
+                    .frame(width: 46, height: 46)
+                    .background(draft.trimmingCharacters(in: .whitespaces).isEmpty
+                                ? AnyShapeStyle(DT.surface2Dark) : AnyShapeStyle(DT.heroGradient))
+                    .clipShape(Circle())
+            }
+            .buttonStyle(Pressable())
+            .disabled(draft.trimmingCharacters(in: .whitespaces).isEmpty)
+            .sensoryFeedback(.impact(weight: .light), trigger: store.sessionMessages.count)
+            .accessibilityLabel("Send message")
+        }
+        .padding(10)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous)
+            .strokeBorder(.white.opacity(0.10), lineWidth: 0.8))
+    }
+
+    private func sendDraft() {
+        let text = draft
+        draft = ""
+        store.sendSessionMessage(text)
     }
 
     // MARK: Theater — rotate the phone: content edge-to-edge, chrome floats
@@ -119,11 +210,22 @@ struct LiveCallView: View {
                 .padding(.horizontal, 14)
                 .padding(.top, 8)
                 Spacer()
-                HStack {
-                    Spacer()
-                    theaterControls
-                        .padding(.trailing, 14)
+                if typing {
+                    typingBar
+                        .padding(.horizontal, 14)
                         .padding(.bottom, 10)
+                        .frame(maxWidth: 560)
+                } else {
+                    HStack {
+                        if !store.sessionMessages.isEmpty {
+                            sentBubbles.frame(maxWidth: 300)
+                                .padding(.leading, 14)
+                        }
+                        Spacer()
+                        theaterControls
+                            .padding(.trailing, 14)
+                            .padding(.bottom, 10)
+                    }
                 }
             }
         }
@@ -160,6 +262,22 @@ struct LiveCallView: View {
                 .accessibilityValue(store.micHeld ? "Microphone live" : "Microphone muted")
                 .accessibilityHint("Double-tap to toggle the microphone")
                 .accessibilityAction { store.micHeld.toggle() }
+
+            Button {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
+                    typing = true
+                    draftFocused = true
+                }
+            } label: {
+                Image(systemName: "keyboard")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(.white.opacity(0.85))
+                    .frame(width: 40, height: 40)
+                    .background(theaterGlass, in: Circle())
+                    .overlay(Circle().strokeBorder(.white.opacity(0.12), lineWidth: 0.8))
+            }
+            .buttonStyle(Pressable())
+            .accessibilityLabel("Type instead")
 
             Button { toggleTheaterOrientation() } label: {
                 Image(systemName: "iphone")
@@ -268,6 +386,25 @@ struct LiveCallView: View {
             }
             .buttonStyle(Pressable())
             .accessibilityLabel(store.handRaised ? "Lower hand" : "Raise hand")
+
+            Button {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
+                    typing = true
+                    draftFocused = true
+                }
+            } label: {
+                Image(systemName: "keyboard")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(.white.opacity(0.85))
+                    .frame(width: 52, height: 52)
+                    .background(DT.surface2Dark)
+                    .clipShape(RoundedRectangle(cornerRadius: DT.rHero, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: DT.rHero, style: .continuous)
+                        .strokeBorder(.white.opacity(0.10), lineWidth: 0.8))
+            }
+            .buttonStyle(Pressable())
+            .accessibilityLabel("Type instead")
+            .accessibilityHint("Send a typed message to the room — for when you don't want to speak")
 
             holdButton
 

@@ -3,6 +3,13 @@ import Combine
 
 enum AppTab: Hashable { case home, work, agents, tasks }
 
+/// A typed message sent into the live session — for when you don't want
+/// to speak. Ephemeral by design: memory only, cleared on leave.
+struct SessionMessage: Identifiable, Equatable {
+    let id = UUID()
+    let text: String
+}
+
 @MainActor
 final class AppStore: ObservableObject {
     let intent = IntentRecorder()
@@ -571,6 +578,21 @@ final class AppStore: ObservableObject {
         inCall = false
         showApproval = false
         approvalTask?.cancel()
+        sessionMessages.removeAll()   // conversation lives in memory only
+    }
+
+    // MARK: In-session typing — the voice lane's quiet sibling
+
+    @Published var sessionMessages: [SessionMessage] = []
+
+    func sendSessionMessage(_ text: String) {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+            sessionMessages.append(SessionMessage(text: trimmed))
+            if sessionMessages.count > 3 { sessionMessages.removeFirst() }
+        }
+        postConversation(trimmed)   // joins the room's feed when the wire is live
     }
 
     func allowEdit() {

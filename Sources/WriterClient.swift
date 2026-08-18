@@ -72,6 +72,8 @@ private struct WirePayload: Decodable {
     let caption: String?
     let durationSec: Double?
     let relatedEventIds: [String]?
+    let steps: [String]?
+    let accent: [Int]?
     // shared
     let title: String?
     let kind: String?
@@ -307,7 +309,8 @@ extension AppStore {
                 directorColor: Self.agentColors[directorId] ?? Self.fallbackColor(directorId),
                 caption: payload.caption ?? title,
                 duration: payload.durationSec ?? 7,
-                steps: [])
+                steps: payload.steps ?? [],
+                accent: payload.accent ?? [])
             wireBeatRelated[index] = payload.relatedEventIds ?? []
             if wireBeats.count > Self.beatCap, let victim = wireBeats.keys.min() {
                 wireBeats.removeValue(forKey: victim)
@@ -316,6 +319,20 @@ extension AppStore {
         default:
             break
         }
+    }
+
+    /// A typed session message joins the room's conversation feed via the
+    /// writer — fire and forget; offline it stays a local ephemeral bubble.
+    func postConversation(_ text: String) {
+        guard wireStatus.isLive, let url = URL(string: "\(writerURL)/rpc") else { return }
+        var request = URLRequest(url: url, timeoutInterval: 2)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try? JSONSerialization.data(withJSONObject: [
+            "tool": "conversation_publish",
+            "args": ["text": text, "actorId": "harrison"],
+        ])
+        Task { _ = try? await URLSession.shared.data(for: request) }
     }
 
     private func countSkillUse(_ actorId: String, _ skill: AgentSkill) {
@@ -359,9 +376,11 @@ extension AppStore {
             artifacts = Array(wireArtifacts.values).sorted { $0.id < $1.id }
         }
         if !wireBeats.isEmpty {
-            // Stage content: resolve each beat's relatedEventIds against the
-            // work events seen so far — late arrivals resolve next rebuild.
+            // Stage precedence: director-curated steps win; otherwise resolve
+            // relatedEventIds against work events seen so far (late arrivals
+            // resolve next rebuild); otherwise the structural placeholder.
             beats = wireBeats.sorted { $0.key < $1.key }.map { index, beat in
+                guard beat.steps.isEmpty else { return beat }
                 let steps = (wireBeatRelated[index] ?? []).compactMap { wireEventTitles[$0] }
                 guard !steps.isEmpty else { return beat }
                 return Beat(id: beat.id, kind: beat.kind, title: beat.title,
