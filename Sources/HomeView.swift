@@ -173,30 +173,34 @@ struct HomeView: View {
                     .clipShape(RoundedRectangle(cornerRadius: DT.rControl, style: .continuous))
                     .padding(.top, 14)
 
-                    Eyebrow(store.hasLiveSession ? "IN SESSION" : "WORK")
-                        .padding(.top, 24)
                     if store.hasLiveSession {
+                        Eyebrow("IN SESSION")
+                            .padding(.top, 24)
                         LiveHeroCard().padding(.top, 10)
-                    } else {
+                    } else if store.configuration.previewContentEnabled {
+                        Eyebrow("WORK")
+                            .padding(.top, 24)
                         HomeQuietSessionCard().padding(.top, 10)
                     }
 
                     HStack {
                         Eyebrow("TODAY")
                         Spacer()
-                        NavigationLink { ActivityView() } label: {
-                            HStack(spacing: 4) {
-                                Image(systemName: "calendar")
-                                    .font(.system(size: 10, weight: .semibold))
-                                Text("Calendar")
-                                    .font(.system(size: 12, weight: .bold))
-                                Image(systemName: "chevron.right")
-                                    .font(.system(size: 9, weight: .bold))
+                        if store.configuration.previewContentEnabled {
+                            NavigationLink { ActivityView() } label: {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "calendar")
+                                        .font(.system(size: 10, weight: .semibold))
+                                    Text("Calendar")
+                                        .font(.system(size: 12, weight: .bold))
+                                    Image(systemName: "chevron.right")
+                                        .font(.system(size: 9, weight: .bold))
+                                }
+                                .foregroundStyle(DT.violetText(scheme))
                             }
-                            .foregroundStyle(DT.violetText(scheme))
+                            .buttonStyle(Pressable())
+                            .accessibilityHint("Week, month, year, and custom shipping history")
                         }
-                        .buttonStyle(Pressable())
-                        .accessibilityHint("Week, month, year, and custom shipping history")
                     }
                     .padding(.top, 24)
                     // Hold any tile to peek at what's behind it — iOS's
@@ -259,13 +263,19 @@ struct HomeView: View {
                         .padding(.top, 24)
                         .accessibilityLabel("Focus Home trial active — artifact and recent rails hidden. Manage in Settings.")
                     } else {
-                        ArtifactRail().padding(.top, 24)
+                        if !store.artifacts.isEmpty {
+                            ArtifactRail().padding(.top, 24)
+                        }
 
-                        FromFriendsRail().padding(.top, 24)
+                        if store.configuration.previewContentEnabled {
+                            FromFriendsRail().padding(.top, 24)
 
-                        Eyebrow("RECENT").padding(.top, 24)
-                        ForEach(DemoData.recents) { room in
-                            RecentRow(room: room).padding(.top, 10)
+                            Eyebrow("RECENT").padding(.top, 24)
+                            ForEach(DemoData.recents) { room in
+                                RecentRow(room: room).padding(.top, 10)
+                            }
+                        } else if store.artifacts.isEmpty && store.tasks.isEmpty {
+                            productionEmptyState.padding(.top, 24)
                         }
                     }
 
@@ -278,6 +288,32 @@ struct HomeView: View {
             .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(isPresented: $goNeedsYou) { NeedsYouRouter() }
         }
+    }
+
+    private var productionEmptyState: some View {
+        VStack(spacing: 10) {
+            Image(systemName: "rectangle.and.pencil.and.ellipsis")
+                .font(.system(size: 28, weight: .light))
+                .foregroundStyle(DT.violetText(scheme))
+            Text("Start from Work")
+                .font(.system(size: 15, weight: .bold))
+            Text("Choose a repository or folder, then begin a chat. Activity appears only after Drive observes real work.")
+                .font(.system(size: 12))
+                .foregroundStyle(DT.ink55(scheme))
+                .multilineTextAlignment(.center)
+                .lineSpacing(2)
+            Button { store.selectedTab = .work } label: {
+                Text("Open Work")
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundStyle(DT.violetText(scheme))
+                    .padding(.horizontal, 16)
+                    .frame(minHeight: 44)
+                    .contentShape(Rectangle())
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(22)
+        .card(radius: DT.rHero)
     }
 
     // MARK: Peeks — what "hold to preview" shows for each tile

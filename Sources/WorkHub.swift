@@ -94,6 +94,15 @@ struct WorkTargetRef: Identifiable, Codable, Equatable {
             connectionState: .disconnected,
             opaqueReference: "security_scope_pending"),
     ]
+
+    static let unconfigured = WorkTargetRef(
+        id: "target-unconfigured",
+        displayName: "Choose a work target",
+        displayLocation: "No repository or folder connected",
+        kind: .directory,
+        accessPosture: .permissionRequired,
+        connectionState: .unavailable,
+        opaqueReference: "host_target_required")
 }
 
 struct CallPreset: Identifiable, Codable, Equatable {
@@ -112,10 +121,20 @@ struct CallPreset: Identifiable, Codable, Equatable {
         agentIDs: ["maya", "coder"],
         presenterCandidateIDs: ["maya"])
 
-    static func loadDefault(defaults: UserDefaults = .standard) -> CallPreset {
+    static let unavailable = CallPreset(
+        id: "preset-unavailable",
+        name: "No default preset",
+        targetIDs: [],
+        agentIDs: [],
+        presenterCandidateIDs: [])
+
+    static func loadDefault(
+        defaults: UserDefaults = .standard,
+        fallback: CallPreset = .fallback
+    ) -> CallPreset {
         guard let data = defaults.data(forKey: "call.defaultPreset.v1"),
               let value = try? JSONDecoder().decode(CallPreset.self, from: data) else {
-            return .fallback
+            return fallback
         }
         return value
     }
@@ -211,12 +230,18 @@ struct CallTabView: View {
                 HStack(spacing: 7) {
                     Image(systemName: store.selectedWorkTarget.kind.symbol)
                     VStack(alignment: .leading, spacing: 1) {
-                        Text(store.selectedWorkTarget.displayName)
+                        Text(store.selectedWorkTarget.canUse
+                             ? store.selectedWorkTarget.displayName
+                             : "Target")
                             .font(.system(size: 12, weight: .bold))
                             .lineLimit(1)
-                        Text(store.selectedWorkTarget.connectionState.label)
-                            .font(.system(size: 9.5, weight: .semibold))
-                            .foregroundStyle(store.selectedWorkTarget.canUse ? DT.live(scheme) : DT.ink55(scheme))
+                            .minimumScaleFactor(0.72)
+                            .allowsTightening(true)
+                        if store.selectedWorkTarget.canUse {
+                            Text(store.selectedWorkTarget.connectionState.label)
+                                .font(.system(size: 9.5, weight: .semibold))
+                                .foregroundStyle(DT.live(scheme))
+                        }
                     }
                     Image(systemName: "chevron.down")
                         .font(.system(size: 9, weight: .bold))
@@ -275,9 +300,16 @@ struct CallTabView: View {
                     .foregroundStyle(DT.ink35(scheme))
             }
             if !store.selectedWorkTarget.canUse {
-                Button("Choose an available target") { showingTargets = true }
-                    .font(.system(size: 12, weight: .bold))
-                    .foregroundStyle(DT.violetText(scheme))
+                Button { showingTargets = true } label: {
+                    Text(store.workTargets.contains(where: \.canUse)
+                         ? "Choose an available target"
+                         : "View target connection status")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundStyle(DT.violetText(scheme))
+                        .padding(.horizontal, 14)
+                        .frame(minHeight: 44)
+                        .contentShape(Rectangle())
+                }
             }
             Spacer()
         }
@@ -313,17 +345,20 @@ struct CallTabView: View {
                 .font(.system(size: 14))
                 .padding(.horizontal, 13)
                 .padding(.vertical, 11)
+                .frame(minHeight: 44)
                 .background(DT.surface2(scheme), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
                 .disabled(!store.selectedWorkTarget.canUse)
+                .accessibilityHidden(!store.selectedWorkTarget.canUse)
             Button { send() } label: {
                 Image(systemName: "arrow.up")
                     .font(.system(size: 14, weight: .bold))
                     .foregroundStyle(.white)
-                    .frame(width: 38, height: 38)
+                    .frame(width: 44, height: 44)
                     .background(composer.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? DT.ink35(scheme) : DT.violet, in: Circle())
             }
             .disabled(composer.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || !store.selectedWorkTarget.canUse)
             .accessibilityLabel("Send message")
+            .accessibilityHidden(!store.selectedWorkTarget.canUse)
         }
         .padding(.horizontal, 14)
         .padding(.top, 10)
@@ -363,7 +398,7 @@ private struct WorkHeaderButtonStyle: ButtonStyle {
         configuration.label
             .foregroundStyle(prominent ? Color.white : DT.violetText(scheme))
             .padding(.horizontal, 10)
-            .frame(height: 36)
+            .frame(minHeight: 44)
             .background(prominent ? AnyShapeStyle(DT.heroGradient) : AnyShapeStyle(DT.violet.opacity(0.10)), in: Capsule())
             .opacity(configuration.isPressed ? 0.72 : 1)
             .scaleEffect(configuration.isPressed ? 0.97 : 1)
@@ -377,30 +412,40 @@ struct WorkTargetPickerView: View {
 
     var body: some View {
         NavigationStack {
-            List(store.workTargets) { target in
-                Button {
-                    store.selectWorkTarget(target.id)
-                    if target.canUse { dismiss() }
-                } label: {
-                    HStack(spacing: 12) {
-                        Image(systemName: target.kind.symbol)
-                            .foregroundStyle(DT.violetText(scheme))
-                            .frame(width: 30)
-                        VStack(alignment: .leading, spacing: 3) {
-                            Text(target.displayName).font(.system(size: 14, weight: .bold))
-                            Text(target.displayLocation).font(.system(size: 11)).foregroundStyle(.secondary)
-                            Text("\(target.accessPosture.label) · \(target.connectionState.label)")
-                                .font(.system(size: 10, weight: .semibold))
-                                .foregroundStyle(target.canUse ? DT.live(scheme) : DT.ink55(scheme))
+            List {
+                ForEach(store.workTargets) { target in
+                    Button {
+                        store.selectWorkTarget(target.id)
+                        if target.canUse { dismiss() }
+                    } label: {
+                        HStack(spacing: 12) {
+                            Image(systemName: target.kind.symbol)
+                                .foregroundStyle(DT.violetText(scheme))
+                                .frame(width: 30)
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(target.displayName).font(.system(size: 14, weight: .bold))
+                                Text(target.displayLocation).font(.system(size: 11)).foregroundStyle(.secondary)
+                                Text("\(target.accessPosture.label) · \(target.connectionState.label)")
+                                    .font(.system(size: 10, weight: .semibold))
+                                    .foregroundStyle(target.canUse ? DT.live(scheme) : DT.ink55(scheme))
+                            }
+                            Spacer()
+                            if store.selectedWorkTargetID == target.id {
+                                Image(systemName: "checkmark.circle.fill").foregroundStyle(DT.violet)
+                            }
                         }
-                        Spacer()
-                        if store.selectedWorkTargetID == target.id {
-                            Image(systemName: "checkmark.circle.fill").foregroundStyle(DT.violet)
-                        }
+                        .contentShape(Rectangle())
                     }
-                    .contentShape(Rectangle())
+                    .buttonStyle(.plain)
+                    .disabled(!target.canUse)
                 }
-                .buttonStyle(.plain)
+                if !store.workTargets.contains(where: \.canUse) {
+                    ContentUnavailableView(
+                        "No targets available",
+                        systemImage: "folder.badge.questionmark",
+                        description: Text("A connected host or security-scoped folder grant is required."))
+                        .listRowBackground(Color.clear)
+                }
             }
             .navigationTitle("Work target")
             .navigationBarTitleDisplayMode(.inline)
@@ -432,6 +477,12 @@ struct CallConfiguratorView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 18) {
+                    if store.workTargets.allSatisfy({ !$0.canUse }) || store.agents.isEmpty {
+                        ContentUnavailableView(
+                            "Call unavailable",
+                            systemImage: "phone.down",
+                            description: Text("Connect a work target and an approved agent roster before starting a call."))
+                    }
                     section("TARGETS") {
                         VStack(spacing: 0) {
                             ForEach(store.workTargets.filter(\.canUse)) { target in

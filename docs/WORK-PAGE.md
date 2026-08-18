@@ -1,130 +1,143 @@
-# The Work page, from the ground up
+# Work: chat first, calls when useful
 
-Review → redesign → plan for the Work tab. The whole user experience is
-in scope: entry, states, motion, language, honesty, accessibility, and
-what the page is *for*.
+This document is the product and interaction contract for the Work root. It
+supersedes the 2026-08-17 decision that made Work a vertically stacked session
+lifecycle page. The lifecycle work was not discarded: it now lives in the
+secondary **Calls** and **History** flows.
 
-## Review — what the page is today, honestly
+Implementation status as of 2026-08-18: the native surface described here is
+implemented on the open `drive-ios` PR stack through
+`codex/on-device-system-model`. It is not merged or released, and its chat and
+target registries remain local preview boundaries rather than production
+services. Debug retains those fixtures; Release starts with one disabled
+“Choose a work target” reference, no agents/messages/calls, and rejects chat or
+call launch until real target and roster connections exist. [TODO.md](../TODO.md)
+is the canonical backlog.
 
-Today's Work tab is three things stacked: the same IN SESSION hero Home
-already shows, a "Start a session" button that secretly just joins the
-demo session, and two static "recent" rows whose Replay labels don't
-replay anything.
+## Thesis
 
-The audit, part by part:
+**Work is the quiet place where a person starts or resumes work against an
+explicit target.** Most visits should begin with a composer, not an operations
+dashboard. The person can escalate the same intent into a call without first
+scrolling through invitations, schedules, and replays.
 
-| UX part | Today | Verdict |
-|---|---|---|
-| Reason to visit | None — Home already has the hero | ✗ redundant |
-| "Start a session" | Fake: joins the existing demo call | ✗ dishonest affordance |
-| Live context | Static subtitle; no sense of what's happening inside | ✗ opaque |
-| Invitations | Live in the inbox only — the session tab never shows them | ✗ missing |
-| Upcoming | No concept of a scheduled/planned session | ✗ missing |
-| Records | "Recents" rows, disconnected from replay artifacts and memory | ✗ dead ends |
-| Empty state | Page assumes a live session forever | ✗ unconsidered |
-| Wire truth | Ignores wire presence/beats entirely | ✗ demo-only |
-| New systems | No skills, no session memory, no composer | ✗ predates them |
-| Language | Title "Work" ✓; body copy fine | ✓ keep |
-| Swipe/guide bar | tabSwipe ✓, ambient bar ✓ | ✓ keep |
+The first screen answers four questions immediately:
 
-The page predates everything the product now knows: sessions have
-invitations, agents have skills, sessions leave memory and replays.
+1. What repository, folder, or saved file set will receive this work?
+2. Can Drive currently access it, and with what posture?
+3. Do I want a new chat or a live call?
+4. What should the agents do?
 
-## The thesis
+## Primary surface
 
-**Work is the session lifecycle page.** One page that answers, top to
-bottom: *what's live right now → who's inviting me → what's coming →
-how do I start one → what happened before.* Home is the doorway;
-Work is the front porch of the room — it should show you the inside
-before you commit, and hold the records after.
+### Target context
 
-Differentiation rule: Home's hero says "a session exists — join." The
-Work page's live card says *what the session is doing right now* (the
-current beat, live), because that's what makes joining feel worth it.
+The header shows a human-readable target label, source, connection state, and
+access posture. `WorkTargetRef` carries an opaque host-resolved reference; a
+display path is never authorization and no credential or raw device path is
+rendered or sent as configuration.
 
-## The redesign, section by section
+Changing a target opens a compact picker. Unavailable or permission-required
+targets remain legible but cannot accept a message. Device files use the system
+file importer and security-scoped URLs rather than broad filesystem access.
 
-### 1 · NOW — the live card with a beat ticker
-Title, LIVE pill, the people in the room (humans as initials, agents as
-Cline bots), and the differentiator: a **live beat ticker** — the
-current beat's kind chip + title over the kind-colored progress rail,
-updating at 2 Hz off the same director clock as the Spotlight. Join is
-the only verb.
-- **Quiet state** (no live session): the card becomes an honest quiet
-  state — "No session live" — with the two real actions: *Plan a
-  session* and *Watch the last replay*. Never a fake LIVE.
-- **Wire truth**: live when the session registry carries a started,
-  unended session (or the demo world is offline). Until that session's
-  first directed beat arrives, the card says so instead of borrowing a
-  different program. Once beats arrive, the ticker reads the same
-  `directorPosition` the Spotlight uses — one clock, no drift.
+### New Chat and Call
 
-### 2 · INVITATIONS — the entry ritual, surfaced
-Unarchived invitations from the inbox render here as first-class rows:
-inviter avatar, note, **Join now** / **Later** (Later marks read,
-keeps the inbox item). People don't like being called; the tab where
-sessions live is exactly where being *invited* should be visible.
+Both actions are visible at the top-right without scrolling:
 
-### 3 · UPCOMING — sessions that exist before they're live
-Planned sessions with when, people, and agenda size. Sourced from the
-composer (below) plus anything the wire schedules later. Context menu
-removes. This is the page's memory of intent.
+- **New Chat** clears the current managed conversation only after the runtime
+  can establish a new chat identity. In the current preview it clears local
+  messages and says so in its accessibility hint.
+- **Call** launches a valid saved preset immediately when that is the person's
+  preference; otherwise it opens the call configurator.
 
-### 4 · PLAN A SESSION — the composer (the old button, made real)
-A sheet, not a lie:
-1. **Project** — picked from the real project registry (attention-sorted).
-2. **Agenda** — auto-suggested from that project's blocked/review tasks
-   (the things that actually need humans), toggleable.
-3. **People** — agent chips with **skill hints** (a directing badge shows
-   who can run the room — the skills system feeding session setup).
-4. **Note** — the invitation line, prefilled with the session language.
-5. **Send invitations** — on a live wire, publishes create → schedule →
-   optional start → one session-linked invite per selected agent. Offline
-   preview keeps an explicitly local session; a dropped wire asks the user
-   to reconnect instead of silently forking state.
+The configurator selects opaque targets, agent references, and Presenter-
+eligible agents. It does not carry prompts, tools, credentials, model IDs, or
+Presenter grants. Cline remains the host coordinator and issues any temporary
+title grant when the call begins.
 
-### 5 · EARLIER — session records, not dead rows
-Every replay artifact is a session record card: title, beats/duration
-meta, **Play** (opens the replay player that already exists), and —
-when session memory holds notes for that room — the **"what landed"
-hook** with a link into the memory file. Records = replay + notes,
-the durable pair the session leaves behind.
+### Composer
 
-### Page-wide UX decisions
-- **States**: live / quiet / wire-dropped (last synced registry remains
-  coherent; mutations wait for reconnect) / first-run (quiet state +
-  seeded upcoming makes the page legible before any session).
-- **Motion**: ticker at 2 Hz periodic (information, not decoration —
-  allowed under Reduce Motion; the LivePill still stills itself).
-  Composer and rows use the standard springs; Pressable everywhere.
-- **A11y**: live card is one element ("Live: <title>, beat 3 of 8,
-  <beat title>. Join."); ticker rail hidden decorative; invitation rows
-  combine; composer fields labeled; all targets ≥ 44pt.
-- **Dynamic Type**: scaledFont on titles/rows; tickers use minimum
-  scale factors, never truncate the beat title silently.
-- **Language**: sessions, invitations, "plan" not "schedule-call";
-  no "start" language on something that joins.
-- **Intent/preheat**: page records `.work`; composer warms the picked
-  project's map (already cached via preheat on selection).
-- **Honesty**: nothing on this page pretends — quiet state over fake
-  LIVE, on-device composer labeled, replays labeled as directed beats.
+The empty state names the selected target and leaves the visual field quiet.
+The composer is the dominant interaction and is disabled when access is not
+usable. Sending must eventually enter the managed chat catalog/runtime; it must
+not create a second chat protocol inside the iOS app.
 
-## Plan
+## Secondary Calls and History
 
-- **P0 — this build (shipped with this doc)**: everything above,
-  on-device. Ticker off the store clock; invitations from the inbox
-  store; upcoming persisted (`upcoming.v1`); composer local; records
-  from replay artifacts + session memory.
-- **P1 — wire (partly shipped in the 2026-08-18 working tree)**: typed
-  session created/scheduled/started/ended events now drive NOW/UPCOMING;
-  the composer publishes real session-linked `room_invite`s; scheduled
-  timestamps drive reminders. Remaining: records enumerate per-session
-  programs via `events_since` windows instead of artifact stand-ins.
-- **P2 — presence & voice**: who's speaking on the live card; join
-  straight into hold-to-talk; scheduled-session push at T-minus.
-- **Design ops**: capture the rebuilt page to the design project's
-  `ios/v2/` group alongside the other live screens.
+The earlier lifecycle design remains useful, but no longer owns the root:
 
-Owner decisions staged: should UPCOMING sessions push a reminder
-(pairs with notification prefs)? Does the composer belong on Home too
-(as a quick action), or stay a Work-page ritual?
+- **Calls** contains live state, invitations, upcoming sessions, and the plan-a-
+  session composer.
+- **History** contains replayable session records and their durable memory
+  hooks.
+- A live call opens Spotlight's typed stage. The temporary Presenter publishes
+  structured beats and artifacts; no screen pixels are captured or streamed.
+
+Lifecycle truth comes from typed session created, scheduled, started, invited,
+and ended events. Quiet, disconnected, and preview states must be explicit.
+
+## States and honesty
+
+| State | Required behavior |
+|---|---|
+| No messages | Target-aware empty state and enabled composer when access is valid |
+| Active chat | Managed messages associated with a stable chat and target reference |
+| Permission required | Explain the missing grant and offer the system picker; never imply access |
+| Target disconnected | Preserve context read-only, block mutations, and offer reconnect |
+| Writer/runtime unavailable | Identify which capability is unavailable; do not silently fork durable state |
+| Offline local task | Only advertise local execution when the Apple system model reports availability |
+| Call configured | Validate at least one usable target and agent before launch |
+| Call live | Make Presenter ownership visible, temporary, exclusive, and revocable |
+
+## Accessibility and layout
+
+- The Drive-mark Home control is visible and VoiceOver-labeled; native back
+  behavior remains intact on pushed screens.
+- New Chat, Call, target selection, the composer, Calls, and History have
+  distinct labels and minimum 44-point hit targets.
+- Dynamic Type may wrap target context and action labels; it must not push Chat
+  or Call below a required scroll.
+- iPad uses the same information architecture with adaptive width, not a scaled
+  phone screenshot.
+- Reduce Motion still allows informational state changes while removing
+  decorative movement.
+
+## Implemented on the open stack
+
+- [x] Quiet target-aware Work root with New Chat and Call above the fold.
+- [x] Opaque `WorkTargetRef` and saved `CallPreset` shapes.
+- [x] Feature-isolated native call configurator.
+- [x] Calls and History as secondary sheets over the root.
+- [x] Unified Settings deep link for call behavior and preset naming.
+- [x] Exclusive Presenter UI and typed grant/transfer/revoke protocol across
+      the iOS, harness, writer, and Cline branches.
+
+## Remaining integration
+
+- [ ] Replace `WorkTargetRef.previews` with authenticated repository, saved-file,
+      and security-scoped device target discovery plus revocation/reconnect.
+- [ ] Replace the local one-sided message list with the managed chat catalog,
+      response streaming, persistence, resume, cancellation, and error states.
+- [ ] Resolve call presets through the host and prove grant rejection,
+      transfer, expiry, reconnect, and replay end to end after the stacked PRs
+      merge.
+- [ ] Derive History from per-session durable event windows rather than replay
+      artifact stand-ins; add speaking presence where the transport supports it.
+- [ ] Add release-grade empty, degraded, and reviewer-demo data. Remove seeded
+      production claims and localhost dependencies from an App Store build.
+- [ ] Complete hands-on iPhone/iPad, VoiceOver, Voice Control, Larger Text,
+      keyboard, reduced-motion, and poor-network testing.
+
+## Acceptance gate
+
+- Work opens on a quiet target-aware composer.
+- New Chat and Call are both reachable without scrolling at supported text
+  sizes on iPhone and iPad.
+- The displayed target never functions as an authorization token.
+- Calls and History retain the useful lifecycle behavior without crowding the
+  default surface.
+- No message or call mutation claims success unless the owning runtime accepted
+  it, except in an explicitly labeled local preview/test mode.
+- Presenter capability is typed-stage-only, exclusive, temporary, revocable,
+  and replayable once the owning host persists the typed events.

@@ -2,8 +2,9 @@ import SwiftUI
 
 @main
 struct DriveApp: App {
-    @StateObject private var store = AppStore()
-    @StateObject private var settingsDrafts = SettingsDraftStore()
+    private static let configuration = AppConfiguration.current
+    @StateObject private var store = AppStore(configuration: configuration)
+    @StateObject private var settingsDrafts = SettingsDraftStore(configuration: configuration)
     @StateObject private var localAI = LocalAIStore()
 
     var body: some Scene {

@@ -12,6 +12,7 @@ struct SessionMessage: Identifiable, Equatable {
 
 @MainActor
 final class AppStore: ObservableObject {
+    let configuration: AppConfiguration
     let intent = IntentRecorder()
     let preheat = PreheatEngine()
     var wireBackoff: Double = 1.5
@@ -182,14 +183,35 @@ final class AppStore: ObservableObject {
         }
     }
 
-    init() {
+    init(configuration: AppConfiguration = .current) {
+        self.configuration = configuration
+        writerURL = configuration.initialWriterURL()
+
+        if !configuration.previewContentEnabled {
+            agents = []
+            interrupts = []
+            workTargets = [.unconfigured]
+            selectedWorkTargetID = WorkTargetRef.unconfigured.id
+            defaultCallPreset = .unavailable
+            tasks = []
+            projects = []
+            beats = []
+            artifacts = []
+            inbox = []
+            memoryFiles = []
+            upcomingSessions = []
+        }
+        launched = configuration.isUITesting
+
         // Focus by default: quiet projects (nothing running, nothing needing
         // a human) arrive already filed. The ethos — deep, not sprawling.
         if Self.autoFileEnabled {
             archivedProjects.formUnion(Self.quietProjects(in: tasks).subtracting(neverFileProjects))
         }
         rebuildTaskIndex()
-        seedFleet()
+        if configuration.previewContentEnabled {
+            seedFleet()
+        }
     }
 
     private nonisolated static func quietProjects(in tasks: [TaskItem]) -> Set<String> {
@@ -507,17 +529,21 @@ final class AppStore: ObservableObject {
         didSet { Experiment.save(experiments) }
     }
 
-    var feedbackAvailable: Bool { feedbackProgramOn && feedbackOptIn }
+    var feedbackAvailable: Bool {
+        configuration.feedbackExperimentsEnabled && feedbackProgramOn && feedbackOptIn
+    }
 
     /// True while a presentation variant is in an unexpired trial.
     func variantActive(_ flag: String) -> Bool {
-        experiments.contains {
+        guard configuration.feedbackExperimentsEnabled else { return false }
+        return experiments.contains {
             $0.flag == flag && $0.status == .trialing && ($0.expiresAt.map { $0 > Date() } ?? false)
         }
     }
 
     /// The one-week rule enforces itself: run at launch and on foreground.
     func sweepExperiments() {
+        guard configuration.feedbackExperimentsEnabled else { return }
         var changed = experiments
         var any = false
         for i in changed.indices where changed[i].status == .trialing {
@@ -536,6 +562,7 @@ final class AppStore: ObservableObject {
     }
 
     func startTrial(_ id: String) {
+        guard configuration.feedbackExperimentsEnabled else { return }
         guard let i = experiments.firstIndex(where: { $0.id == id }) else { return }
         withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
             experiments[i].status = .trialing
@@ -554,6 +581,7 @@ final class AppStore: ObservableObject {
     /// The only thing that ever leaves the chat: the structured suggestion,
     /// on an explicit send. (Client-side inbox in the preview build.)
     func submitSuggestion(title: String, summary: String, surface: String, flag: String?) {
+        guard configuration.feedbackExperimentsEnabled else { return }
         let id = "sug-\(Int(Date().timeIntervalSince1970))"
         experiments.insert(Experiment(
             id: id, title: title, detail: summary, surface: surface,
@@ -577,7 +605,7 @@ final class AppStore: ObservableObject {
     }
 
     // MARK: Wire — consumption of the drivemode-mcp writer
-    @AppStorage("writerURL") var writerURL = "http://127.0.0.1:4600"
+    @Published var writerURL = ""
     @Published var wireStatus: WireStatus = .offline
     /// True once a live wire has dropped — drives the reconnect chip. Cleared
     /// the moment events flow again.

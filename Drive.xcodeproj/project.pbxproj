@@ -45,15 +45,25 @@
 		000000000000000000002123 /* WorkHub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001123 /* WorkHub.swift */; };
 		000000000000000000002124 /* AgentTitles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001124 /* AgentTitles.swift */; };
 		000000000000000000002125 /* LocalAI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001125 /* LocalAI.swift */; };
+		000000000000000000002126 /* AppConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001126 /* AppConfiguration.swift */; };
 		000000000000000000002000 /* Fonts in Resources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001001 /* Fonts */; };
 		000000000000000000002001 /* AppIcon60x60@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001002 /* AppIcon60x60@2x.png */; };
 		000000000000000000002002 /* AppIcon60x60@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001003 /* AppIcon60x60@3x.png */; };
 		000000000000000000002003 /* AppIcon1024.png in Resources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001004 /* AppIcon1024.png */; };
 		000000000000000000002004 /* DriveCoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001005 /* DriveCoreTests.swift */; };
+		000000000000000000002005 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001006 /* PrivacyInfo.xcprivacy */; };
+		000000000000000000002006 /* DriveUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001007 /* DriveUITests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
 		000000000000000000008000 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 000000000000000000007000 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 000000000000000000005000;
+			remoteInfo = Drive;
+		};
+		000000000000000000008002 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 000000000000000000007000 /* Project object */;
 			proxyType = 1;
@@ -101,19 +111,25 @@
 		000000000000000000001123 /* WorkHub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkHub.swift; sourceTree = "<group>"; };
 		000000000000000000001124 /* AgentTitles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentTitles.swift; sourceTree = "<group>"; };
 		000000000000000000001125 /* LocalAI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalAI.swift; sourceTree = "<group>"; };
+		000000000000000000001126 /* AppConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfiguration.swift; sourceTree = "<group>"; };
 		000000000000000000001000 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		000000000000000000001001 /* Fonts */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Fonts; sourceTree = "<group>"; };
 		000000000000000000001002 /* AppIcon60x60@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "AppIcon60x60@2x.png"; sourceTree = "<group>"; };
 		000000000000000000001003 /* AppIcon60x60@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "AppIcon60x60@3x.png"; sourceTree = "<group>"; };
 		000000000000000000001004 /* AppIcon1024.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = AppIcon1024.png; sourceTree = "<group>"; };
 		000000000000000000001005 /* DriveCoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriveCoreTests.swift; sourceTree = "<group>"; };
+		000000000000000000001006 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		000000000000000000001007 /* DriveUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriveUITests.swift; sourceTree = "<group>"; };
+		000000000000000000001008 /* Info.Debug.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.Debug.plist; sourceTree = "<group>"; };
 		000000000000000000009000 /* Drive.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Drive.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		000000000000000000009001 /* DriveTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DriveTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		000000000000000000009002 /* DriveUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DriveUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		000000000000000000004001 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
 		000000000000000000004004 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+		000000000000000000004007 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -122,14 +138,17 @@
 			children = (
 				000000000000000000003002 /* Sources */,
 				000000000000000000003003 /* Tests */,
+				000000000000000000003005 /* UITests */,
 				000000000000000000003004 /* Icons */,
 				000000000000000000001001 /* Fonts */,
 				000000000000000000001000 /* Info.plist */,
+				000000000000000000001008 /* Info.Debug.plist */,
+				000000000000000000001006 /* PrivacyInfo.xcprivacy */,
 				000000000000000000003001 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		000000000000000000003001 /* Products */ = {isa = PBXGroup; children = (000000000000000000009000 /* Drive.app */, 000000000000000000009001 /* DriveTests.xctest */,); name = Products; sourceTree = "<group>"; };
+		000000000000000000003001 /* Products */ = {isa = PBXGroup; children = (000000000000000000009000 /* Drive.app */, 000000000000000000009001 /* DriveTests.xctest */, 000000000000000000009002 /* DriveUITests.xctest */,); name = Products; sourceTree = "<group>"; };
 		000000000000000000003002 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
@@ -171,11 +190,13 @@
 				000000000000000000001123 /* WorkHub.swift */,
 				000000000000000000001124 /* AgentTitles.swift */,
 				000000000000000000001125 /* LocalAI.swift */,
+				000000000000000000001126 /* AppConfiguration.swift */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
 		};
 		000000000000000000003003 /* Tests */ = {isa = PBXGroup; children = (000000000000000000001005 /* DriveCoreTests.swift */,); path = Tests; sourceTree = "<group>"; };
+		000000000000000000003005 /* UITests */ = {isa = PBXGroup; children = (000000000000000000001007 /* DriveUITests.swift */,); path = UITests; sourceTree = "<group>"; };
 		000000000000000000003004 /* Icons */ = {isa = PBXGroup; children = (000000000000000000001002 /* AppIcon60x60@2x.png */, 000000000000000000001003 /* AppIcon60x60@3x.png */, 000000000000000000001004 /* AppIcon1024.png */,); path = Icons; sourceTree = "<group>"; };
 /* End PBXGroup section */
 
@@ -202,6 +223,17 @@
 			productReference = 000000000000000000009001 /* DriveTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		000000000000000000005002 /* DriveUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 000000000000000000006103 /* Build configuration list for PBXNativeTarget "DriveUITests" */;
+			buildPhases = (000000000000000000004006 /* Sources */, 000000000000000000004007 /* Frameworks */, 000000000000000000004008 /* Resources */,);
+			buildRules = ();
+			dependencies = (000000000000000000008003 /* PBXTargetDependency */,);
+			name = DriveUITests;
+			productName = DriveUITests;
+			productReference = 000000000000000000009002 /* DriveUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -214,6 +246,7 @@
 				TargetAttributes = {
 					000000000000000000005000 = {CreatedOnToolsVersion = 26.0;};
 					000000000000000000005001 = {CreatedOnToolsVersion = 26.0; TestTargetID = 000000000000000000005000;};
+					000000000000000000005002 = {CreatedOnToolsVersion = 26.0; TestTargetID = 000000000000000000005000;};
 				};
 			};
 			buildConfigurationList = 000000000000000000006100 /* Build configuration list for PBXProject "Drive" */;
@@ -225,13 +258,14 @@
 			productRefGroup = 000000000000000000003001 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
-			targets = (000000000000000000005000 /* Drive */, 000000000000000000005001 /* DriveTests */,);
+			targets = (000000000000000000005000 /* Drive */, 000000000000000000005001 /* DriveTests */, 000000000000000000005002 /* DriveUITests */,);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		000000000000000000004002 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (000000000000000000002000 /* Fonts in Resources */, 000000000000000000002001 /* AppIcon60x60@2x.png in Resources */, 000000000000000000002002 /* AppIcon60x60@3x.png in Resources */, 000000000000000000002003 /* AppIcon1024.png in Resources */,); runOnlyForDeploymentPostprocessing = 0; };
+		000000000000000000004002 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (000000000000000000002000 /* Fonts in Resources */, 000000000000000000002001 /* AppIcon60x60@2x.png in Resources */, 000000000000000000002002 /* AppIcon60x60@3x.png in Resources */, 000000000000000000002003 /* AppIcon1024.png in Resources */, 000000000000000000002005 /* PrivacyInfo.xcprivacy in Resources */,); runOnlyForDeploymentPostprocessing = 0; };
 		000000000000000000004005 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+		000000000000000000004008 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -277,29 +311,35 @@
 				000000000000000000002123 /* WorkHub.swift in Sources */,
 				000000000000000000002124 /* AgentTitles.swift in Sources */,
 				000000000000000000002125 /* LocalAI.swift in Sources */,
+				000000000000000000002126 /* AppConfiguration.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		000000000000000000004003 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (000000000000000000002004 /* DriveCoreTests.swift in Sources */,); runOnlyForDeploymentPostprocessing = 0; };
+		000000000000000000004006 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (000000000000000000002006 /* DriveUITests.swift in Sources */,); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
 		000000000000000000008001 /* PBXTargetDependency */ = {isa = PBXTargetDependency; target = 000000000000000000005000 /* Drive */; targetProxy = 000000000000000000008000 /* PBXContainerItemProxy */;};
+		000000000000000000008003 /* PBXTargetDependency */ = {isa = PBXTargetDependency; target = 000000000000000000005000 /* Drive */; targetProxy = 000000000000000000008002 /* PBXContainerItemProxy */;};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		000000000000000000006000 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = {ALWAYS_SEARCH_USER_PATHS = NO; CLANG_ENABLE_MODULES = YES; COPY_PHASE_STRIP = NO; DEBUG_INFORMATION_FORMAT = dwarf; ENABLE_TESTABILITY = YES; GCC_OPTIMIZATION_LEVEL = 0; IPHONEOS_DEPLOYMENT_TARGET = 17.0; SDKROOT = iphoneos; SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)"; SWIFT_OPTIMIZATION_LEVEL = "-Onone"; SWIFT_VERSION = 5.0;}; name = Debug;};
 		000000000000000000006001 /* Release */ = {isa = XCBuildConfiguration; buildSettings = {ALWAYS_SEARCH_USER_PATHS = NO; CLANG_ENABLE_MODULES = YES; COPY_PHASE_STRIP = YES; DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym"; IPHONEOS_DEPLOYMENT_TARGET = 17.0; SDKROOT = iphoneos; SWIFT_COMPILATION_MODE = wholemodule; SWIFT_VERSION = 5.0; VALIDATE_PRODUCT = YES;}; name = Release;};
-		000000000000000000006002 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 1; GENERATE_INFOPLIST_FILE = NO; INFOPLIST_FILE = Info.plist; LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks"; MARKETING_VERSION = 0.1; PRODUCT_BUNDLE_IDENTIFIER = ai.drivemode.drive.preview; PRODUCT_NAME = "$(TARGET_NAME)"; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; SUPPORTS_MACCATALYST = NO; SWIFT_EMIT_LOC_STRINGS = YES; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = "1,2";}; name = Debug;};
-		000000000000000000006003 /* Release */ = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 1; GENERATE_INFOPLIST_FILE = NO; INFOPLIST_FILE = Info.plist; LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks"; MARKETING_VERSION = 0.1; PRODUCT_BUNDLE_IDENTIFIER = ai.drivemode.drive.preview; PRODUCT_NAME = "$(TARGET_NAME)"; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; SUPPORTS_MACCATALYST = NO; SWIFT_EMIT_LOC_STRINGS = YES; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = "1,2";}; name = Release;};
+		000000000000000000006002 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 1; DRIVE_RELEASE_CHANNEL = preview; DRIVE_WRITER_BASE_URL = "http://127.0.0.1:4600"; GENERATE_INFOPLIST_FILE = NO; INFOPLIST_FILE = Info.Debug.plist; LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks"; MARKETING_VERSION = 0.1; PRODUCT_BUNDLE_IDENTIFIER = ai.drivemode.drive.preview; PRODUCT_NAME = "$(TARGET_NAME)"; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; SUPPORTS_MACCATALYST = NO; SWIFT_EMIT_LOC_STRINGS = YES; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = "1,2";}; name = Debug;};
+		000000000000000000006003 /* Release */ = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 1; DRIVE_RELEASE_CHANNEL = production; DRIVE_WRITER_BASE_URL = ""; GENERATE_INFOPLIST_FILE = NO; INFOPLIST_FILE = Info.plist; LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks"; MARKETING_VERSION = 0.1; PRODUCT_BUNDLE_IDENTIFIER = ai.drivemode.drive.preview; PRODUCT_NAME = "$(TARGET_NAME)"; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; SUPPORTS_MACCATALYST = NO; SWIFT_EMIT_LOC_STRINGS = YES; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = "1,2";}; name = Release;};
 		000000000000000000006004 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = {BUNDLE_LOADER = "$(TEST_HOST)"; CODE_SIGN_STYLE = Automatic; GENERATE_INFOPLIST_FILE = YES; IPHONEOS_DEPLOYMENT_TARGET = 17.0; LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks"; PRODUCT_BUNDLE_IDENTIFIER = ai.drivemode.drive.preview.tests; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = "1,2"; TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Drive.app/Drive";}; name = Debug;};
 		000000000000000000006005 /* Release */ = {isa = XCBuildConfiguration; buildSettings = {BUNDLE_LOADER = "$(TEST_HOST)"; CODE_SIGN_STYLE = Automatic; GENERATE_INFOPLIST_FILE = YES; IPHONEOS_DEPLOYMENT_TARGET = 17.0; LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks"; PRODUCT_BUNDLE_IDENTIFIER = ai.drivemode.drive.preview.tests; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = "1,2"; TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Drive.app/Drive";}; name = Release;};
+		000000000000000000006006 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGN_STYLE = Automatic; GENERATE_INFOPLIST_FILE = YES; IPHONEOS_DEPLOYMENT_TARGET = 17.0; PRODUCT_BUNDLE_IDENTIFIER = ai.drivemode.drive.preview.uitests; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = "1,2"; TEST_TARGET_NAME = Drive;}; name = Debug;};
+		000000000000000000006007 /* Release */ = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGN_STYLE = Automatic; GENERATE_INFOPLIST_FILE = YES; IPHONEOS_DEPLOYMENT_TARGET = 17.0; PRODUCT_BUNDLE_IDENTIFIER = ai.drivemode.drive.preview.uitests; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = "1,2"; TEST_TARGET_NAME = Drive;}; name = Release;};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
 		000000000000000000006100 /* Build configuration list for PBXProject "Drive" */ = {isa = XCConfigurationList; buildConfigurations = (000000000000000000006000 /* Debug */, 000000000000000000006001 /* Release */,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release;};
 		000000000000000000006101 /* Build configuration list for PBXNativeTarget "Drive" */ = {isa = XCConfigurationList; buildConfigurations = (000000000000000000006002 /* Debug */, 000000000000000000006003 /* Release */,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release;};
 		000000000000000000006102 /* Build configuration list for PBXNativeTarget "DriveTests" */ = {isa = XCConfigurationList; buildConfigurations = (000000000000000000006004 /* Debug */, 000000000000000000006005 /* Release */,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release;};
+		000000000000000000006103 /* Build configuration list for PBXNativeTarget "DriveUITests" */ = {isa = XCConfigurationList; buildConfigurations = (000000000000000000006006 /* Debug */, 000000000000000000006007 /* Release */,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release;};
 /* End XCConfigurationList section */
 	};
 	rootObject = 000000000000000000007000 /* Project object */;

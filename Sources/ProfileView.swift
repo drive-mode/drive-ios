@@ -8,8 +8,8 @@ struct ProfileView: View {
     // The stat blocks are modules: yours to show, hide, and reorder.
     @AppStorage("profile.order") private var orderRaw = ProfileModule.defaultOrder
     @AppStorage("profile.hidden") private var hiddenRaw = ""
-    @AppStorage("profile.displayName") private var profileName = "Harrison"
-    @AppStorage("profile.email") private var profileEmail = "harrison@quant-h2.com"
+    @AppStorage("profile.displayName") private var profileName = ""
+    @AppStorage("profile.email") private var profileEmail = ""
     @State private var customizing = false
 
     private var activeModules: [ProfileModule] {
@@ -21,19 +21,27 @@ struct ProfileView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
                 header.padding(.top, 6)
-                showcaseCard.padding(.top, 14)
-                ForEach(activeModules) { module in
-                    moduleView(module)
-                }
-                if activeModules.isEmpty {
-                    Text("Everything's hidden — tap Customize to bring your stats back.")
-                        .font(.system(size: 12.5))
-                        .foregroundStyle(DT.ink55(scheme))
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 40)
+                if store.configuration.previewContentEnabled {
+                    if store.configuration.showcaseEnabled {
+                        showcaseCard.padding(.top, 14)
+                    }
+                    ForEach(activeModules) { module in
+                        moduleView(module)
+                    }
+                    if activeModules.isEmpty {
+                        Text("Everything's hidden — tap Customize to bring your stats back.")
+                            .font(.system(size: 12.5))
+                            .foregroundStyle(DT.ink55(scheme))
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 40)
+                    }
+                } else {
+                    productionSummary.padding(.top, 16)
                 }
                 settingsLinks.padding(.top, 22)
-                Text("Usage is measured on-device.")
+                Text(store.configuration.previewContentEnabled
+                     ? "Usage is measured on-device."
+                     : "Only observed work is shown; unavailable account totals are never estimated.")
                     .font(.system(size: 10.5))
                     .foregroundStyle(DT.ink35(scheme))
                     .frame(maxWidth: .infinity)
@@ -66,28 +74,76 @@ struct ProfileView: View {
 
     private var header: some View {
         HStack(spacing: 13) {
-            AvatarChip(letter: "H", color: DT.violet, size: 46, human: true)
+            AvatarChip(letter: profileInitial, color: DT.violet, size: 46, human: true)
             VStack(alignment: .leading, spacing: 2) {
-                Text("Your week, \(profileName)")
+                Text(store.configuration.previewContentEnabled
+                     ? "Your week, \(displayName)"
+                     : displayName)
                     .font(.system(size: 21, weight: .heavy))
                     .kerning(-0.5)
-                Text(verbatim: profileEmail)
+                Text(verbatim: displayEmail)
                     .font(.system(size: 11.5))
                     .foregroundStyle(DT.ink55(scheme))
             }
             Spacer()
-            Button { customizing = true } label: {
-                Image(systemName: "rectangle.3.group")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(DT.violetText(scheme))
-                    .frame(width: 34, height: 34)
-                    .background(DT.violet.opacity(0.10))
-                    .clipShape(Circle())
+            if store.configuration.previewContentEnabled {
+                Button { customizing = true } label: {
+                    Image(systemName: "rectangle.3.group")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(DT.violetText(scheme))
+                        .frame(width: 34, height: 34)
+                        .background(DT.violet.opacity(0.10))
+                        .clipShape(Circle())
+                }
+                .buttonStyle(Pressable())
+                .accessibilityLabel("Customize profile")
+                .accessibilityHint("Choose and reorder your stat modules")
             }
-            .buttonStyle(Pressable())
-            .accessibilityLabel("Customize profile")
-            .accessibilityHint("Choose and reorder your stat modules")
         }
+    }
+
+    private var displayName: String {
+        let value = profileName.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !value.isEmpty { return value }
+        return store.configuration.previewContentEnabled ? "Harrison" : "Drive account"
+    }
+
+    private var displayEmail: String {
+        let value = profileEmail.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !value.isEmpty { return value }
+        return store.configuration.previewContentEnabled
+            ? "harrison@quant-h2.com"
+            : "Account service not connected"
+    }
+
+    private var profileInitial: String {
+        String(displayName.prefix(1)).uppercased()
+    }
+
+    private var productionSummary: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Label("No sample account data", systemImage: "checkmark.shield")
+                .font(.system(size: 14, weight: .bold))
+            Text("Usage and analytics begin with observed events from an approved host. Billing stays hidden until the account-service boundary is configured.")
+                .font(.system(size: 12.5))
+                .foregroundStyle(DT.ink55(scheme))
+                .lineSpacing(2)
+            HStack(spacing: 9) {
+                releaseMetric("\(store.tasks.count)", "tasks")
+                releaseMetric("\(store.artifacts.count)", "artifacts")
+                releaseMetric("\(store.wireSessions.count)", "calls")
+            }
+        }
+        .padding(16)
+        .card(radius: DT.rHero)
+    }
+
+    private func releaseMetric(_ value: String, _ label: String) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(value).font(.system(size: 21, weight: .heavy))
+            Text(label).font(.system(size: 10, weight: .semibold)).foregroundStyle(DT.ink55(scheme))
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     /// The door to Drivemode "by Cline" — your projects as a shelf.
@@ -338,12 +394,14 @@ struct ProfileView: View {
             }
             .buttonStyle(Pressable())
             Rectangle().fill(DT.hairline(scheme)).frame(height: 0.8).padding(.leading, 54)
-            Button { store.openSettings(.billingPayments, source: .profile) } label: {
-                settingsRow(icon: "creditcard", label: "Billing & payments",
-                            sub: "Plan · payment method · renewal")
+            if store.configuration.billingEnabled {
+                Button { store.openSettings(.billingPayments, source: .profile) } label: {
+                    settingsRow(icon: "creditcard", label: "Billing & payments",
+                                sub: "Plan · payment method · renewal")
+                }
+                .buttonStyle(Pressable())
+                Rectangle().fill(DT.hairline(scheme)).frame(height: 0.8).padding(.leading, 54)
             }
-            .buttonStyle(Pressable())
-            Rectangle().fill(DT.hairline(scheme)).frame(height: 0.8).padding(.leading, 54)
             Button { store.openSettings(.usage, source: .profile) } label: {
                 settingsRow(icon: "gauge.with.dots.needle.50percent", label: "Usage",
                             sub: "Model work · calls · resources")

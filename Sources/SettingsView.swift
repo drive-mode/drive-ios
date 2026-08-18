@@ -86,7 +86,10 @@ final class SettingsDraftStore: ObservableObject {
         let defaultCallPresetName: String
     }
 
-    init(defaults: UserDefaults = .standard) {
+    init(
+        defaults: UserDefaults = .standard,
+        configuration: AppConfiguration = .current
+    ) {
         self.defaults = defaults
         appearance = defaults.string(forKey: "appearance") ?? "System"
         reduceMotion = defaults.bool(forKey: "reduceMotion")
@@ -109,10 +112,13 @@ final class SettingsDraftStore: ObservableObject {
         quietTo = defaults.object(forKey: "notify.quietTo") == nil
             ? 8 * 60 : defaults.integer(forKey: "notify.quietTo")
         escalation = defaults.string(forKey: "notify.escalation") ?? "Do nothing"
-        displayName = defaults.string(forKey: "profile.displayName") ?? "Harrison"
-        email = defaults.string(forKey: "profile.email") ?? "harrison@quant-h2.com"
+        displayName = defaults.string(forKey: "profile.displayName")
+            ?? (configuration.previewContentEnabled ? "Harrison" : "")
+        email = defaults.string(forKey: "profile.email")
+            ?? (configuration.previewContentEnabled ? "harrison@quant-h2.com" : "")
         callLaunchBehavior = defaults.string(forKey: "call.launchBehavior") ?? "Configure each call"
-        defaultCallPresetName = defaults.string(forKey: "call.defaultPreset") ?? "Focused pair"
+        defaultCallPresetName = defaults.string(forKey: "call.defaultPreset")
+            ?? (configuration.previewContentEnabled ? "Focused pair" : "No default preset")
         persisted = Snapshot(
             appearance: appearance, reduceMotion: reduceMotion,
             micDefault: micDefault, talkGesture: talkGesture,
@@ -143,6 +149,29 @@ final class SettingsDraftStore: ObservableObject {
         ]
         values.forEach { defaults.set($0.1, forKey: $0.0) }
         persisted = snapshot
+    }
+
+    func reset() {
+        guard let persisted else { return }
+        appearance = persisted.appearance
+        reduceMotion = persisted.reduceMotion
+        micDefault = persisted.micDefault
+        talkGesture = persisted.talkGesture
+        autoFile = persisted.autoFile
+        sweepAge = persisted.sweepAge
+        notifyApprovals = persisted.notifyApprovals
+        notifyBlocked = persisted.notifyBlocked
+        notifyInvites = persisted.notifyInvites
+        notifyShips = persisted.notifyShips
+        notifyProduct = persisted.notifyProduct
+        quietHours = persisted.quietHours
+        quietFrom = persisted.quietFrom
+        quietTo = persisted.quietTo
+        escalation = persisted.escalation
+        displayName = persisted.displayName
+        email = persisted.email
+        callLaunchBehavior = persisted.callLaunchBehavior
+        defaultCallPresetName = persisted.defaultCallPresetName
     }
 
     private var snapshot: Snapshot {
@@ -182,6 +211,7 @@ struct PreviewAccountService: AccountServiceProviding {
 }
 
 struct SettingsModalView: View {
+    @EnvironmentObject private var store: AppStore
     @EnvironmentObject private var drafts: SettingsDraftStore
     @Environment(\.dismiss) private var dismiss
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
@@ -198,7 +228,7 @@ struct SettingsModalView: View {
             if horizontalSizeClass == .regular {
                 NavigationSplitView {
                     List {
-                        ForEach(SettingsTab.allCases) { tab in
+                        ForEach(store.configuration.availableSettingsTabs) { tab in
                             Button { selectedTab = tab } label: {
                                 Label(tab.rawValue, systemImage: tab.symbol)
                                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -228,6 +258,11 @@ struct SettingsModalView: View {
         .presentationDragIndicator(.visible)
         .presentationDetents([.large])
         .presentationContentInteraction(.scrolls)
+        .onAppear {
+            if !store.configuration.availableSettingsTabs.contains(selectedTab) {
+                selectedTab = .general
+            }
+        }
     }
 
     private var modalControls: some View {
@@ -240,6 +275,10 @@ struct SettingsModalView: View {
             .accessibilityLabel("Close settings")
             .accessibilityHint("Draft changes stay available when settings reopens")
             Spacer()
+            Button("Reset") { drafts.reset() }
+                .font(.system(size: 13, weight: .bold))
+                .disabled(!drafts.hasUnsavedChanges)
+                .accessibilityHint("Restores the last saved settings")
             Button("Save") {
                 drafts.save()
                 dismiss()
@@ -261,7 +300,7 @@ struct SettingsModalView: View {
             Image(systemName: selectedTab.symbol)
                 .foregroundStyle(DT.violet)
             Picker("Settings section", selection: $selectedTab) {
-                ForEach(SettingsTab.allCases) { tab in
+                ForEach(store.configuration.availableSettingsTabs) { tab in
                     Text(tab.rawValue).tag(tab)
                 }
             }
@@ -287,7 +326,12 @@ struct SettingsModalView: View {
         case .profile: ProfileSettingsPanel()
         case .calls: CallSettingsPanel()
         case .agents: AgentSettingsPanel()
-        case .billingPayments: BillingSettingsPanel(service: PreviewAccountService())
+        case .billingPayments:
+            if store.configuration.billingEnabled {
+                BillingSettingsPanel(service: PreviewAccountService())
+            } else {
+                AccountServiceUnavailablePanel()
+            }
         case .usage: UsageSettingsPanel()
         case .analytics: AnalyticsSettingsPanel()
         case .privacy: PrivacyAccountView()
@@ -342,6 +386,7 @@ private struct CallSettingsPanel: View {
 }
 
 private struct AgentSettingsPanel: View {
+    @EnvironmentObject private var store: AppStore
     @Environment(\.colorScheme) private var scheme
     @AppStorage("director.overlay.pace") private var directorPace = "Balanced"
     @AppStorage("director.overlay.handoffs") private var suggestHandoffs = true
@@ -356,34 +401,67 @@ private struct AgentSettingsPanel: View {
             .foregroundStyle(DT.ink78(scheme))
             .padding(16).card()
 
-            let policy = DirectorPolicyDescriptor.builtIn
-            VStack(alignment: .leading, spacing: 0) {
-                HStack {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Director policy").font(.system(size: 14, weight: .bold))
-                        Text("\(policy.version) · \(policy.signatureStatus) · Host-only")
-                            .font(.system(size: 10, design: .monospaced)).foregroundStyle(.secondary)
+            if store.configuration.previewContentEnabled {
+                let policy = DirectorPolicyDescriptor.builtIn
+                VStack(alignment: .leading, spacing: 0) {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Director policy").font(.system(size: 14, weight: .bold))
+                            Text("\(policy.version) · \(policy.signatureStatus) · Host-only")
+                                .font(.system(size: 10, design: .monospaced)).foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        Image(systemName: "checkmark.shield.fill").foregroundStyle(DT.violet)
                     }
-                    Spacer()
-                    Image(systemName: "checkmark.shield.fill").foregroundStyle(DT.violet)
-                }
-                .padding(14)
-                Divider().padding(.leading, 14)
-                Picker("Presentation pace", selection: $directorPace) {
-                    Text("Calm").tag("Calm")
-                    Text("Balanced").tag("Balanced")
-                    Text("Fast").tag("Fast")
-                }
-                .padding(14)
-                Divider().padding(.leading, 14)
-                Toggle("Suggest Presenter handoffs", isOn: $suggestHandoffs)
-                    .tint(DT.violet)
                     .padding(14)
+                    Divider().padding(.leading, 14)
+                    directorOverlays
+                }
+                .card()
+            } else {
+                VStack(alignment: .leading, spacing: 0) {
+                    Label("Director policy unavailable", systemImage: "shield.slash")
+                        .font(.system(size: 14, weight: .bold))
+                        .padding(14)
+                    Divider().padding(.leading, 14)
+                    Text("Connect an approved host before policy status, routing, or Presenter handoffs are shown.")
+                        .font(.system(size: 11))
+                        .foregroundStyle(.secondary)
+                        .padding(14)
+                }
+                .card()
             }
-            .card()
             Text("These are safe user overlays. The signed prompts, routing, tools, scoring, and model configuration are not editable or exportable.")
                 .font(.system(size: 11)).foregroundStyle(.secondary)
         }
+    }
+
+    private var directorOverlays: some View {
+        VStack(spacing: 0) {
+            Picker("Presentation pace", selection: $directorPace) {
+                Text("Calm").tag("Calm")
+                Text("Balanced").tag("Balanced")
+                Text("Fast").tag("Fast")
+            }
+            .padding(14)
+            Divider().padding(.leading, 14)
+            Toggle("Suggest Presenter handoffs", isOn: $suggestHandoffs)
+                .tint(DT.violet)
+                .padding(14)
+        }
+    }
+}
+
+private struct AccountServiceUnavailablePanel: View {
+    var body: some View {
+        settingsPanel(
+            title: "Billing & payments",
+            intro: "Billing is not available until the account-service integration is configured.") {
+                Label("No billing data is loaded", systemImage: "creditcard.trianglebadge.exclamationmark")
+                    .font(.system(size: 14, weight: .semibold))
+                    .padding(16)
+                    .card()
+            }
     }
 }
 
@@ -719,44 +797,48 @@ struct ConfigSettingsView: View {
                          ? "Slack escalation arrives with the Slack connection — the preference applies the moment it does."
                          : "Push arrives with the hub connection — these choices apply the moment it does. Approvals and blocked asks break through quiet hours only if you let them.")
 
-                FeedbackSettingsSection().padding(.top, 20)
+                if store.configuration.feedbackExperimentsEnabled {
+                    FeedbackSettingsSection().padding(.top, 20)
+                }
 
-                sectionLabel("WIRE").padding(.top, 20)
-                VStack(spacing: 0) {
-                    HStack {
-                        Text("Writer").scaledFont(15)
-                        Spacer()
-                        HStack(spacing: 6) {
-                            Circle()
-                                .fill(store.wireStatus.isLive ? DT.live(scheme) : DT.ink35(scheme))
-                                .frame(width: 6, height: 6)
-                            Text(store.wireStatus.label)
-                                .font(.system(size: 12, design: .monospaced))
+                if store.configuration.writerSettingsVisible {
+                    sectionLabel("WIRE").padding(.top, 20)
+                    VStack(spacing: 0) {
+                        HStack {
+                            Text("Writer").scaledFont(15)
+                            Spacer()
+                            HStack(spacing: 6) {
+                                Circle()
+                                    .fill(store.wireStatus.isLive ? DT.live(scheme) : DT.ink35(scheme))
+                                    .frame(width: 6, height: 6)
+                                Text(store.wireStatus.label)
+                                    .font(.system(size: 12, design: .monospaced))
+                                    .foregroundStyle(DT.ink55(scheme))
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.7)
+                            }
+                        }
+                        .padding(.horizontal, 14).padding(.vertical, 6).frame(minHeight: 46)
+                        hairline
+                        valueRow("URL", value: store.writerURL)
+                        hairline
+                        HStack {
+                            Text("Intent").scaledFont(15)
+                            Spacer()
+                            Text("\(store.intent.diagnostics) · \(store.preheat.diagnostics)")
+                                .font(.system(size: 11, design: .monospaced))
                                 .foregroundStyle(DT.ink55(scheme))
                                 .lineLimit(1)
-                                .minimumScaleFactor(0.7)
+                                .minimumScaleFactor(0.6)
                         }
+                        .padding(.horizontal, 14).padding(.vertical, 6).frame(minHeight: 46)
                     }
-                    .padding(.horizontal, 14).padding(.vertical, 6).frame(minHeight: 46)
-                    hairline
-                    valueRow("URL", value: store.writerURL)
-                    hairline
-                    HStack {
-                        Text("Intent").scaledFont(15)
-                        Spacer()
-                        Text("\(store.intent.diagnostics) · \(store.preheat.diagnostics)")
-                            .font(.system(size: 11, design: .monospaced))
-                            .foregroundStyle(DT.ink55(scheme))
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.6)
-                    }
-                    .padding(.horizontal, 14).padding(.vertical, 6).frame(minHeight: 46)
+                    .card()
+                    .padding(.top, 7)
+                    footnote(store.wireStatus.isLive
+                             ? "Tasks, artifacts, and the session program are coming from the connected event stream."
+                             : "Preview writer is offline; preview data remains clearly labeled.")
                 }
-                .card()
-                .padding(.top, 7)
-                footnote(store.wireStatus.isLive
-                         ? "Tasks, artifacts, and the session program are coming off the durable log."
-                         : "Start it: DRIVEMODE_HTTP_PORT=4600 bun run writer — demo data until then.")
 
                 Spacer(minLength: 24)
             }
@@ -893,6 +975,8 @@ struct NeverFileView: View {
 
 /// Personal settings — privacy honesty and account.
 struct PrivacyAccountView: View {
+    @EnvironmentObject private var store: AppStore
+    @EnvironmentObject private var drafts: SettingsDraftStore
     @Environment(\.colorScheme) private var scheme
 
     var body: some View {
@@ -900,21 +984,29 @@ struct PrivacyAccountView: View {
             VStack(alignment: .leading, spacing: 0) {
                 sectionLabel("PRIVACY")
                 VStack(spacing: 0) {
-                    HStack {
-                        Text("Transcripts").font(.system(size: 15))
-                        Spacer()
-                        HStack(spacing: 6) {
-                            Circle().fill(DT.live(scheme)).frame(width: 6, height: 6)
-                            Text("Never stored").font(.system(size: 14)).foregroundStyle(DT.ink55(scheme))
+                    if store.configuration.previewContentEnabled {
+                        HStack {
+                            Text("Transcripts").font(.system(size: 15))
+                            Spacer()
+                            HStack(spacing: 6) {
+                                Circle().fill(DT.live(scheme)).frame(width: 6, height: 6)
+                                Text("Never stored").font(.system(size: 14)).foregroundStyle(DT.ink55(scheme))
+                            }
                         }
+                        .padding(.horizontal, 14).padding(.vertical, 6).frame(minHeight: 46)
+                        hairline
+                        valueRow("Work events", value: "Current writer")
+                    } else {
+                        valueRow("Account service", value: "Not connected")
+                        hairline
+                        valueRow("Work host", value: store.wireStatus.isLive ? "Connected" : "Not connected")
                     }
-                    .padding(.horizontal, 14).padding(.vertical, 6).frame(minHeight: 46)
-                    hairline
-                    valueRow("Work events", value: "On-device log")
                 }
                 .card()
                 .padding(.top, 7)
-                footnote("Conversation stays in memory. Nothing uploads outside a live session.")
+                footnote(store.configuration.previewContentEnabled
+                         ? "Conversation stays in memory. Preview behavior is not a production retention promise."
+                         : "Drive shows only connected service state. Hosted transfer and retention disclosures must be approved before a host can connect.")
 
                 sectionLabel("POLICIES").padding(.top, 20)
                 VStack(spacing: 0) {
@@ -927,11 +1019,13 @@ struct PrivacyAccountView: View {
                         valueRow("Data policy", value: "v0.3")
                     }
                     .buttonStyle(.plain)
-                    hairline
-                    NavigationLink { FeedbackPolicyView() } label: {
-                        valueRow("Feedback mode policy", value: "v0.3")
+                    if store.configuration.feedbackExperimentsEnabled {
+                        hairline
+                        NavigationLink { FeedbackPolicyView() } label: {
+                            valueRow("Feedback mode policy", value: "v0.3")
+                        }
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
                 }
                 .card()
                 .padding(.top, 7)
@@ -939,27 +1033,29 @@ struct PrivacyAccountView: View {
 
                 sectionLabel("ACCOUNT").padding(.top, 20)
                 VStack(spacing: 0) {
-                    HStack {
-                        Text("Signed in").font(.system(size: 15))
-                        Spacer()
-                        Text(verbatim: "harrison@quant-h2.com")
-                            .font(.system(size: 13))
-                            .foregroundStyle(DT.ink55(scheme))
+                    if store.configuration.previewContentEnabled {
+                        HStack {
+                            Text("Signed in").font(.system(size: 15))
+                            Spacer()
+                            Text(verbatim: drafts.email)
+                                .font(.system(size: 13))
+                                .foregroundStyle(DT.ink55(scheme))
+                        }
+                        .padding(.horizontal, 14).padding(.vertical, 6).frame(minHeight: 46)
+                        hairline
+                        valueRow("Invite links", value: "Preview only")
+                    } else {
+                        valueRow("Status", value: "Not signed in")
+                        hairline
+                        valueRow("Account actions", value: "Unavailable")
                     }
-                    .padding(.horizontal, 14).padding(.vertical, 6).frame(minHeight: 46)
-                    hairline
-                    valueRow("Invite links", value: "")
-                    hairline
-                    HStack {
-                        Text("Sign out").font(.system(size: 15)).foregroundStyle(DT.danger)
-                        Spacer()
-                    }
-                    .padding(.horizontal, 14).padding(.vertical, 6).frame(minHeight: 46)
                 }
                 .card()
                 .padding(.top, 7)
 
-                Text("Drive 0.2 · MC1 preview")
+                Text(store.configuration.previewContentEnabled
+                     ? "Drive 0.2 · MC1 preview"
+                     : productionVersionLabel)
                     .font(.system(size: 11))
                     .foregroundStyle(DT.ink35(scheme))
                     .frame(maxWidth: .infinity)
@@ -972,6 +1068,11 @@ struct PrivacyAccountView: View {
         .background(DT.page(scheme).ignoresSafeArea())
         .navigationTitle("Privacy & account")
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private var productionVersionLabel: String {
+        let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
+        return "Drive \(version ?? "")"
     }
 
     private var hairline: some View {

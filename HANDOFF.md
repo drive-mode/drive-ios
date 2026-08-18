@@ -1,175 +1,219 @@
-# Handoff — Drive iOS (MC1 preview)
+# Handoff — Drive iOS product preview
 
-Written 2026-08-18. Updated for the current working tree based on
-`399e33d` on `main` at **github.com/drive-mode/drive-ios** (private).
-The session-registry pass described below is not committed yet and spans
-`drive-ios`, `drivemode-mcp`, and `collaboration-harness`.
+Updated 2026-08-18 from `codex/on-device-system-model` (`fa43a99`) plus the
+current pull-request and CI state. The documentation-only follow-up is on
+`codex/ios-app-store-readiness-docs`.
+
+## Status first
+
+Drive iOS is a substantial native preview, not a merged or distributable app.
+All 12 approved PRs remain open. The seven iOS PRs, two Harness PRs, and two
+MCP PRs are cleanly based; Cline coordinator PR
+[#17](https://github.com/drive-mode/cline-drivecode/pull/17) is red because the
+Hub/CLI stage fixtures and reducer do not yet propagate the required
+`presenterGrantId` field.
+
+The open stack implements the intended UI and protocol seams, but several are
+still previews:
+
+- Work targets are static `WorkTargetRef.previews` records.
+- Work chat is a one-sided in-memory list plus a fire-and-forget event; there is
+  no managed chat catalog, response stream, persistence, or resume yet.
+- Calls enter local app state; they do not establish a production remote call.
+- Billing uses `PreviewAccountService`; account creation, sign-out, deletion,
+  StoreKit, and provider usage are not connected.
+- Runtime badges and the iOS Director descriptor are hard-coded allowlisted
+  preview values rather than host-supplied signed projections.
+- The standalone MCP writer is append-only only for its current process. It is
+  in-memory and resets on restart; cross-restart durability must come from the
+  production Hub or future persistence work.
+
+The current working tree also contains a local release-hardening slice not yet
+committed or merged: `AppConfiguration` separates Debug preview from a
+fail-closed Release shell, the privacy manifest is target-bundled, Settings has
+Reset, and production-channel UI/accessibility smoke tests are in the scheme.
+This reduces misleading review behavior; it does not supply the missing host,
+account, distribution identity, signing, device evidence, or App Store upload.
+
+The canonical remaining-work list is [TODO.md](TODO.md). The public-release
+gate is [docs/APP-STORE-REVIEW.md](docs/APP-STORE-REVIEW.md).
 
 ## What this is
 
-A SwiftUI iPhone app for Drive — voice-first pair programming with your
-agents. It runs today as a **wire-consuming preview**: with the
-`drivemode-mcp` writer running, tasks, artifacts, session beats, agents,
-interrupts, and invitations all come off the durable log; offline it
-falls back to a seeded demo world (~750 tasks / 220 projects) with the
-same shapes. No hub, no hosted backend, no stored audio.
+A SwiftUI iPhone/iPad client for starting a target-aware chat, escalating into
+a live call, approving agent work, and reading typed work events. With the
+local `drivemode-mcp` writer running, current-process tasks, artifacts, beats,
+agents, interrupts, invitations, titles, and session lifecycle events populate
+the app. Offline, a seeded preview world keeps the interface reviewable.
 
-## Run it in 90 seconds
+Voice capture currently measures live microphone level and drops each buffer in
+the same callback. It does not transcribe or retain audio. The iOS 26 local-AI
+spike reads one user-selected security-scoped text file (32 KB maximum) and runs
+bounded summarization, extraction, navigation, or triage with Apple's system
+model and no cloud fallback.
 
-```bash
-cd drive-ios && ./build.sh && xcrun simctl install booted build/Drive.app && xcrun simctl launch booted ai.drivemode.drive.preview
-```
+## Build and test
 
-There is **no Xcode project** — `build.sh` is `swiftc` over `Sources/*.swift`
-into `build/Drive.app`, plus Info.plist, icons, the bundled font, and an
-ad-hoc signature. (An Xcode/xcodegen project is the gate for widgets and
-Live Activities — see Backlog.)
-
-For the live wire, in `drivemode-mcp` (on `main`):
+`Drive.xcodeproj` is the primary path. It contains the shared `Drive` scheme,
+iPhone/iPad support, `DriveTests`, and `DriveUITests`:
 
 ```bash
-DRIVEMODE_HTTP_PORT=4600 mise x bun@1.3.14 node@22.23.2 -- bun run --cwd apps/writer start
+cd drive-ios
+xcodebuild -project Drive.xcodeproj -scheme Drive \
+  -destination 'platform=iOS Simulator,name=iPhone 17 Pro' test
 ```
 
-The writer's log is **in-memory** — after any restart, reseed with the
-session scratchpad's `seed_full.py` (roster, tasks w1–w8 incl. a blocked
-one, artifacts x1–x4, the 8-beat program with stage content, one
-invitation). Keep a copy near the repo; it is the fastest way back to a
-full-looking app.
+Select any available matching simulator rather than copying the example name
+blindly. The direct compiler path remains a simulator-preview fallback:
 
-## The rules that never bend
+```bash
+cd drive-ios
+./build.sh
+xcrun simctl install booted build/Drive.app
+xcrun simctl launch booted ai.drivemode.drive.preview
+```
 
-These are product decisions, not implementation details. Breaking one is
-a bug even if it compiles:
+For a live local writer, run the writer using the repository's pinned toolchain.
+Debug defaults to `http://127.0.0.1:4600`, which works only when the app and
+writer share the same network namespace (such as this simulator workflow).
+Release has no default writer, rejects loopback/LAN/non-HTTPS endpoints, and
+omits local-network keys from its built plist.
 
-1. **Events, never pixels.** Agents publish typed work events; the phone
-   choreographs them. No screen sharing, no file contents on the wire.
-2. **Transcripts are never stored.** Conversation — voice or typed —
-   lives in memory for the session and is gone on leave. Schemas reject
-   transcript-shaped payloads. Voice capture computes a loudness level
-   and drops the buffer in the same callback.
-3. **Prompts, tool allowlists, API keys, and model IDs never cross.**
-   The phone configures *appearance, skills (capability + approval
-   posture), and approvals* — never the how.
-4. **Nothing lands without a human.** Edits are gated; the approval sheet
-   is the product's spine.
-5. **Work is archived, people are deleted.** Filing/TTL applies to work
-   products; personal data deletion is immediate and real.
-6. **Honesty chrome.** If something is demo, on-device, or not yet wired,
-   the UI says so (quiet states over fake LIVE, "Preview" labels).
+Do not restore the old scratchpad `seed_full.py` workflow as a source of truth.
+TODO §13 intentionally replaces remembered seeding and simulator steps with
+versioned fixtures and a public `drive-dev` contract.
 
-## Architecture in one page
+## Product vocabulary
 
-- `Store.swift` — one `AppStore` (`@MainActor`, `ObservableObject`) holding
-  every surface's state. Task mutations flow through `tasks.didSet` →
-  `rebuildTaskIndex()`, which recomputes per-project aggregates, ordering,
-  attention, archive counts, the folded search index, and warms the
-  preheat caches. Touch that function carefully; it is the fleet-scale
-  performance contract.
-- `WriterClient.swift` — the wire. Polls `POST /rpc {events_since}` with an
-  adaptive cadence (1s in-session/bursts → 8s idle, exponential backoff to
-  30s offline, paused in background), parses with Codable structs, and
-  maps events into tasks/artifacts/beats/agents/interrupts/inbox and the
-  working-session registry. It also publishes the composer's typed
-  create → schedule → start → invite mutations. Beat
-  stage precedence: **curated `steps` → `relatedEventIds` resolution →
-  structural placeholder**. Handles writer restarts (`latestSeq < cursor`
-  → resync).
-- `SpotlightDirector.swift` — the directed session view. One `Director`
-  clock; the 30fps TimelineView holds only the rail and the stage, chrome
-  rides a 4 Hz tick.
-- `IntentEngine.swift` — Markov next-surface prediction + preheat (folded
-  search index, dependency-map layout LRU).
-- Feature files are one-per-surface (`HomeView`, `CallTabView` = Work,
-  `TasksView`, `AgentsView`, `ProfileView`, `ArtifactsView`,
-  `ActivityView`, `InboxView`, `ShowcaseView`, `SettingsView`) plus the
-  systems: `AgentSkills` / `SkillPackages`, `AgentMemory`, `FeedbackMode`,
-  `PolicyViews`, `Notifications`, `VoiceCapture`.
+| Term | Meaning |
+|---|---|
+| Spotlight | The user-facing shared presentation surface |
+| `stage` | The wire/protocol projection rendered by that surface |
+| Presenter | A temporary, exclusive, auditable Agent Title allowed to publish typed stage content |
+| Director | The signed, versioned, host-side orchestration policy |
+| Persona | An editable agent name such as Maya or Scout |
+| Runtime badge | An allowlisted model-family label plus hosted/on-device location |
+
+Presenter replaces the old idea of a “spotlight owner”; it does not authorize
+pixel capture and it does not expose Director implementation details.
+
+## Rules that never bend
+
+1. **Events, never pixels.** Agents publish typed work events. No title grants
+   screen capture or pixel streaming.
+2. **No stored voice transcript.** Microphone access is explicit; audio and
+   transcripts are not retained by this client.
+3. **Reference-only boundaries.** Prompts, tool policy, keys, exact model IDs,
+   endpoints, Director scoring/routing, skill bodies, and resource contents do
+   not cross in UI configuration or title grants.
+4. **Human gates remain enforceable.** The host, not just the phone, enforces
+   approvals and title permissions.
+5. **Work may be retained; people can be deleted.** Production account deletion
+   is release-blocking and must distinguish Drive-hosted data from a user's own
+   infrastructure.
+6. **Honesty chrome.** Preview, on-device, disconnected, unavailable, and
+   unpersisted states say what they are.
+
+## Architecture map
+
+- `Store.swift` — the main-actor app store, root routing, preview fleet, Work
+  chat/preset state, and current title projections.
+- `WorkHub.swift` — chat-first Work root, opaque target/preset contracts,
+  target picker, call configurator, and secondary Calls/History flows.
+- `SettingsView.swift` — `SettingsTab`, `SettingsRoute`, modal deep-linking,
+  adaptive iPad layout, shared drafts, preview account surface, usage,
+  analytics, local AI, and safe Director overlays.
+- `AgentSkills.swift` / `AgentsView.swift` — packages, search, category folding,
+  compact equip controls, Memory/Skills entry points, and runtime badges.
+- `AgentTitles.swift` — reference-only title shapes, local projection, Presenter
+  controls, and non-exportable Director descriptor presentation.
+- `WriterClient.swift` — adaptive polling and event projection/publishing for
+  the current writer process. Do not describe this preview writer as
+  cross-restart durable.
+- `LocalAI.swift` — Foundation Models availability, bounded security-scoped file
+  reading, task execution, cancellation, receipts, and honest fallbacks.
+- `SpotlightDirector.swift` — the typed shared surface and beat clock. The file
+  name is legacy; Presenter is the authority title, not a pixel-sharing mode.
+- `Drive.xcodeproj`, `Tests/DriveCoreTests.swift`, and `UITests/DriveUITests.swift`
+  — native project, 22 focused unit tests, and three production-channel UI tests
+  including Home/Work accessibility audits. There is no release archive job.
+
+## PR stack and merge order
+
+| Order | Repository / PR | Purpose | Current state |
+|---:|---|---|---|
+| 1 | Harness [#2](https://github.com/drive-mode/collaboration-harness/pull/2) | Session lifecycle events | Open, mergeable, no checks |
+| 2 | MCP [#2](https://github.com/drive-mode/drivemode-mcp/pull/2) | Session lifecycle tools | Open, mergeable, no checks |
+| 3–7 | iOS [#1](https://github.com/drive-mode/drive-ios/pull/1)–[#5](https://github.com/drive-mode/drive-ios/pull/5) | Registry, project/tests, Settings, Work, Agents | Open clean stack, no checks |
+| 8 | Harness [#3](https://github.com/drive-mode/collaboration-harness/pull/3) | Agent Title protocol | Open, mergeable, no checks |
+| 9 | MCP [#3](https://github.com/drive-mode/drivemode-mcp/pull/3) | Presenter writer enforcement | Open, mergeable, no checks |
+| 10–11 | iOS [#6](https://github.com/drive-mode/drive-ios/pull/6)–[#7](https://github.com/drive-mode/drive-ios/pull/7) | Presenter/Director UI and local AI | Open clean stack, no checks |
+| 12 | Cline [#17](https://github.com/drive-mode/cline-drivecode/pull/17) | Host coordinator and signed Director boundary | Open, CI failing |
+
+Cline #17 can be repaired/rebased independently, but the merged-system gate is
+not complete until iOS Presenter behavior is exercised against that actual
+coordinator. Also reconcile title cleanup: Cline revokes a leaving Presenter and
+clears titles on room end, while the standalone Harness fold currently leaves a
+grant alive until expiry or explicit revoke.
+
+## Verification reality
+
+The current slice passes 22 unit and three UI tests, including production Home/
+Work accessibility audits, and compiles a simulator Release whose built plist
+selects production and contains no local-network exception. Prior preview work
+also built and ran on iPhone and iPad simulators. That evidence does not cover:
+
+- current GitHub integration CI on Cline #17;
+- a release-signed device archive or App Store upload validation;
+- production services, authentication, account deletion, or StoreKit;
+- physical-device local-network, microphone, file-provider, Foundation Models,
+  thermal, memory, or battery behavior;
+- a complete VoiceOver/Voice Control/Larger Text pass;
+- SwiftUI toggle feel, long press, drag reorder, or 500-skill rendering latency;
+- deterministic cross-repository setup, evidence, cleanup, and repeatability.
+
+XcodeBuildMCP can drive labeled taps, swipes, and text, but element references
+must be refreshed after navigation. Synthetic automation has not been a
+substitute for hands-on screen-reader, gesture, control, or device testing.
 
 ## Docs to read before changing things
 
-| Doc | Why |
+| Document | Source-of-truth scope |
 |---|---|
-| `docs/SKILLS.md` | What a skill *is* (capability + posture), packages, kits, the host boundary |
-| `docs/MEMORY.md` | Memory scopes and the hook-always/body-on-demand rule |
-| `docs/FEEDBACK-MODE.md` | Consent, the 7-day trial lifecycle, kill switch |
-| `docs/PRIVACY-POLICY.md`, `docs/DATA-POLICY.md` | Data classes A–E, exact payloads |
-| `docs/SOCIAL.md` | Drivemode "by Cline" showcase thesis and phases |
-| `docs/WORK-PAGE.md` | The Work page review → redesign → P0/P1/P2 plan |
-| `DATA-NEEDS.md` | What each surface needs from the transport (the contract) |
-| `TODO.md` | The living backlog, §-numbered |
-
-## Repo state
-
-- **drive-ios** — baseline `main` is `399e33d`; the current worktree folds
-  typed session lifecycle events into NOW/UPCOMING, publishes real
-  invitations from the composer, and drives scheduled reminders from the
-  wire timestamp.
-- **drivemode-mcp** — current worktree adds `session_create`,
-  `session_schedule`, `session_start`, and `session_end` across HTTP, MCP,
-  and stdio. Check with
-  `mise x bun@1.3.14 node@22.23.2 -- bun run check`.
-- **collaboration-harness** — current worktree adds typed
-  `control.session_created/scheduled/started/ended` events and lets
-  `control.invite` carry the related `sessionId`.
-
-Keep these three diffs together: the iOS decoder deliberately depends on
-the protocol and writer changes, even though each repository still checks
-independently.
-
-## Verification reality (read this before trusting a screenshot)
-
-XcodeBuildMCP drives accessibility-labeled taps, swipes, and text well.
-Enable both the `simulator` and `ui-automation` workflows, call
-`session_show_defaults`, and reuse the booted simulator rather than
-creating another device. Refresh `snapshot_ui` after every navigation or
-sheet change because element refs are screen-specific. It **cannot**
-reliably drive: SwiftUI `Toggle`s, long-press/hold (synthetic dwell
-registers as a tap), or drag-reorder. Anything gated behind those is
-marked "hands-on" in TODO. Workarounds used here: set defaults directly
-(`xcrun simctl spawn booted defaults write ai.drivemode.drive.preview
-<key> -bool YES`), grant privacy (`xcrun simctl privacy booted grant
-microphone …`), and prove notification authorization via
-`xcrun simctl push`.
-
-Two footguns that cost time:
-- `lsof -ti :4600 | xargs kill` **kills the simulator app too** (it holds
-  a client socket). Use `-sTCP:LISTEN`.
-- The shell's cwd resets between commands; `cd` into `drive-ios`
-  explicitly or `./build.sh` silently doesn't run.
-
-Session-registry verification used the existing booted iPhone 17 Pro.
-Accessibility-label taps drove **Plan a session → Exports refactor → Now
-→ Send invitations**. The writer log then contained ordered
-`control.session_created`, `control.session_scheduled`,
-`control.session_started`, and `control.invite` events sharing one session
-id; the Work page switched to the new title and honestly rendered
-"Waiting for the first directed beat…". XcodeBuildMCP's launch and daemon
-logs are under `~/Library/Developer/XcodeBuildMCP/workspaces/`.
+| [TODO.md](TODO.md) | Product backlog, delivery state, and release priorities |
+| [docs/WORK-PAGE.md](docs/WORK-PAGE.md) | Current chat-first Work interaction contract |
+| [docs/APP-STORE-REVIEW.md](docs/APP-STORE-REVIEW.md) | App Store/TestFlight readiness, gates, and evidence |
+| [DATA-NEEDS.md](DATA-NEEDS.md) | Transport and service data requirements only |
+| [docs/SKILLS.md](docs/SKILLS.md) | Skill capability/posture and host boundary |
+| [docs/MEMORY.md](docs/MEMORY.md) | Memory scopes and hook/body rule |
+| [docs/PRIVACY-POLICY.md](docs/PRIVACY-POLICY.md) | Preview privacy draft; must be finalized before release |
+| [docs/DATA-POLICY.md](docs/DATA-POLICY.md) | Preview data inventory and open production decisions |
 
 ## Where to pick up
 
-Highest-value next moves, in order:
-
-1. **Policy sync to the host** — approvals *and* skill loadouts
-   (`{agentId, skill, equipped, gated}`) over a typed channel. The UI
-   already models per-skill granularity; the host contract doesn't.
-2. **Memory host contract** — file sync per scope, write attribution,
-   session-note TTLs (DATA-NEEDS + docs/MEMORY.md).
-3. **Finish Work P1/P2** — enumerate replay records from per-session event
-   windows, then add live speaking presence. The registry, real composer
-   invitations, and timestamped reminders are in this working tree.
-4. **Xcode project** — unblocks the streak widget / Live Activity and
-   real distribution.
-5. **Integrations P0** (`initiatives/integrations-vcs`, still awaiting a
-   green light): connector ADR → `packs-vcs`/`comms.*` → tier-0 health →
-   GitHub App → Slack → a Connections settings surface.
-6. **Hands-on QA pass** for the un-drivable interactions above, plus a
-   real VoiceOver run.
+1. Repair Cline #17 integration CI and reconcile Presenter leave/end behavior.
+2. Merge the dependency stacks, then rerun cross-repository contract and iOS
+   system checks against the merged commits.
+3. Connect managed chat, authenticated targets, remote call setup, runtime
+   badges, the signed Director descriptor, and host-resolved call presets.
+4. Connect account/authentication, deletion, billing/StoreKit decision, usage,
+   and analytics truth.
+5. Finish approval/skill policy sync, memory sync/attribution, and real skill
+   bodies/generation.
+6. Implement TODO §13 deterministic verification.
+7. Work through the App Store plan from G0; the current public-release verdict
+   is **NO-GO**, and external TestFlight is also blocked until distribution,
+   privacy, backend/reviewer access, and account posture are real.
 
 ## Owner decisions still open
 
-Naming lockup ("Drive" vs "Cline Drive"), mic default (muted vs hot),
-PWA posture, Slack inline-approve vs deep-link, Inbox custom filter
-names, showcase name ("Drivemode by Cline" vs "Drive Showcase"),
-comment identity, and whether the session composer also belongs on Home.
+The authoritative release decisions are D01–D12 in
+[docs/APP-STORE-REVIEW.md](docs/APP-STORE-REVIEW.md#owner-decision-register).
+They cover identity/legal seller, business model, hosted-agent/4.7 posture,
+Showcase, HTTPS/LAN, login, minimum OS/local AI, retention/deletion, microphone
+value, storefronts/rating, support/SLO, and rollout thresholds. Do not let an
+implementation PR silently settle one.
+
+Non-release product decisions remain in [TODO.md](TODO.md): Inbox custom
+filters, Slack approval posture, social identity, and whether a fast session
+composer also belongs on Home.

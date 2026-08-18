@@ -52,13 +52,18 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
     /// fires a real one a few seconds later, so anyone can prove their setup
     /// works without waiting for a planned session.
     func sendTestReminder() {
+        let usesPreviewCopy = store?.configuration.previewContentEnabled == true
         let center = UNUserNotificationCenter.current()
         center.requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
             guard granted else { return }
             let content = UNMutableNotificationContent()
-            content.title = "Auth middleware — working session"
-            content.body = "Maya & Cline · now — the gate review you asked for."
-            content.categoryIdentifier = "SESSION"
+            content.title = usesPreviewCopy
+                ? "Auth middleware — working session"
+                : "Drive test notification"
+            content.body = usesPreviewCopy
+                ? "Maya & Cline · now — the gate review you asked for."
+                : "Notifications are enabled on this device."
+            if usesPreviewCopy { content.categoryIdentifier = "SESSION" }
             content.sound = .default
             center.add(UNNotificationRequest(
                 identifier: "session-test",
