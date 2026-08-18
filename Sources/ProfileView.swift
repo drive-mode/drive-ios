@@ -5,18 +5,31 @@ import SwiftUI
 struct ProfileView: View {
     @EnvironmentObject var store: AppStore
     @Environment(\.colorScheme) private var scheme
+    // The stat blocks are modules: yours to show, hide, and reorder.
+    @AppStorage("profile.order") private var orderRaw = ProfileModule.defaultOrder
+    @AppStorage("profile.hidden") private var hiddenRaw = ""
+    @State private var customizing = false
+
+    private var activeModules: [ProfileModule] {
+        let hidden = ProfileModule.hidden(from: hiddenRaw)
+        return ProfileModule.order(from: orderRaw).filter { !hidden.contains($0) }
+    }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
                 header.padding(.top, 6)
-                ringsCard.padding(.top, 16)
-                insightRows.padding(.top, 14)
-                shipChart.padding(.top, 16)
-                trendRow.padding(.top, 10)
-                recordCards.padding(.top, 16)
-                streakBanner.padding(.top, 16)
-                badgeGrid.padding(.top, 14)
+                showcaseCard.padding(.top, 14)
+                ForEach(activeModules) { module in
+                    moduleView(module)
+                }
+                if activeModules.isEmpty {
+                    Text("Everything's hidden — tap Customize to bring your stats back.")
+                        .font(.system(size: 12.5))
+                        .foregroundStyle(DT.ink55(scheme))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 40)
+                }
                 settingsLinks.padding(.top, 22)
                 Text("Usage is measured on-device.")
                     .font(.system(size: 10.5))
@@ -31,6 +44,22 @@ struct ProfileView: View {
         .navigationTitle("Profile")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear { store.intent.record(.profile) }
+        .sheet(isPresented: $customizing) {
+            CustomizeProfileSheet(orderRaw: $orderRaw, hiddenRaw: $hiddenRaw)
+        }
+    }
+
+    @ViewBuilder
+    private func moduleView(_ module: ProfileModule) -> some View {
+        switch module {
+        case .rings: ringsCard.padding(.top, 16)
+        case .insights: insightRows.padding(.top, 14)
+        case .week: shipChart.padding(.top, 16)
+        case .trends: trendRow.padding(.top, 12)
+        case .records: recordCards.padding(.top, 16)
+        case .streak: streakBanner.padding(.top, 16)
+        case .badges: badgeGrid.padding(.top, 14)
+        }
     }
 
     private var header: some View {
@@ -45,7 +74,50 @@ struct ProfileView: View {
                     .foregroundStyle(DT.ink55(scheme))
             }
             Spacer()
+            Button { customizing = true } label: {
+                Image(systemName: "rectangle.3.group")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(DT.violetText(scheme))
+                    .frame(width: 34, height: 34)
+                    .background(DT.violet.opacity(0.10))
+                    .clipShape(Circle())
+            }
+            .buttonStyle(Pressable())
+            .accessibilityLabel("Customize profile")
+            .accessibilityHint("Choose and reorder your stat modules")
         }
+    }
+
+    /// The door to Drivemode "by Cline" — your projects as a shelf.
+    private var showcaseCard: some View {
+        NavigationLink { ShowcaseView() } label: {
+            HStack(spacing: 12) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .fill(DT.heroGradient)
+                        .frame(width: 40, height: 40)
+                    Image(systemName: "square.grid.2x2.fill")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(.white)
+                }
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Your showcase")
+                        .scaledFont(15, .bold)
+                        .foregroundStyle(DT.ink(scheme))
+                    Text("\(ShowcaseDemo.you.count) projects · Drivemode by Cline")
+                        .font(.system(size: 11))
+                        .foregroundStyle(DT.ink55(scheme))
+                }
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(DT.ink35(scheme))
+            }
+            .padding(.horizontal, 14).padding(.vertical, 12)
+            .card()
+        }
+        .buttonStyle(Pressable())
+        .accessibilityHint("Your project squares, demos, and friends")
     }
 
     // MARK: Rings

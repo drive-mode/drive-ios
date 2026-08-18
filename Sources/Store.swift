@@ -294,6 +294,95 @@ final class AppStore: ObservableObject {
         scheduleTabBarHide()
     }
 
+    // MARK: Feedback & experiments — see docs/FEEDBACK-MODE.md. Two switches
+    // must both be on (program + device opt-in); trials are presentation-only
+    // variant flags with a hard 7-day clock; the kill switch clears it all.
+
+    @Published var feedbackProgramOn: Bool = UserDefaults.standard.object(forKey: "feedback.program") == nil
+        ? true : UserDefaults.standard.bool(forKey: "feedback.program") {
+        didSet {
+            UserDefaults.standard.set(feedbackProgramOn, forKey: "feedback.program")
+            if !feedbackProgramOn { feedbackKillSwitch() }
+        }
+    }
+
+    @Published var feedbackOptIn = UserDefaults.standard.bool(forKey: "feedback.optIn") {
+        didSet { UserDefaults.standard.set(feedbackOptIn, forKey: "feedback.optIn") }
+    }
+
+    @Published var experiments: [Experiment] = Experiment.load() {
+        didSet { Experiment.save(experiments) }
+    }
+
+    var feedbackAvailable: Bool { feedbackProgramOn && feedbackOptIn }
+
+    /// True while a presentation variant is in an unexpired trial.
+    func variantActive(_ flag: String) -> Bool {
+        experiments.contains {
+            $0.flag == flag && $0.status == .trialing && ($0.expiresAt.map { $0 > Date() } ?? false)
+        }
+    }
+
+    /// The one-week rule enforces itself: run at launch and on foreground.
+    func sweepExperiments() {
+        var changed = experiments
+        var any = false
+        for i in changed.indices where changed[i].status == .trialing {
+            if let end = changed[i].expiresAt, end <= Date() {
+                changed[i].status = .expired
+                any = true
+            }
+        }
+        guard any else { return }
+        experiments = changed
+        inbox.insert(InboxItem(
+            id: "exp-expired-\(Int(Date().timeIntervalSince1970))", kind: .tip,
+            title: "A trial reached its week",
+            body: "The variant reverted itself — trials never outstay the 7-day clock. The suggestion stays in review.",
+            age: "now"), at: 0)
+    }
+
+    func startTrial(_ id: String) {
+        guard let i = experiments.firstIndex(where: { $0.id == id }) else { return }
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+            experiments[i].status = .trialing
+            experiments[i].startedAt = Date()
+            experiments[i].expiresAt = Date().addingTimeInterval(7 * 86_400)
+        }
+    }
+
+    func endTrial(_ id: String) {
+        guard let i = experiments.firstIndex(where: { $0.id == id }) else { return }
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+            experiments[i].status = .reverted
+        }
+    }
+
+    /// The only thing that ever leaves the chat: the structured suggestion,
+    /// on an explicit send. (Client-side inbox in the preview build.)
+    func submitSuggestion(title: String, summary: String, surface: String, flag: String?) {
+        let id = "sug-\(Int(Date().timeIntervalSince1970))"
+        experiments.insert(Experiment(
+            id: id, title: title, detail: summary, surface: surface,
+            flag: flag ?? "", status: .suggested,
+            startedAt: nil, expiresAt: nil, sentAt: Date()), at: 0)
+        inbox.insert(InboxItem(
+            id: "fb-\(id)", kind: .tip,
+            title: "Suggestion sent — \(title)",
+            body: "We review within a week: adopt it for everyone or retire it. Track it in Settings → Feedback & experiments.",
+            age: "now"), at: 0)
+    }
+
+    /// Program off → bubble gone, trials reverted, opt-in cleared.
+    private func feedbackKillSwitch() {
+        feedbackOptIn = false
+        var changed = experiments
+        for i in changed.indices where changed[i].status == .trialing {
+            changed[i].status = .reverted
+        }
+        experiments = changed
+    }
+
     // MARK: Wire — consumption of the drivemode-mcp writer
     @AppStorage("writerURL") var writerURL = "http://127.0.0.1:4600"
     @Published var wireStatus: WireStatus = .offline

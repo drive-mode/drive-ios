@@ -44,11 +44,14 @@ Tabs: **Home · Call · Agents · Tasks**, profile off Home's avatar.
 | Project map | `Sources/ProjectMapView.swift` | Per-project dependency map, positions **computed** (topological layers, wrapped columns, 18-node cap) — any project renders readable |
 | Needs you | `Sources/NeedsYouView.swift` | Interrupt triage — cards open the conversation |
 | Conversation | `Sources/ConversationView.swift` | The thread an interrupt points at: report_status trail · agent ask · quick replies · voice |
-| Profile | `Sources/ProfileView.swift` | **Your week**: Steer/Answer/Ship rings (Activity-style, animated), personable insights, day chart with crowned best day, trend arrows, records, streak, badges — plus settings entries |
+| Profile | `Sources/ProfileView.swift` | **Your week**: Steer/Answer/Ship rings (Activity-style, animated), personable insights, day chart with crowned best day, trend arrows, records, streak, badges — every block a **module you show/hide/reorder** (Customize sheet + "Ask Cline for a layout"); showcase entry; settings entries |
 | Artifacts | `Sources/ArtifactsView.swift` | Kind-colored gallery + **lifecycle**: permanent ("keeps") vs ephemeral (TTL badge, auto-files to archive); group by project/repo/day/type; filter by kind/size/life; sort; context-menu TTL control |
 | Artifact detail | `Sources/ArtifactDetailView.swift` | Every artifact opens: **replays play their beat program** (self-clocked `ReplayPlayer`, scrubbable), diffs render as diffs, others get a directed-summary preview — plus lineage, inline lifecycle chips, Open in session, Share |
 | Activity | `Sources/ActivityView.swift` | The Today calendar: week bars, month calendar + **GitHub-style contribution wall** (darker squares = more activity, 5-level violet scale, horizontal year scroll), custom range — tap a day/square for per-project breakdown |
-| Settings | `Sources/SettingsView.swift` | Configuration + Privacy & account · WIRE status + intent diagnostics |
+| Settings | `Sources/SettingsView.swift` | Configuration + Privacy & account · WIRE status + intent diagnostics · FEEDBACK & EXPERIMENTS · POLICIES |
+| Showcase | `Sources/ShowcaseView.swift` | **Drivemode "by Cline"** (P0): your profile as a grid of project squares; project pages with README, DEMO (the directed replay), and People (team · join-session CTA · friend comments); FROM FRIENDS rail on Home. Private by default — see docs/SOCIAL.md |
+| Feedback mode | `Sources/FeedbackMode.swift` | Two-switch program + opt-in (consent-gated); ephemeral design chat with Cline that drafts structured suggestions; **experiments with a hard 7-day clock** — try a variant, watch the app change, revert any time. docs/FEEDBACK-MODE.md is the contract |
+| Policies | `Sources/PolicyViews.swift` | Privacy / Data / Feedback-mode policies rendered in-app; the feedback policy is the consent gate. Full text in docs/ |
 | Inbox | `Sources/InboxView.swift` | Tray icon + unread badge on Home. Two voices — **For you** (approvals, blocked asks, invitations, ships, streaks) and **Product** (news, tips) — with read/unread, swipe archive/delete, filters, Read-all, context menus, and inline act (Deny/Allow, Reply, Join session) |
 
 **Language:** sessions, not calls. The tab is **Work**; people are *invited to a
@@ -123,6 +126,7 @@ escalation preference — persisted now, applied the moment push lands.
 ## Input & accessibility
 
 - **Swipe between tab pages** (root surfaces only — pushed views keep edge-swipe-back); **swipe the Spotlight** to scrub beats; taps on the thirds still work.
+- **Hold to preview**: press-and-hold Home's TODAY tiles, artifact rail cards, and project cards for a peek at what's behind them (iOS context-menu previews) — tap still navigates.
 - **Kind-colored progress rail**: plan/decision violet, diagram blue, edit green, run teal, tests lime, result amber (danger red reserved for bug beats) — the program's table of contents for skimmers. Forward skips land 55% into a beat so fast navigation shows the payoff state, and the caption keeps naming who's speaking so audio stays useful mid-skim.
 - **VoiceOver**: the Spotlight is one adjustable element (swipe up/down moves beats, value narrates kind/title/director/caption); hold-to-talk exposes a toggle action (press-and-hold isn't VO-operable); icon buttons, tiles, agent rows, and map nodes carry labels/hints; decorative waveforms and rails are hidden.
 - **Dynamic Type** via the `scaledFont` modifier (conversation, settings, rows scale; capped at accessibility3); fixed row heights became `minHeight`.

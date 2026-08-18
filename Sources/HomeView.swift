@@ -25,6 +25,22 @@ struct MainTabs: View {
             }
             .tint(DT.violet)
 
+            // Feedback door — only while the program AND this device's
+            // opt-in are both on, and never over the session plane.
+            if store.feedbackAvailable && !store.inCall {
+                HStack {
+                    Spacer()
+                    VStack {
+                        Spacer()
+                        FeedbackBubble()
+                            .padding(.trailing, 16)
+                            .padding(.bottom, 96)
+                    }
+                }
+                .allowsHitTesting(true)
+                .transition(.scale.combined(with: .opacity))
+            }
+
             // Summon zone: only exists while the bar is away. A quiet grabber
             // marks the spot; press or swipe up to bring navigation back.
             if !store.tabBarVisible {
@@ -64,6 +80,7 @@ struct HomeView: View {
     @EnvironmentObject var store: AppStore
     @Environment(\.colorScheme) private var scheme
     @State private var query = ""
+    @State private var goNeedsYou = false
 
     var body: some View {
         NavigationStack {
@@ -174,37 +191,74 @@ struct HomeView: View {
                         .accessibilityHint("Week, month, year, and custom shipping history")
                     }
                     .padding(.top, 24)
+                    // Hold any tile to peek at what's behind it — iOS's
+                    // press-and-hold preview, tap still navigates.
                     HStack(spacing: 9) {
                         Button { store.selectedTab = .tasks } label: {
                             pulseTile(value: "\(store.runningTasks)", label: "tasks running", icon: "checklist")
                         }
                         .buttonStyle(Pressable())
+                        .contextMenu {
+                            Button { store.selectedTab = .tasks } label: {
+                                Label("Open Tasks", systemImage: "checklist")
+                            }
+                        } preview: { tasksPeek }
                         .accessibilityElement(children: .ignore)
                         .accessibilityLabel("\(store.runningTasks) tasks running")
-                        .accessibilityHint("Opens the Tasks tab")
+                        .accessibilityHint("Opens the Tasks tab. Hold to preview.")
                         Button { store.selectedTab = .agents } label: {
                             pulseTile(value: "\(store.reportingCount)", label: "agents reporting", icon: "person.2")
                         }
                         .buttonStyle(Pressable())
+                        .contextMenu {
+                            Button { store.selectedTab = .agents } label: {
+                                Label("Open Agents", systemImage: "person.2")
+                            }
+                        } preview: { agentsPeek }
                         .accessibilityElement(children: .ignore)
                         .accessibilityLabel("\(store.reportingCount) agents reporting")
-                        .accessibilityHint("Opens the Agents tab")
+                        .accessibilityHint("Opens the Agents tab. Hold to preview.")
                         NavigationLink { NeedsYouRouter() } label: {
                             pulseTile(value: "\(store.needsYouCount)", label: "need you", icon: "bell",
                                       accent: store.needsYouCount > 0)
                         }
                         .buttonStyle(Pressable())
+                        .contextMenu {
+                            Button { goNeedsYou = true } label: {
+                                Label("Open Needs you", systemImage: "bell")
+                            }
+                        } preview: { needsYouPeek }
                         .accessibilityElement(children: .ignore)
                         .accessibilityLabel("\(store.needsYouCount) items need you")
-                        .accessibilityHint("Opens the conversation that needs an answer")
+                        .accessibilityHint("Opens the conversation that needs an answer. Hold to preview.")
                     }
                     .padding(.top, 10)
 
-                    ArtifactRail().padding(.top, 24)
+                    // Focus Home (trial variant): the fast surfaces stay,
+                    // the browsing rails step back. Honesty chip names it.
+                    if store.variantActive("focus-home") {
+                        HStack(spacing: 7) {
+                            Image(systemName: "flask.fill")
+                                .font(.system(size: 10, weight: .semibold))
+                            Text("Focus Home trial — rails hidden · manage in Settings")
+                                .font(.system(size: 10.5, weight: .semibold))
+                        }
+                        .foregroundStyle(DT.violetText(scheme))
+                        .padding(.horizontal, 11).padding(.vertical, 7)
+                        .background(DT.violet.opacity(0.08))
+                        .clipShape(Capsule())
+                        .frame(maxWidth: .infinity)
+                        .padding(.top, 24)
+                        .accessibilityLabel("Focus Home trial active — artifact and recent rails hidden. Manage in Settings.")
+                    } else {
+                        ArtifactRail().padding(.top, 24)
 
-                    Eyebrow("RECENT").padding(.top, 24)
-                    ForEach(DemoData.recents) { room in
-                        RecentRow(room: room).padding(.top, 10)
+                        FromFriendsRail().padding(.top, 24)
+
+                        Eyebrow("RECENT").padding(.top, 24)
+                        ForEach(DemoData.recents) { room in
+                            RecentRow(room: room).padding(.top, 10)
+                        }
                     }
 
                     Spacer(minLength: 24)
@@ -214,6 +268,91 @@ struct HomeView: View {
             .tabSwipe()
             .background(DT.page(scheme).ignoresSafeArea())
             .toolbar(.hidden, for: .navigationBar)
+            .navigationDestination(isPresented: $goNeedsYou) { NeedsYouRouter() }
+        }
+    }
+
+    // MARK: Peeks — what "hold to preview" shows for each tile
+
+    private var tasksPeek: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 12) {
+                peekStat("\(store.runningTasks)", "running", color: DT.live(scheme))
+                peekStat("\(store.attentionTasks.filter { $0.state == .blocked }.count)", "blocked", color: DT.danger)
+                peekStat("\(store.orderedProjects.count)", "projects", color: DT.violetText(scheme))
+                Spacer()
+            }
+            ForEach(store.attentionTasks.prefix(3)) { task in
+                TaskRow(task: task, showProject: true)
+            }
+            if store.attentionTasks.isEmpty {
+                Text("Nothing needs a human right now.")
+                    .font(.system(size: 12))
+                    .foregroundStyle(DT.ink55(scheme))
+            }
+        }
+        .padding(16)
+        .frame(width: 340)
+        .background(DT.page(scheme))
+    }
+
+    private var agentsPeek: some View {
+        VStack(alignment: .leading, spacing: 9) {
+            ForEach(store.agents) { agent in
+                HStack(spacing: 10) {
+                    AvatarChip(letter: String(agent.name.prefix(1)), color: agent.color, size: 30)
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text(agent.name).scaledFont(13.5, .bold)
+                        Text(agent.statusLine)
+                            .font(.system(size: 11))
+                            .foregroundStyle(DT.ink55(scheme))
+                            .lineLimit(1)
+                    }
+                    Spacer()
+                    StateChip(state: agent.state)
+                }
+            }
+        }
+        .padding(16)
+        .frame(width: 340)
+        .background(DT.page(scheme))
+    }
+
+    private var needsYouPeek: some View {
+        VStack(alignment: .leading, spacing: 9) {
+            ForEach(store.openInterrupts.prefix(3)) { interrupt in
+                HStack(alignment: .top, spacing: 10) {
+                    AvatarChip(letter: String(interrupt.agentName.prefix(1)), color: interrupt.agentColor, size: 26)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(interrupt.title).scaledFont(13, .bold).lineLimit(2)
+                        if let first = interrupt.detail.first {
+                            Text(first)
+                                .font(.system(size: 11.5))
+                                .foregroundStyle(DT.ink55(scheme))
+                                .lineLimit(2)
+                        }
+                    }
+                    Spacer()
+                    Text(interrupt.age)
+                        .font(.system(size: 10, design: .monospaced))
+                        .foregroundStyle(DT.ink35(scheme))
+                }
+            }
+            if store.openInterrupts.isEmpty {
+                Text("All clear — nobody's waiting on you.")
+                    .font(.system(size: 12))
+                    .foregroundStyle(DT.ink55(scheme))
+            }
+        }
+        .padding(16)
+        .frame(width: 340)
+        .background(DT.page(scheme))
+    }
+
+    private func peekStat(_ value: String, _ label: String, color: Color) -> some View {
+        HStack(spacing: 5) {
+            Text(value).scaledFont(15, .heavy).foregroundStyle(color)
+            Text(label).font(.system(size: 11, weight: .semibold)).foregroundStyle(DT.ink55(scheme))
         }
     }
 

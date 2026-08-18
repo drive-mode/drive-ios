@@ -326,6 +326,15 @@ struct ArtifactRail: View {
                             railCard(artifact)
                         }
                         .buttonStyle(Pressable())
+                        // Hold to peek at the artifact without leaving Home.
+                        .contextMenu {
+                            Button { store.joinCall() } label: {
+                                Label("Open in session", systemImage: "waveform")
+                            }
+                            ShareLink(item: "\(artifact.title) — \(artifact.meta) · \(artifact.room)") {
+                                Label("Share", systemImage: "square.and.arrow.up")
+                            }
+                        } preview: { railPeek(artifact) }
                     }
                 }
             }
@@ -334,6 +343,39 @@ struct ArtifactRail: View {
             .padding(.horizontal, -20)
             .contentMargins(.horizontal, 20, for: .scrollContent)
         }
+    }
+
+    private func railPeek(_ artifact: Artifact) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 10) {
+                Image(systemName: artifact.kind.symbol)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(artifact.kind.tint)
+                    .frame(width: 36, height: 36)
+                    .background(artifact.kind.tint.opacity(0.14))
+                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(artifact.title).scaledFont(15, .heavy)
+                    Text(artifact.meta)
+                        .font(.system(size: 11, design: .monospaced))
+                        .foregroundStyle(artifact.kind.tint)
+                }
+                Spacer()
+            }
+            HStack(spacing: 8) {
+                AvatarChip(letter: String(artifact.agentName.prefix(1)), color: artifact.agentColor, size: 20)
+                Text("\(artifact.agentName) · \(artifact.room) · \(artifact.age) ago")
+                    .font(.system(size: 11.5))
+                    .foregroundStyle(DT.ink55(scheme))
+                Spacer()
+                Text(artifact.life.badge)
+                    .font(.system(size: 10, weight: .heavy))
+                    .foregroundStyle(artifact.life.isPermanent ? DT.ink55(scheme) : Color(hex: 0xFFC55C))
+            }
+        }
+        .padding(16)
+        .frame(width: 340)
+        .background(DT.page(scheme))
     }
 
     private func railCard(_ artifact: Artifact) -> some View {

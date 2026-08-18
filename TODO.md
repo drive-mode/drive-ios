@@ -136,3 +136,45 @@ webhooks) → Slack interrupts + deep links → **Connections settings surface**
 - PWA install posture
 - Slack inline-approve vs deep-link-only (integrations decision #3)
 - Inbox "rename" intent — custom filter names? (question back to Harrison)
+- Showcase naming: "Drivemode by Cline" vs "Drive Showcase" (SOCIAL.md)
+- Showcase comment identity: name only vs avatar+name
+
+## 9 · Customization, feedback & showcase (2026-08-17 late pass)
+
+Designed first (docs/), then built, verified on-simulator:
+
+- [x] **Docs before build**: `docs/FEEDBACK-MODE.md` (roles, consent,
+      one-week trial lifecycle, kill switch, invariants),
+      `docs/PRIVACY-POLICY.md`, `docs/DATA-POLICY.md` (data classes A–E,
+      exact suggestion payload), `docs/SOCIAL.md` (Drivemode "by Cline"
+      thesis, phases P0–P3, risks).
+- [x] **Profile customization** — every stat block is a module: show/hide +
+      drag-reorder via the Customize sheet (AppStorage-persisted), with an
+      "Ask Cline for a layout" suggested arrangement.
+- [x] **Feedback mode** — two switches (program + device opt-in through the
+      consent policy screen); floating Cline bubble; ephemeral design chat
+      that drafts a structured proposal; explicit Send; **experiments with
+      a real 7-day clock** (self-expiring, End-trial revert, kill switch).
+      One shipped variant proves the loop: Focus Home (verified live:
+      suggest → trial → Home switches → revert → "still in review").
+- [x] **Policy surfaces in-app** — Privacy & account → POLICIES renders all
+      three; the feedback policy doubles as the consent gate.
+- [x] **Hold-to-preview** — press-and-hold peeks on Home's TODAY tiles
+      (tasks/agents/needs-you summaries), artifact rail cards, and project
+      cards (counts + attention queue), with Open actions in the menu.
+- [x] **Showcase P0 prototype** — profile grid of project squares (state +
+      Cline watermark), friends row, project pages with README tab, DEMO
+      tab (the directed replay IS the demo), People tab (team, join-session
+      CTA, friend comments + composer), FROM FRIENDS rail on Home,
+      "Your showcase" entry on Profile.
+
+Open from this pass:
+- [ ] Hands-on pass for what headless taps can't drive: SwiftUI toggles
+      (incl. the consent flow end-to-end), hold-to-preview feel, customize
+      drag-reorder. (Menus/buttons/navigation all verified.)
+- [ ] Feedback backend route (suggestions are client-side in preview) —
+      typed `feedback.suggestion` channel per DATA-POLICY addendum.
+- [ ] Showcase P1: map squares to real repos (rides integrations/VCS);
+      publish flow with secret-shape lint; block/report before any P2.
+- [ ] Feedback bubble placement vs FROM FRIENDS rail overlap on short
+      screens — nudge or auto-dodge.

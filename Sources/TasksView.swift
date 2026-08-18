@@ -372,10 +372,49 @@ struct ProjectCard: View {
                 Label(store.neverFileProjects.contains(project.id) ? "Allow auto-file" : "Never auto-file",
                       systemImage: store.neverFileProjects.contains(project.id) ? "archivebox.circle" : "archivebox.circle.fill")
             }
-        }
+        } preview: { peek }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(a11yLabel(agg))
         .accessibilityHint("Opens the project map. Long press to pin or archive.")
+    }
+
+    /// What holding a project card shows: the numbers plus the queue of
+    /// tasks that need a human — triage without the drill-in.
+    private var peek: some View {
+        let agg = store.agg(project.id)
+        let attention = (store.tasksByProject[project.id] ?? [])
+            .filter { $0.state == .blocked || $0.state == .review }
+            .prefix(3)
+        return VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Text(project.name).scaledFont(16, .heavy)
+                Spacer()
+                Text("\(project.area.uppercased()) · \(agg.total) TASKS")
+                    .font(.system(size: 9, weight: .bold))
+                    .tracking(0.7)
+                    .foregroundStyle(DT.ink35(scheme))
+            }
+            HStack(spacing: 12) {
+                peekCount("\(agg.running)", "running", DT.live(scheme))
+                if agg.blocked > 0 { peekCount("\(agg.blocked)", "blocked", DT.danger) }
+                if agg.review > 0 { peekCount("\(agg.review)", "review", DT.violetText(scheme)) }
+                peekCount("\(agg.done)", "shipped", DT.ink55(scheme))
+                Spacer()
+            }
+            ForEach(Array(attention)) { task in
+                TaskRow(task: task, showProject: false)
+            }
+        }
+        .padding(16)
+        .frame(width: 340)
+        .background(DT.page(scheme))
+    }
+
+    private func peekCount(_ value: String, _ label: String, _ color: Color) -> some View {
+        HStack(spacing: 4) {
+            Text(value).scaledFont(14, .heavy).foregroundStyle(color)
+            Text(label).font(.system(size: 10.5, weight: .semibold)).foregroundStyle(DT.ink55(scheme))
+        }
     }
 
     private func a11yLabel(_ agg: ProjectAgg) -> String {

@@ -30,9 +30,17 @@ struct RootView: View {
             LiveCallView()
         }
         .dynamicTypeSize(.xSmall ... .accessibility3)
-        .onAppear { store.startWire() }
+        .onAppear {
+            store.startWire()
+            store.sweepExperiments()   // the one-week rule enforces itself
+        }
         .onChange(of: scenePhase) { _, phase in
-            if phase == .active { store.startWire() } else { store.pauseWire() }
+            if phase == .active {
+                store.startWire()
+                store.sweepExperiments()
+            } else {
+                store.pauseWire()
+            }
         }
     }
 }

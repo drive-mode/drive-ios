@@ -124,6 +124,8 @@ struct ConfigSettingsView: View {
                          ? "Slack escalation arrives with the Slack connection — the preference applies the moment it does."
                          : "Push arrives with the hub connection — these choices apply the moment it does. Approvals and blocked asks break through quiet hours only if you let them.")
 
+                FeedbackSettingsSection().padding(.top, 20)
+
                 sectionLabel("WIRE").padding(.top, 20)
                 VStack(spacing: 0) {
                     HStack {
@@ -318,6 +320,27 @@ struct PrivacyAccountView: View {
                 .card()
                 .padding(.top, 7)
                 footnote("Conversation stays in memory. Nothing uploads outside a live session.")
+
+                sectionLabel("POLICIES").padding(.top, 20)
+                VStack(spacing: 0) {
+                    NavigationLink { PrivacyPolicyView() } label: {
+                        valueRow("Privacy policy", value: "v0.3")
+                    }
+                    .buttonStyle(.plain)
+                    hairline
+                    NavigationLink { DataPolicyView() } label: {
+                        valueRow("Data policy", value: "v0.3")
+                    }
+                    .buttonStyle(.plain)
+                    hairline
+                    NavigationLink { FeedbackPolicyView() } label: {
+                        valueRow("Feedback mode policy", value: "v0.3")
+                    }
+                    .buttonStyle(.plain)
+                }
+                .card()
+                .padding(.top, 7)
+                footnote("Plain language, versioned — widening any collection re-asks for consent.")
 
                 sectionLabel("ACCOUNT").padding(.top, 20)
                 VStack(spacing: 0) {
