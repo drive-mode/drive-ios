@@ -313,7 +313,7 @@ existing entries in §9 remain the source of detail.
       a feature-isolated sheet/module that chooses opaque targets, agents, and
       Presenter-eligible agents. On the web it may ship as an MFE; native iOS
       consumes the same typed contract rather than embedding a web surface.
-- [ ] **Persona + model family + title** — keep editable persona names such as
+- [x] **Persona + model family + title** — keep editable persona names such as
       Maya and Scout. Cline remains the coordinator for routing and presentation
       handoffs. Show an allowlisted family badge such as Claude, Codex, or Apple
       on-device separately from the name, plus execution location (hosted or
@@ -326,7 +326,7 @@ existing entries in §9 remain the source of detail.
       may coexist, but only one active Presenter owns a stage; grant, transfer,
       expiry, and revoke are durable events. “Can present” means typed beats,
       artifacts, and views only — never pixel capture or screen streaming.
-- [ ] **Protect the Director boundary** — the built-in orchestration policy is
+- [x] **Protect the Director boundary** — the built-in orchestration policy is
       signed, versioned, host-side, and non-exportable. Members may fork or add
       an overlay for allowed Director behavior, but the base prompts, routing
       logic, scoring, tool/model maps, and compiler remain proprietary host
