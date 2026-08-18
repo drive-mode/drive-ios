@@ -37,6 +37,12 @@ events carry time, not just sequence.
    kind, director, caption, relatedEventIds) — rides `work.generic`, kernel
    untouched. The client now resolves `relatedEventIds` against seen work
    events and stages them (plan checklists, test rows) — verified live.
+   **Addendum (merged to main)**: beats also carry `steps` + `accent` —
+   director-curated typed stage lines (diagram nodes, diff summary lines,
+   run output, test names, metric rows). The live session now renders the
+   full stage everywhere; precedence steps > relatedEventIds > placeholder.
+   Both PRs (harness `control.invite`, mcp fleet packs) are **merged to
+   main**.
 5. ~~**`room.invite`**~~ — **landed**: `control.invite` in
    collaboration-harness (PR #1) → writer `room_invite` → inbox card with
    real ages, verified. Inbox **read-state sync** remains open (client-side
