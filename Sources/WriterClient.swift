@@ -85,6 +85,25 @@ private struct WireLife: Decodable {
     let ttlDays: Int?
 }
 
+private struct WireAgentTitleScope: Decodable {
+    let kind: String
+    let ref: String
+}
+
+private struct WireAgentTitleGrant: Decodable {
+    let id: String
+    let agentId: String
+    let title: String
+    let scope: WireAgentTitleScope
+    let skillBundleRefs: [String]
+    let resourceGrantRefs: [String]
+    let delegatedAgentIds: [String]
+    let permissions: [String]
+    let grantedAt: String
+    let expiresAt: String
+    let revokedAt: String?
+}
+
 /// One optional-field payload covers every pack kind we consume — decoded
 /// once, typed, no `as? [String: Any]` casts.
 private struct WirePayload: Decodable {
@@ -136,6 +155,14 @@ private struct WireEvent: Decodable {
     let programId: String?
     let outcome: String?
     let replayArtifactId: String?
+    // control.title_*
+    let grant: WireAgentTitleGrant?
+    let grantId: String?
+    let revokedAt: String?
+    let reason: String?
+    let fromGrantId: String?
+    let toGrant: WireAgentTitleGrant?
+    let transferredAt: String?
     // work.generic
     let kind: String?
     let payload: WirePayload?
@@ -223,6 +250,8 @@ extension AppStore {
                 wireActiveSession = nil
                 wireActiveProgramId = nil
                 wireReminderScheduled.removeAll()
+                titleGrantsByID.removeAll()
+                titleEventLog.removeAll()
                 return
             }
             var eventCount = 0
@@ -258,6 +287,29 @@ extension AppStore {
                 id: p.id, kind: p.kind ?? "agent",
                 displayName: p.displayName ?? Self.displayName(p.id),
                 role: p.role ?? "partner", joinedAt: at)
+            return
+        case "control.title_granted":
+            guard let raw = event.grant,
+                  let grant = Self.materializeTitleGrant(raw) else { return }
+            applyTitleGrant(grant, eventId: event.id)
+            return
+        case "control.title_transferred":
+            guard let fromGrantId = event.fromGrantId,
+                  let raw = event.toGrant,
+                  let grant = Self.materializeTitleGrant(raw) else { return }
+            applyTitleTransfer(
+                fromGrantId: fromGrantId,
+                toGrant: grant,
+                at: event.transferredAt.flatMap(Self.parseIso) ?? at,
+                eventId: event.id)
+            return
+        case "control.title_revoked":
+            guard let grantId = event.grantId else { return }
+            applyTitleRevocation(
+                grantId: grantId,
+                at: event.revokedAt.flatMap(Self.parseIso) ?? at,
+                reason: event.reason ?? "revoked",
+                eventId: event.id)
             return
         case "control.invite":
             // Invitations ride the control track straight into the inbox.
@@ -503,6 +555,49 @@ extension AppStore {
         rebuildFromWire()
     }
 
+    func publishPresenterGrant(_ grant: AgentTitleGrant) async throws {
+        let event = try await performWireMutation(tool: "title_grant", args: titleGrantArguments(grant))
+        apply(wireEvent: event)
+    }
+
+    func publishPresenterTransfer(from: AgentTitleGrant, to grant: AgentTitleGrant) async throws {
+        var args = titleGrantArguments(grant)
+        args.removeValue(forKey: "grantId")
+        args.removeValue(forKey: "agentId")
+        args.removeValue(forKey: "scopeKind")
+        args.removeValue(forKey: "scopeRef")
+        args["fromGrantId"] = from.id
+        args["toGrantId"] = grant.id
+        args["toAgentId"] = grant.agentId
+        let event = try await performWireMutation(tool: "title_transfer", args: args)
+        apply(wireEvent: event)
+    }
+
+    func publishPresenterRevocation(_ grant: AgentTitleGrant, reason: String) async throws {
+        let event = try await performWireMutation(tool: "title_revoke", args: [
+            "grantId": grant.id,
+            "reason": reason,
+            "actorId": "harrison",
+        ])
+        apply(wireEvent: event)
+    }
+
+    private func titleGrantArguments(_ grant: AgentTitleGrant) -> [String: Any] {
+        [
+            "grantId": grant.id,
+            "agentId": grant.agentId,
+            "title": grant.title.rawValue,
+            "scopeKind": grant.scope.kind.rawValue,
+            "scopeRef": grant.scope.reference,
+            "skillBundleRefs": grant.skillBundleRefs,
+            "resourceGrantRefs": grant.resourceGrantRefs,
+            "delegatedAgentIds": grant.delegatedAgentIds,
+            "permissions": grant.permissions.map(\.rawValue),
+            "expiresAt": Self.isoString(grant.expiresAt),
+            "actorId": "harrison",
+        ]
+    }
+
     private func performWireMutation(
         tool: String, args: [String: Any]
     ) async throws -> WireEvent {
@@ -661,6 +756,27 @@ extension AppStore {
         var hash = 0
         for scalar in actorId.unicodeScalars { hash = (hash &* 31 &+ Int(scalar.value)) & 0xFFFF }
         return fallbackColors[hash % fallbackColors.count]
+    }
+
+    private static func materializeTitleGrant(_ raw: WireAgentTitleGrant) -> AgentTitleGrant? {
+        guard let title = AgentTitle(rawValue: raw.title),
+              let scopeKind = AgentTitleScopeKind(rawValue: raw.scope.kind),
+              let grantedAt = parseIso(raw.grantedAt),
+              let expiresAt = parseIso(raw.expiresAt) else { return nil }
+        let permissions = raw.permissions.compactMap(AgentTitlePermission.init(rawValue:))
+        guard !permissions.isEmpty else { return nil }
+        return AgentTitleGrant(
+            id: raw.id,
+            agentId: raw.agentId,
+            title: title,
+            scope: AgentTitleScope(kind: scopeKind, reference: raw.scope.ref),
+            skillBundleRefs: raw.skillBundleRefs,
+            resourceGrantRefs: raw.resourceGrantRefs,
+            delegatedAgentIds: raw.delegatedAgentIds,
+            permissions: permissions,
+            grantedAt: grantedAt,
+            expiresAt: expiresAt,
+            revokedAt: raw.revokedAt.flatMap(parseIso))
     }
 
     static func displayName(_ actorId: String) -> String {
