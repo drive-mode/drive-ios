@@ -217,6 +217,23 @@ memory under maps, task memory on task cards, scope-filtered browser off
 the Agents tab, edit-in-place. Verified live: select-all, kit dimming when
 fully equipped, package detail + improver, browser with 11 seeded files.
 
+## 11 · Work page, ground up (2026-08-17 late pass 3)
+
+Reviewed → redesigned → planned in `docs/WORK-PAGE.md`; P0 shipped and
+verified: the tab is now **the session lifecycle page** — NOW (live card
+w/ 2 Hz beat ticker on the director clock; honest quiet state with real
+actions when nothing's live) → INVITATIONS (inbox invites surfaced, Join
+now/Later) → UPCOMING (persisted `upcoming.v1`, context-menu remove) →
+**Plan a session** composer (project chips → agenda auto-suggested from
+blocked/review tasks → people with **directing-skill sparks** → when →
+note → Send: creates the upcoming session + inbox receipt, honesty line)
+→ EARLIER (session records = replay artifact + session-memory hook,
+Play → the replay player). Verified live incl. a composed session
+landing in UPCOMING. Open (P1/P2 per doc): wire session registry, real
+`room_invite` sends from the composer, per-session replay windows,
+presence on the live card, T-minus push (pairs w/ notification prefs);
+owner: composer on Home too?
+
 Open:
 - [ ] "Observed but unequipped" surfacing — Maya published artifacts on
       the log without the skill equipped; the library could suggest

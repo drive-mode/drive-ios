@@ -335,6 +335,28 @@ final class AppStore: ObservableObject {
         didSet { MemoryFile.save(memoryFiles) }
     }
 
+    // MARK: Work page — sessions that exist before they're live
+    // (docs/WORK-PAGE.md). Composed on-device in the preview; the wire's
+    // session registry takes over in P1.
+    @Published var upcomingSessions: [UpcomingSession] = UpcomingSession.load() {
+        didSet { UpcomingSession.save(upcomingSessions) }
+    }
+
+    func planSession(_ session: UpcomingSession) {
+        upcomingSessions.insert(session, at: 0)
+        inbox.insert(InboxItem(
+            id: "up-\(session.id)", kind: .invite,
+            title: "You invited \(session.people.joined(separator: " & ")) to a working session",
+            body: "\(session.title) — \(session.when). \(session.agendaCount) agenda item\(session.agendaCount == 1 ? "" : "s").",
+            age: "now", read: true), at: 0)
+    }
+
+    func removeUpcoming(_ id: String) {
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+            upcomingSessions.removeAll { $0.id == id }
+        }
+    }
+
     // MARK: Feedback & experiments — see docs/FEEDBACK-MODE.md. Two switches
     // must both be on (program + device opt-in); trials are presentation-only
     // variant flags with a hard 7-day clock; the kill switch clears it all.

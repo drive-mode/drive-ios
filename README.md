@@ -35,7 +35,7 @@ Tabs: **Home · Call · Agents · Tasks**, profile off Home's avatar.
 |---|---|---|
 | Open | `Sources/OpenView.swift` | Brand hero · Preview chip · one violet verb |
 | Home (+tabs) | `Sources/HomeView.swift` | Live hero · today tiles · needs-you pill · profile |
-| Call tab | `Sources/CallTabView.swift` | Live room · start a room · replays |
+| Work tab | `Sources/CallTabView.swift` | **The session lifecycle page** (docs/WORK-PAGE.md): NOW (live card with a 2 Hz beat ticker off the director clock) → INVITATIONS (Join now / Later) → UPCOMING → **Plan a session** composer (project → agenda from what needs a human → people with directing-skill sparks → send) → EARLIER (session records: replay + session-memory hook). Honest quiet state when nothing's live |
 | **Directed Spotlight** | `Sources/SpotlightDirector.swift` | The star: typed beats (plan / diagram / edit / run / tests / decision / result), story rail, tap-to-scrub, looping program |
 | Live call | `Sources/LiveCallView.swift` | Portrait + **theater** (landscape) layouts · rotate control (`requestGeometryUpdate`) · glass hold strip |
 | Approval | `Sources/ApprovalView.swift` | Light sheet over dark call · Deny / Allow |
