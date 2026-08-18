@@ -221,7 +221,7 @@ struct ArtifactDetailView: View {
 // MARK: - Replay player
 
 /// A self-clocked directed program: same beats, same renderers as the live
-/// Spotlight, but the clock starts when the player appears. Tap the thirds
+/// Presenter stage, but the clock starts when the player appears. Tap the thirds
 /// or swipe to scrub; the program loops.
 struct ReplayPlayer: View {
     let beats: [Beat]

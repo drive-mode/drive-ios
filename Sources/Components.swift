@@ -68,6 +68,46 @@ struct DriveMark: View {
     }
 }
 
+/// Visible escape hatch on every non-Home root surface. Pushed screens keep
+/// native back navigation; titles never hide a second gesture.
+struct HomeToolbarButton: View {
+    @EnvironmentObject private var store: AppStore
+    @Environment(\.colorScheme) private var scheme
+
+    var body: some View {
+        Button {
+            withAnimation(.easeOut(duration: 0.2)) {
+                store.selectedTab = .home
+                store.summonTabBar()
+            }
+        } label: {
+            HStack(spacing: 6) {
+                DriveMark()
+                    .foregroundStyle(DT.ink(scheme))
+                    .frame(width: 20, height: 20)
+                Text("Home")
+                    .font(.system(size: 13, weight: .bold))
+            }
+        }
+        .accessibilityLabel("Home")
+        .accessibilityHint("Returns to the Drive home screen")
+    }
+}
+
+struct SettingsToolbarButton: View {
+    @EnvironmentObject private var store: AppStore
+    let tab: SettingsTab
+    let source: SettingsSource
+
+    var body: some View {
+        Button { store.openSettings(tab, source: source) } label: {
+            Image(systemName: "gearshape")
+        }
+        .accessibilityLabel("Settings")
+        .accessibilityHint("Opens \(tab.rawValue) settings")
+    }
+}
+
 /// Brand loader per the motion doc: **the wheel turns; Cline stays
 /// upright** — a whole-mark spin reads as a tumbling logo, not driving.
 /// Stills under Reduce Motion.

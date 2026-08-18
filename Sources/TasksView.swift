@@ -60,6 +60,12 @@ struct TasksView: View {
             .tabSwipe()
             .background(DT.page(scheme).ignoresSafeArea())
             .navigationTitle("Tasks")
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) { HomeToolbarButton() }
+                ToolbarItem(placement: .topBarTrailing) {
+                    SettingsToolbarButton(tab: .general, source: .tasks)
+                }
+            }
             .overlay(alignment: .bottom) {
                 if selecting && !selectedIds.isEmpty {
                     Button {

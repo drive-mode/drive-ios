@@ -27,7 +27,7 @@ struct MainTabs: View {
 
             // Feedback door — only while the program AND this device's
             // opt-in are both on, and never over the session plane.
-            if store.feedbackAvailable && !store.inCall {
+            if store.feedbackAvailable && !store.inCall && store.selectedTab == .home {
                 HStack {
                     Spacer()
                     VStack {
@@ -409,8 +409,8 @@ struct LiveHeroCard: View {
                     Image(systemName: "sparkles.tv")
                         .font(.system(size: 11, weight: .semibold))
                     Text(store.hasLiveProgramBeats
-                        ? "Directed spotlight · \(store.beats.count) beats · rotate for theater"
-                        : "Directed spotlight · waiting for the first beat")
+                        ? "Presenter stage · \(store.beats.count) beats · rotate for theater"
+                        : "Presenter stage · waiting for the first beat")
                         .font(.system(size: 11.5, weight: .semibold))
                 }
                 .foregroundStyle(.white.opacity(0.85))

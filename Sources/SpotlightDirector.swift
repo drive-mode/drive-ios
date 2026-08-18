@@ -19,7 +19,7 @@ extension BeatKind {
     }
 }
 
-/// Program clock math, shared by the live Spotlight (store-driven) and the
+/// Program clock math, shared by the live Presenter stage (store-driven) and the
 /// replay player (self-clocked).
 enum Director {
     /// Beat index and 0..1 progress for an elapsed time into a looping program.
@@ -39,10 +39,9 @@ enum Director {
     }
 }
 
-/// The directed Spotlight. Agents publish typed work events — the director
-/// choreographs them into beats a phone can digest. Tap right/left thirds to
-/// scrub like a story; the program loops.
-struct DirectedSpotlight: View {
+/// The Presenter stage. The Director choreographs typed work events into
+/// beats, while a temporary Presenter title grants an agent publishing rights.
+struct PresenterStage: View {
     @EnvironmentObject var store: AppStore
     /// Theater = landscape immersion: content edge-to-edge, chrome floats.
     var theater = false
@@ -115,7 +114,7 @@ struct DirectedSpotlight: View {
             )
             // VoiceOver: one element narrating the program; swipe up/down scrubs.
             .accessibilityElement(children: .ignore)
-            .accessibilityLabel("Directed spotlight")
+            .accessibilityLabel("Presenter stage")
             .accessibilityValue(beat.map { "Beat \(index + 1) of \(store.beats.count). \($0.kind.rawValue): \($0.title). \($0.director) directing. \($0.caption)" } ?? "No program yet")
             .accessibilityHint("Swipe up or down to move between beats")
             .accessibilityAdjustableAction { direction in
