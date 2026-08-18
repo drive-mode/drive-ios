@@ -19,7 +19,13 @@ carries the same shapes. No voice yet.
 - Brand locks: `../cline-drivecode/docs/drivecode/design/brand/MOBILE-BRAND-STYLING.md`
 - Tokens live in [`Sources/Theme.swift`](Sources/Theme.swift) (`DT`) and alias the Hub variables
 
-## Build & run (no Xcode project needed)
+## Build, test, and run
+
+`Drive.xcodeproj` is the primary build path and carries the shared `Drive`
+scheme, iPhone + iPad support, and the `DriveTests` unit-test target. Select an
+iOS Simulator in Xcode and run or test the shared scheme.
+
+The direct compiler script remains a lightweight preview fallback:
 
 ```bash
 ./build.sh   # swiftc -> build/Drive.app (iOS Simulator, arm64)
@@ -143,4 +149,4 @@ escalation preference — persisted now, applied the moment push lands.
 - [ ] Push for interrupts → Needs you as notification landing surface (preferences already in Settings)
 - [ ] Bundle Schibsted Grotesk (needs OTF/TTF from design)
 - [ ] Owner decisions: naming lockup, mic default, PWA — variant cards staged in the design project
-- [ ] Xcode project (or xcodegen) once the app grows resources/entitlements (unblocks widgets/Live Activity)
+- [x] Xcode project with shared simulator scheme, iPhone/iPad target, and unit tests
