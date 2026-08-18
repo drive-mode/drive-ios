@@ -69,8 +69,12 @@ cells instantiate menus; flat task rows never had them.
       beat program in a self-clocked `ReplayPlayer` (scrub by tap/swipe/VO),
       diffs render as diffs, the rest get a directed-summary preview; plus
       lineage card, inline lifecycle chips, real "Open in session" + Share.
-- [ ] **Invitation push surface** — "Maya invited you to a working session" as
-      a notification + lock-screen approve action (inbox card exists in-app).
+- [x] **Invitation/session push surface** — planned sessions schedule a
+      local reminder carrying a SESSION category whose **Join** action
+      deep-links into the session; banners show in-foreground too;
+      Settings has "Send a test reminder" (also the permission path).
+      Verified: push went from "not authorized" → delivered, activation
+      joined the session. Real remote push waits on the hub.
 - [ ] **Streak widget / Live Activity** for the lock screen (needs an app
       extension → waits on the Xcode project, §4).
 - [x] Task map: **pinch-zoom + pan** (clamped, 2.6× max, double-tap reset,
@@ -84,8 +88,10 @@ cells instantiate menus; flat task rows never had them.
 
 ## 4 · Brand & platform
 
-- [ ] **Bundle Schibsted Grotesk** (needs OTF/TTF — iOS can't register the
-      woff2 we mirror; ask design for the desktop app's font files).
+- [x] **Bundle Schibsted Grotesk** — the OFL variable TTF from Google
+      Fonts (`Fonts/`, `UIAppFonts`, copied by build.sh) now drives every
+      `scaledFont` call site; mono sites keep the system face. The blocker
+      was never the license.
 - [ ] **Xcode project (or xcodegen)** once resources/entitlements grow beyond
       the swiftc pipeline.
 
@@ -107,9 +113,14 @@ cells instantiate menus; flat task rows never had them.
       the way: leaving theater no longer strands landscape; a live wire pulse
       un-files a same-named auto-filed demo project. Remaining: spotlight
       card category mapping for the new kinds (harness follow-up).
-- [ ] Real **voice**: hold-to-talk capture, in-memory only (privacy-strict).
-- [ ] Age-based archive TTLs against real clocks (artifact TTLs + task sweep
-      are state-based demo values today).
+- [x] Real **voice**: hold-to-talk runs AVAudioEngine and the waveform
+      draws actual loudness; the tap computes RMS and **drops the buffer
+      in the same callback** — nothing retained, written, or transcribed.
+      Refusal reads "Mic access off". (Live levels need a hands-on check;
+      synthetic dwell registers as a tap.)
+- [x] Age-based artifact TTLs against real clocks — wire artifacts count
+      down from their own event timestamp (`ttlDays − age`, floored at
+      "filing…"). Task sweep aging already reads `wireTaskAt`.
 - [ ] Metrics/badges/records earned from real durable-log history; state-bar
       sparklines; search ranking + debounce at 10k+ tasks.
 - [ ] Inbox items sourced from push + durable log.
