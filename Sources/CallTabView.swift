@@ -66,11 +66,12 @@ struct UpcomingSession: Codable, Identifiable, Equatable {
     }
 }
 
-// MARK: - The Work page: the session lifecycle, top to bottom
+// MARK: - Secondary Calls flow: the session lifecycle, top to bottom
 // NOW → INVITATIONS → UPCOMING → PLAN → EARLIER (docs/WORK-PAGE.md)
 
-struct CallTabView: View {
+struct WorkCallsView: View {
     @EnvironmentObject var store: AppStore
+    @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var scheme
     @State private var composing = false
 
@@ -146,11 +147,10 @@ struct CallTabView: View {
             }
             .tabSwipe()
             .background(DT.page(scheme).ignoresSafeArea())
-            .navigationTitle("Work")
+            .navigationTitle("Calls")
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) { HomeToolbarButton() }
-                ToolbarItem(placement: .topBarTrailing) {
-                    SettingsToolbarButton(tab: .calls, source: .work)
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Done") { dismiss() }
                 }
             }
             .sheet(isPresented: $composing) {
@@ -265,13 +265,13 @@ struct LiveSessionCard: View {
                 .kerning(-0.4)
                 .scaledFont(19, .heavy)
                 .padding(.top, 12)
-            Text("\(store.liveSessionPeople.count) people · directed spotlight · rotate for theater")
+            Text("\(store.liveSessionPeople.count) people · Presenter stage · rotate for theater")
                 .font(.system(size: 11.5))
                 .foregroundStyle(DT.ink55(scheme))
                 .padding(.top, 3)
 
             // The ticker: 2 Hz is information cadence, not decoration —
-            // the same director clock the Spotlight runs on.
+            // the same director clock the Presenter stage runs on.
             if store.hasLiveProgramBeats {
                 TimelineView(.periodic(from: .now, by: 0.5)) { context in
                     let pos = store.directorPosition(at: context.date)

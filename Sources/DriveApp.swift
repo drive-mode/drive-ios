@@ -4,12 +4,14 @@ import SwiftUI
 struct DriveApp: App {
     @StateObject private var store = AppStore()
     @StateObject private var settingsDrafts = SettingsDraftStore()
+    @StateObject private var localAI = LocalAIStore()
 
     var body: some Scene {
         WindowGroup {
             RootView()
                 .environmentObject(store)
                 .environmentObject(settingsDrafts)
+                .environmentObject(localAI)
                 .preferredColorScheme(settingsDrafts.appearance == "Light" ? .light : settingsDrafts.appearance == "Dark" ? .dark : nil)
         }
     }
