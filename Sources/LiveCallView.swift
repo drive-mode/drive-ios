@@ -253,8 +253,16 @@ struct LiveCallView: View {
                 .sensoryFeedback(.impact(weight: .medium), trigger: store.micHeld)
                 .gesture(
                     DragGesture(minimumDistance: 0)
-                        .onChanged { _ in if !store.micHeld { store.micHeld = true } }
-                        .onEnded { _ in store.micHeld = false }
+                        .onChanged { _ in
+                            if !store.micHeld {
+                                store.micHeld = true
+                                VoiceCapture.shared.start()
+                            }
+                        }
+                        .onEnded { _ in
+                            store.micHeld = false
+                            VoiceCapture.shared.stop()
+                        }
                 )
                 .accessibilityElement(children: .ignore)
                 .accessibilityAddTraits(.isButton)
@@ -429,8 +437,8 @@ struct LiveCallView: View {
     private var holdButton: some View {
         HStack(spacing: 9) {
             if store.micHeld {
-                Waveform(color: .white, barCount: 5, height: 14)
-                Text("Holding — release to send")
+                Waveform(color: .white, barCount: 5, height: 14, live: true)
+                Text(VoiceCapture.shared.denied ? "Mic access off" : "Holding — release to send")
             } else {
                 Image(systemName: "mic.fill").font(.system(size: 15, weight: .semibold))
                 Text("Hold")

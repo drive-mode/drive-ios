@@ -206,13 +206,20 @@ struct AvatarChip: View {
 struct Waveform: View {
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
     @AppStorage("reduceMotion") private var appReduceMotion = false
+    @ObservedObject private var voice = VoiceCapture.shared
     var color: Color
     var barCount = 6
     var height: CGFloat = 18
+    /// When true the bars follow the real mic level instead of the idle
+    /// animation — your voice, drawn from a level the tap computed and
+    /// then threw the audio away.
+    var live = false
     private var reduced: Bool { systemReduceMotion || appReduceMotion }
     var body: some View {
         Group {
-            if reduced {
+            if live && voice.capturing {
+                liveBars
+            } else if reduced {
                 staticBars
             } else {
                 TimelineView(.animation(minimumInterval: 1.0 / 20.0)) { context in
@@ -231,6 +238,23 @@ struct Waveform: View {
             }
         }
         .accessibilityHidden(true)
+    }
+
+    /// Center-weighted bars so a loud syllable blooms from the middle.
+    private var liveBars: some View {
+        let amp = CGFloat(voice.level)
+        return HStack(alignment: .center, spacing: 2.5) {
+            ForEach(0..<barCount, id: \.self) { i in
+                let center = Double(barCount - 1) / 2
+                let falloff = 1 - abs(Double(i) - center) / (center + 1)
+                let h = height * max(0.16, amp * CGFloat(0.45 + 0.55 * falloff))
+                RoundedRectangle(cornerRadius: 1.5)
+                    .fill(color)
+                    .frame(width: 3, height: h)
+                    .animation(.easeOut(duration: 0.08), value: amp)
+            }
+        }
+        .frame(height: height)
     }
 
     private var staticBars: some View {

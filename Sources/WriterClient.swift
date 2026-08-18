@@ -279,7 +279,15 @@ extension AppStore {
             guard let id = payload.artifactId, let title = payload.title,
                   let kindRaw = payload.kind,
                   let artifactKind = ArtifactKind(rawValue: kindRaw.capitalized) else { return }
-            let life: ArtifactLife = payload.life?.ttlDays.map { .ephemeral(daysLeft: $0) } ?? .permanent
+            // TTLs run on a real clock: days left = ttl − age, floored at 0
+            // ("filing…"). The log's `at` is the birthday.
+            let life: ArtifactLife
+            if let ttl = payload.life?.ttlDays {
+                let ageDays = Int(Date().timeIntervalSince(at) / 86_400)
+                life = .ephemeral(daysLeft: max(0, ttl - ageDays))
+            } else {
+                life = .permanent
+            }
             if wireArtifacts[id] == nil { wireArtifactOrder.append(id) }
             wireArtifacts[id] = Artifact(
                 id: id, title: title, kind: artifactKind,
