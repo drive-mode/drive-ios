@@ -65,9 +65,50 @@ syncs it the same way approvals will: a policy channel, phone → host —
 capability → its own prompts/tools privately. Usage stays derived
 client-side from the log; there is nothing to sync.
 
+## Packages: skills are folders, not paragraphs (v2)
+
+Every skill is a **multi-file package**: `SKILL.md` (the manifest — hook,
+when-to-use, instructions) plus supporting files (`beat-grammar.md`,
+`diff-honesty.md`, scripts…). Discovery is dynamic and progressive: the
+manifest's hook loads up front for every equipped skill; deeper files
+load only when the work makes them relevant. The library and detail views
+show the file list with its load posture (`always` / `on demand`).
+
+## Categories and kits (v2)
+
+- **Categories** organize the library: Direction & story, Build &
+  delivery, Quality & verification, Knowledge & research, People &
+  collaboration.
+- **Kits (bundles)** equip a set in one move — built-ins (Director,
+  Builder, Quality, Front-of-house) plus user-created kits (name + pick
+  skills). Equipping a kit is a union: it never removes.
+- Per-agent **All / None** selects or clears the whole catalog.
+
+## Read · edit · review · generate (v2)
+
+Every package opens: read the manifest, **edit** when-to-use and
+instructions in place (edits re-enter review as drafts), set the review
+state (Reviewed / Needs work), and **generate a better one** — Cline
+drafts a sharpened v+1 (tightened when-to-use, an added checklist, an
+examples file) shown for accept/discard. New skills scaffold from a name
++ description: category guessed, files stubbed, `work.generic` footprint
+until the host maps a real one, filed as a draft. Generation is
+rule-based in the preview; the improvement is visible and honest.
+
+## Memory is the sibling system
+
+Skills say *how* an agent works; **memory** says *what it knows* —
+notebooks of files scoped to agent / session / task / project / plan,
+with the same discovery rule (hook always, body on demand). See
+docs/MEMORY.md.
+
 Open items:
 - Policy sync channel (rides the same ask as approval sync — DATA-NEEDS).
 - Per-skill approval granularity (gate editing but not testing, per agent
   — the UI already models it; the host contract needs it).
 - Skill-aware routing: "who on the fleet can direct?" powering
   session-setup suggestions.
+- Package file *contents* on the host (the phone shows the shape; bodies
+  sync with the skills-as-folders host contract).
+- Real generation: the preview improver is rule-based; the host path runs
+  a model over the package + usage evidence.

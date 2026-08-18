@@ -202,9 +202,28 @@ may publish, and what needs a human first. Never prompts/tools/models
       → director; diff artifacts also count as editing evidence, reports
       as testing). Verified live: Maya ×4 directing, Cline ×4 tasks.
 
+**v2 (same day): packages, kits, memory** — skills became multi-file
+packages (SKILL.md + on-demand files, dynamic context discovery shown per
+file), organized by category (Direction/Delivery/Quality/Knowledge/
+Collaboration); **kits** equip sets in one tap (4 built-ins + user-created
+via New kit), per-agent **All/None**; every package opens to read, edit
+(edits re-enter review), review (Reviewed/Needs work), and **generate a
+better one** (Cline drafts v+1: sharpened when-to-use, checklist,
+examples.md — accept/discard, verified v1→v2 live); **New skill** scaffolds
+a draft custom package from name+description. **Memory** shipped alongside
+(docs/MEMORY.md): files-with-hooks across agent/session/task/project/plan
+scopes, hook-always/body-on-demand, agent notebooks on profiles, project
+memory under maps, task memory on task cards, scope-filtered browser off
+the Agents tab, edit-in-place. Verified live: select-all, kit dimming when
+fully equipped, package detail + improver, browser with 11 seeded files.
+
 Open:
 - [ ] "Observed but unequipped" surfacing — Maya published artifacts on
       the log without the skill equipped; the library could suggest
       equipping what the log proves an agent already does.
 - [ ] Skill policy sync to host (rides the approval-sync ask, DATA-NEEDS).
 - [ ] Per-skill approval granularity host contract (UI models it already).
+- [ ] Memory host contract (file-sync channel, write attribution, session
+      TTLs) + memory-aware preheat; add-note composer surfaces.
+- [ ] Skill file *bodies* on device (shape shown today; contents ride the
+      skills-as-folders host contract); real model-backed generation.

@@ -51,6 +51,24 @@ struct ProjectDetailView: View {
                     TaskDetailCard(task: task).padding(.top, 12)
                 }
 
+                // The project's standing memory — decisions that outlive tasks.
+                let projectMemory = store.memory(scope: .project, owner: projectId)
+                if !projectMemory.isEmpty {
+                    VStack(spacing: 0) {
+                        ForEach(Array(projectMemory.enumerated()), id: \.element.id) { index, file in
+                            if index > 0 {
+                                Rectangle().fill(DT.hairline(scheme)).frame(height: 0.8).padding(.leading, 51)
+                            }
+                            NavigationLink { MemoryFileView(fileId: file.id) } label: {
+                                MemoryRow(file: file)
+                            }
+                            .buttonStyle(Pressable())
+                        }
+                    }
+                    .card()
+                    .padding(.top, 12)
+                }
+
                 HStack {
                     Eyebrow(stateFilter.map { "\($0.rawValue.uppercased()) TASKS" } ?? "ALL TASKS")
                     Spacer()
@@ -409,6 +427,26 @@ struct TaskDetailCard: View {
                     .font(.system(size: 12))
                     .foregroundStyle(DT.ink55(scheme))
                     .padding(.top, 9)
+            }
+            // Task memory: the notes this task accumulated.
+            ForEach(store.memory(scope: .task, owner: task.id)) { file in
+                NavigationLink { MemoryFileView(fileId: file.id) } label: {
+                    HStack(spacing: 7) {
+                        Image(systemName: "brain")
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundStyle(MemoryScope.task.tint)
+                        Text(file.hook)
+                            .font(.system(size: 11.5, weight: .semibold))
+                            .foregroundStyle(DT.ink78(scheme))
+                            .lineLimit(1)
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 9, weight: .semibold))
+                            .foregroundStyle(DT.ink35(scheme))
+                    }
+                    .padding(.top, 8)
+                }
+                .buttonStyle(Pressable())
             }
             HStack(spacing: 9) {
                 if task.state == .blocked, let interrupt = blockingInterrupt {

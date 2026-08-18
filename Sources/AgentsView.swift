@@ -19,14 +19,25 @@ struct AgentsView: View {
                     }
                     .padding(.top, 8)
 
-                    HStack {
+                    HStack(spacing: 14) {
                         Eyebrow("AGENTS")
                         Spacer()
+                        NavigationLink { MemoryBrowserView() } label: {
+                            HStack(spacing: 4) {
+                                Image(systemName: "brain")
+                                    .font(.system(size: 10, weight: .semibold))
+                                Text("Memory")
+                                    .font(.system(size: 12, weight: .bold))
+                            }
+                            .foregroundStyle(DT.violetText(scheme))
+                        }
+                        .buttonStyle(Pressable())
+                        .accessibilityHint("The fleet's notebooks — agent, session, task, project, and plan memory")
                         NavigationLink { SkillsLibraryView() } label: {
                             HStack(spacing: 4) {
                                 Image(systemName: "square.stack.3d.up")
                                     .font(.system(size: 10, weight: .semibold))
-                                Text("Skill library")
+                                Text("Skills")
                                     .font(.system(size: 12, weight: .bold))
                                 Image(systemName: "chevron.right")
                                     .font(.system(size: 9, weight: .bold))
@@ -406,9 +417,23 @@ struct AgentDetailView: View {
                 }
                 .padding(.top, 10)
 
-                HStack {
+                HStack(spacing: 12) {
                     Eyebrow("SKILLS")
                     Spacer()
+                    Button { store.setAllSkills(agent.id, on: true) } label: {
+                        Text("All")
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundStyle(DT.violetText(scheme))
+                    }
+                    .buttonStyle(Pressable())
+                    .accessibilityLabel("Equip all skills")
+                    Button { store.setAllSkills(agent.id, on: false) } label: {
+                        Text("None")
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundStyle(DT.ink55(scheme))
+                    }
+                    .buttonStyle(Pressable())
+                    .accessibilityLabel("Unequip all skills")
                     NavigationLink { SkillsLibraryView() } label: {
                         HStack(spacing: 4) {
                             Text("Library")
@@ -423,7 +448,15 @@ struct AgentDetailView: View {
                 .padding(.top, 22)
                 .padding(.horizontal, 14)
                 AgentSkillsSection(agent: agent).padding(.top, 7)
-                Text("Sealed skills act only after you allow — the approvals below are the gate.")
+                Text("Sealed skills act only after you allow — the approvals below are the gate. Kits equip a set at once; rows open the package to read, edit, and review.")
+                    .font(.system(size: 10.5))
+                    .foregroundStyle(DT.ink55(scheme))
+                    .padding(.top, 7)
+                    .padding(.horizontal, 14)
+
+                Eyebrow("MEMORY").padding(.top, 22).padding(.leading, 14)
+                AgentMemorySection(agent: agent).padding(.top, 7)
+                Text("The agent's own notebook — durable files plus per-session notes. Hooks load at session start; bodies load when relevant.")
                     .font(.system(size: 10.5))
                     .foregroundStyle(DT.ink55(scheme))
                     .padding(.top, 7)

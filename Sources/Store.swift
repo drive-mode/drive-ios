@@ -294,11 +294,46 @@ final class AppStore: ObservableObject {
         scheduleTabBarHide()
     }
 
-    // MARK: Skills — capability loadouts per agent (AgentSkills.swift).
-    // Bumped on any equip change so every skill surface re-renders; usage
-    // is observed off the durable log per actor, never self-reported.
+    // MARK: Skills — capability loadouts per agent (AgentSkills.swift),
+    // multi-file packages + kits (SkillPackages.swift). Bumped on any equip
+    // change so every skill surface re-renders; usage is observed off the
+    // durable log per actor, never self-reported.
     @Published var skillsVersion = 0
     var wireSkillUse: [String: [String: Int]] = [:]
+
+    @Published var skillPackages: [SkillPackage] = SkillPackage.load() {
+        didSet { SkillPackage.save(skillPackages) }
+    }
+
+    @Published var skillBundles: [SkillBundle] = SkillBundle.load() {
+        didSet { SkillBundle.save(skillBundles) }
+    }
+
+    func package(_ id: String) -> SkillPackage? {
+        skillPackages.first { $0.id == id }
+    }
+
+    func updatePackage(_ package: SkillPackage) {
+        guard let i = skillPackages.firstIndex(where: { $0.id == package.id }) else { return }
+        skillPackages[i] = package
+    }
+
+    func addPackage(_ package: SkillPackage) {
+        skillPackages.append(package)
+    }
+
+    func addBundle(name: String, note: String, skillIds: [String]) {
+        skillBundles.append(SkillBundle(
+            id: "kit-\(Int(Date().timeIntervalSince1970))",
+            name: name, note: note, skillIds: skillIds, builtIn: false))
+    }
+
+    // MARK: Memory — the fleet's notebooks (AgentMemory.swift): agent,
+    // session, task, project, and plan scopes; hooks always load, bodies
+    // load when relevant.
+    @Published var memoryFiles: [MemoryFile] = MemoryFile.load() {
+        didSet { MemoryFile.save(memoryFiles) }
+    }
 
     // MARK: Feedback & experiments — see docs/FEEDBACK-MODE.md. Two switches
     // must both be on (program + device opt-in); trials are presentation-only
