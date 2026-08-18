@@ -20,6 +20,7 @@ events carry time, not just sequence.
 | Artifacts + TTLs | Seeded `Artifact` (kind, size, repo, life) | **New pack `work.artifact`**: id, kind, purpose → life (permanent \| ttlDays), size, repo, room, `supersedes` link. TTL expiry emits archive lifecycle |
 | Your week (rings/streaks/records) | Seeded aggregates | Derivable from log: approvals + **answer latency** (raise→ack delta), ships/day, **voice spans (start/stop/duration only — privacy-strict: never audio or transcripts)**. Badges = derived milestones |
 | Agents + per-agent approvals | `@AppStorage` per agent | Appearance via `roster_set_profile` (exists). **Approval policy must sync to the host** (phone writes policy, host enforces; prompts/tools/models never cross — hard rule) |
+| Agent skills (loadouts + usage) | `@AppStorage` loadouts (`skills.<agentId>`); usage derived from log kinds per actor | **Skill policy sync rides the approval-sync ask**: `{agentId, skill, equipped, gated}` phone → host, host maps capability → its own prompts/tools privately. Usage needs nothing — observed from the log (docs/SKILLS.md) |
 | Status Hub freshness | Seeded ages | `report_status` (exists) + timestamps for "8s ago" / stuck detection |
 
 ## The six asks — status after the schema pass (2026-08-17)

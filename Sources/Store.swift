@@ -294,6 +294,12 @@ final class AppStore: ObservableObject {
         scheduleTabBarHide()
     }
 
+    // MARK: Skills — capability loadouts per agent (AgentSkills.swift).
+    // Bumped on any equip change so every skill surface re-renders; usage
+    // is observed off the durable log per actor, never self-reported.
+    @Published var skillsVersion = 0
+    var wireSkillUse: [String: [String: Int]] = [:]
+
     // MARK: Feedback & experiments — see docs/FEEDBACK-MODE.md. Two switches
     // must both be on (program + device opt-in); trials are presentation-only
     // variant flags with a hard 7-day clock; the kill switch clears it all.

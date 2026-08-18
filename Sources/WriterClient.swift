@@ -204,6 +204,7 @@ extension AppStore {
             // Invitations ride the control track straight into the inbox.
             guard let id = event.id, let inviter = event.inviterId,
                   !inbox.contains(where: { $0.id == id }) else { return }
+            countSkillUse(inviter, .inviting)
             inbox.insert(InboxItem(
                 id: id, kind: .invite,
                 title: "\(Self.displayName(inviter)) invited you to a working session",
@@ -233,6 +234,20 @@ extension AppStore {
                     wireEventTitles.removeValue(forKey: victim)
                 }
             }
+        }
+
+        // Skill usage, observed: which capability did this event exercise?
+        switch kind {
+        case "work.direction.beat":
+            countSkillUse(payload.directorId ?? actorId, .directing)
+        case "work.task.created", "work.task.state", "work.task.progress":
+            countSkillUse(actorId, .tasks)
+        case "work.artifact.created":
+            countSkillUse(actorId, .artifacts)
+            if payload.kind == "diff" { countSkillUse(actorId, .editing) }
+            if payload.kind == "report" { countSkillUse(actorId, .testing) }
+        default:
+            break
         }
 
         switch kind {
@@ -301,6 +316,10 @@ extension AppStore {
         default:
             break
         }
+    }
+
+    private func countSkillUse(_ actorId: String, _ skill: AgentSkill) {
+        wireSkillUse[actorId, default: [:]][skill.rawValue, default: 0] += 1
     }
 
     /// Oldest shipped work leaves the working set first; live work never does.

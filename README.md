@@ -39,7 +39,8 @@ Tabs: **Home · Call · Agents · Tasks**, profile off Home's avatar.
 | **Directed Spotlight** | `Sources/SpotlightDirector.swift` | The star: typed beats (plan / diagram / edit / run / tests / decision / result), story rail, tap-to-scrub, looping program |
 | Live call | `Sources/LiveCallView.swift` | Portrait + **theater** (landscape) layouts · rotate control (`requestGeometryUpdate`) · glass hold strip |
 | Approval | `Sources/ApprovalView.swift` | Light sheet over dark call · Deny / Allow |
-| Agents | `Sources/AgentsView.swift` | Status-hub tiles + rows → per-agent config (appearance / approvals / reporting) |
+| Agents | `Sources/AgentsView.swift` | Status-hub tiles + rows (loadout chips) → per-agent profile: **skills** (equip/unequip, gated seals, wire-observed usage), appearance, approvals, reporting |
+| Skills | `Sources/AgentSkills.swift` | The registry + library: a skill is a **typed capability with an approval posture** — its event-kind footprint on the wire, who carries it, how often the log saw it used. Prompts/tools/models never cross (docs/SKILLS.md) |
 | Tasks | `Sources/TasksView.swift` | **Fleet scale** (~750 tasks · 220 projects seeded): attention rail → lazy project grid (agg cards, state bars) → search across everything; virtualized all-tasks list |
 | Project map | `Sources/ProjectMapView.swift` | Per-project dependency map, positions **computed** (topological layers, wrapped columns, 18-node cap) — any project renders readable |
 | Needs you | `Sources/NeedsYouView.swift` | Interrupt triage — cards open the conversation |

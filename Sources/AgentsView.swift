@@ -19,7 +19,24 @@ struct AgentsView: View {
                     }
                     .padding(.top, 8)
 
-                    Eyebrow("AGENTS").padding(.top, 22)
+                    HStack {
+                        Eyebrow("AGENTS")
+                        Spacer()
+                        NavigationLink { SkillsLibraryView() } label: {
+                            HStack(spacing: 4) {
+                                Image(systemName: "square.stack.3d.up")
+                                    .font(.system(size: 10, weight: .semibold))
+                                Text("Skill library")
+                                    .font(.system(size: 12, weight: .bold))
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 9, weight: .bold))
+                            }
+                            .foregroundStyle(DT.violetText(scheme))
+                        }
+                        .buttonStyle(Pressable())
+                        .accessibilityHint("Every capability the fleet can carry, and who carries it")
+                    }
+                    .padding(.top, 22)
                     ForEach(store.agents) { agent in
                         NavigationLink { AgentDetailView(agent: agent) } label: {
                             agentRow(agent)
@@ -109,6 +126,8 @@ struct AgentsView: View {
                     .font(.system(size: 12))
                     .foregroundStyle(DT.ink55(scheme))
                     .lineLimit(1)
+                SkillChipRow(skills: store.equippedSkills(agent.id))
+                    .padding(.top, 1)
             }
             Spacer()
             VStack(alignment: .trailing, spacing: 5) {
@@ -344,6 +363,7 @@ struct AgentLineage: View {
 }
 
 struct AgentDetailView: View {
+    @EnvironmentObject var store: AppStore
     @Environment(\.colorScheme) private var scheme
     let agent: Agent
     // Persisted per agent — approval policy is the most trust-sensitive
@@ -385,6 +405,29 @@ struct AgentDetailView: View {
                     stat(agent.uptime, "uptime today")
                 }
                 .padding(.top, 10)
+
+                HStack {
+                    Eyebrow("SKILLS")
+                    Spacer()
+                    NavigationLink { SkillsLibraryView() } label: {
+                        HStack(spacing: 4) {
+                            Text("Library")
+                                .font(.system(size: 12, weight: .bold))
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 9, weight: .bold))
+                        }
+                        .foregroundStyle(DT.violetText(scheme))
+                    }
+                    .buttonStyle(Pressable())
+                }
+                .padding(.top, 22)
+                .padding(.horizontal, 14)
+                AgentSkillsSection(agent: agent).padding(.top, 7)
+                Text("Sealed skills act only after you allow — the approvals below are the gate.")
+                    .font(.system(size: 10.5))
+                    .foregroundStyle(DT.ink55(scheme))
+                    .padding(.top, 7)
+                    .padding(.horizontal, 14)
 
                 Eyebrow("LINEAGE").padding(.top, 22).padding(.leading, 14)
                 AgentLineage(agent: agent).padding(.top, 7)
@@ -429,7 +472,7 @@ struct AgentDetailView: View {
                 .card()
                 .padding(.top, 7)
 
-                Text("Prompts, tools, providers, and model IDs never leave the host — Drive configures appearance and approvals only.")
+                Text("Skills are capability policy — what this agent may publish, and what needs you first. The how (prompts, tools, providers, model IDs) never leaves the host; Drive configures appearance, skills, and approvals only.")
                     .font(.system(size: 10.5))
                     .foregroundStyle(DT.ink35(scheme))
                     .multilineTextAlignment(.center)

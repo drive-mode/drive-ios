@@ -178,3 +178,33 @@ Open from this pass:
       publish flow with secret-shape lint; block/report before any P2.
 - [ ] Feedback bubble placement vs FROM FRIENDS rail overlap on short
       screens — nudge or auto-dodge.
+
+## 10 · Agent profiles & skills (2026-08-17 late pass 2)
+
+A skill = a **typed capability with an approval posture** — what an agent
+may publish, and what needs a human first. Never prompts/tools/models
+(those stay host-side). Contract: `docs/SKILLS.md`.
+
+- [x] **Skill registry** (`AgentSkills.swift`) — eight skills mirroring
+      the packs the transport speaks: directing, task running, artifact
+      publishing, code editing (gated), test running (gated), research,
+      inviting, feedback triage. Each carries its event-kind footprint.
+- [x] **Loadouts** — per-agent equipped sets, persisted
+      (`skills.<agentId>`), role-matched defaults (Maya directs+invites,
+      Cline edits+triages, Scout tests+researches, Indexer archives);
+      unknown wire agents get a sane fallback.
+- [x] **Agent profiles** — SKILLS section on agent detail (equip toggles,
+      gated seals tied to APPROVALS, wire-observed usage counts), loadout
+      chips on roster rows, boundary footnote updated.
+- [x] **Skill library** — every capability, its wire footprint, who
+      carries it (tappable into agent profiles), usage per carrier.
+- [x] **Observed usage** — counted off the durable log per actorId (beats
+      → director; diff artifacts also count as editing evidence, reports
+      as testing). Verified live: Maya ×4 directing, Cline ×4 tasks.
+
+Open:
+- [ ] "Observed but unequipped" surfacing — Maya published artifacts on
+      the log without the skill equipped; the library could suggest
+      equipping what the log proves an agent already does.
+- [ ] Skill policy sync to host (rides the approval-sync ask, DATA-NEEDS).
+- [ ] Per-skill approval granularity host contract (UI models it already).
