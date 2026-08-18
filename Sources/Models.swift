@@ -20,6 +20,38 @@ struct Agent: Identifiable, Equatable {
     var uptime: String
 }
 
+enum AgentRuntimeFamily: String, CaseIterable {
+    case claude = "Claude"
+    case codex = "Codex"
+    case cline = "Cline"
+    case apple = "Apple"
+    case other = "Other"
+}
+
+enum AgentExecutionLocation: String, CaseIterable {
+    case hosted = "Hosted"
+    case onDevice = "On device"
+}
+
+/// Sanitized runtime identity. This intentionally cannot carry a model id,
+/// endpoint, key, prompt, tool list, or routing configuration.
+struct AgentRuntimeBadge: Equatable {
+    let family: AgentRuntimeFamily
+    let executionLocation: AgentExecutionLocation
+
+    var label: String { "\(family.rawValue) · \(executionLocation.rawValue)" }
+
+    static func forAgentID(_ id: String) -> AgentRuntimeBadge {
+        switch id {
+        case "maya": return AgentRuntimeBadge(family: .claude, executionLocation: .hosted)
+        case "coder": return AgentRuntimeBadge(family: .codex, executionLocation: .hosted)
+        case "scout": return AgentRuntimeBadge(family: .codex, executionLocation: .hosted)
+        case "indexer": return AgentRuntimeBadge(family: .apple, executionLocation: .onDevice)
+        default: return AgentRuntimeBadge(family: .other, executionLocation: .hosted)
+        }
+    }
+}
+
 struct DiffLine: Identifiable {
     let id = UUID()
     let text: String

@@ -123,4 +123,28 @@ final class DriveCoreTests: XCTestCase {
         XCTAssertFalse(store.sendWorkChat("Read this folder"))
         XCTAssertTrue(store.workChatMessages.isEmpty)
     }
+
+    func testRuntimeBadgesExposeOnlyAllowlistedIdentity() {
+        for id in ["maya", "coder", "scout", "indexer", "future-agent"] {
+            let badge = AgentRuntimeBadge.forAgentID(id)
+            XCTAssertTrue(AgentRuntimeFamily.allCases.contains(badge.family))
+            XCTAssertTrue(AgentExecutionLocation.allCases.contains(badge.executionLocation))
+            XCTAssertFalse(badge.label.localizedCaseInsensitiveContains("model-id"))
+            XCTAssertFalse(badge.label.contains("https://"))
+            XCTAssertFalse(badge.label.contains("sk-"))
+        }
+        XCTAssertEqual(AgentRuntimeBadge.forAgentID("maya").label, "Claude · Hosted")
+        XCTAssertEqual(AgentRuntimeBadge.forAgentID("coder").label, "Codex · Hosted")
+    }
+
+    func testSkillSearchRemainsUsefulWithFiveHundredEntries() {
+        let packages = Array(repeating: SkillCatalog.builtIns, count: 63).flatMap { $0 }
+        XCTAssertGreaterThan(packages.count, 500)
+        XCTAssertEqual(SkillSearch.filtered(packages, query: "").count, packages.count)
+
+        let testing = SkillSearch.filtered(packages, query: "test", category: .quality)
+        XCTAssertEqual(testing.count, 63)
+        XCTAssertTrue(testing.allSatisfy { $0.category == .quality })
+        XCTAssertTrue(SkillSearch.filtered(packages, query: "no-such-skill").isEmpty)
+    }
 }

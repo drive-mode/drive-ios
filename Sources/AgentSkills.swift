@@ -152,24 +152,37 @@ extension AppStore {
     }
 }
 
+enum SkillSearch {
+    static func filtered(
+        _ packages: [SkillPackage],
+        query: String,
+        category: SkillCategory? = nil
+    ) -> [SkillPackage] {
+        let folded = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        return packages.filter { skill in
+            guard category == nil || skill.category == category else { return false }
+            guard !folded.isEmpty else { return true }
+            return skill.name.lowercased().contains(folded)
+                || skill.verb.lowercased().contains(folded)
+                || skill.category.rawValue.lowercased().contains(folded)
+                || skill.whenToUse.lowercased().contains(folded)
+        }
+    }
+}
+
 // MARK: - Roster chips
 
 struct SkillChipRow: View {
     let skills: [SkillPackage]
 
     var body: some View {
-        HStack(spacing: 5) {
-            ForEach(skills.prefix(5)) { skill in
-                Image(systemName: skill.symbol)
-                    .font(.system(size: 8.5, weight: .semibold))
-                    .foregroundStyle(skill.tint.opacity(0.9))
-            }
-            if skills.count > 5 {
-                Text("+\(skills.count - 5)")
-                    .font(.system(size: 8, weight: .bold))
-                    .foregroundStyle(.secondary)
-            }
-        }
+        let names = skills.prefix(2).map(\.name).joined(separator: ", ")
+        Text(skills.isEmpty
+             ? "No skills"
+             : "\(skills.count) skills · \(names)\(skills.count > 2 ? " +\(skills.count - 2)" : "")")
+            .font(.system(size: 9.5, weight: .semibold))
+            .foregroundStyle(.secondary)
+            .lineLimit(1)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Skills: \(skills.map(\.name).joined(separator: ", "))")
     }
@@ -183,11 +196,32 @@ struct AgentSkillsSection: View {
     @EnvironmentObject var store: AppStore
     @Environment(\.colorScheme) private var scheme
     let agent: Agent
+    @State private var query = ""
+    @State private var expandedCategories: Set<SkillCategory> = []
 
     var body: some View {
         let _ = store.skillsVersion
         let equipped = store.equippedIds(agent.id)
         VStack(alignment: .leading, spacing: 0) {
+            HStack(spacing: 8) {
+                Image(systemName: "magnifyingglass")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(DT.ink35(scheme))
+                TextField("Search \(store.skillPackages.count) skills", text: $query)
+                    .font(.system(size: 13))
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                if !query.isEmpty {
+                    Button { query = "" } label: {
+                        Image(systemName: "xmark.circle.fill").foregroundStyle(DT.ink35(scheme))
+                    }
+                    .accessibilityLabel("Clear skill search")
+                }
+            }
+            .padding(.horizontal, 11)
+            .frame(height: 40)
+            .background(DT.surface2(scheme), in: RoundedRectangle(cornerRadius: DT.rControl, style: .continuous))
+
             // Kits: one tap equips the set (union — never removes).
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 7) {
@@ -213,17 +247,56 @@ struct AgentSkillsSection: View {
             }
             .padding(.horizontal, -20)
             .contentMargins(.horizontal, 20, for: .scrollContent)
+            .padding(.top, 9)
 
-            VStack(spacing: 0) {
-                ForEach(Array(store.skillPackages.enumerated()), id: \.element.id) { index, skill in
-                    if index > 0 {
-                        Rectangle().fill(DT.hairline(scheme)).frame(height: 0.8).padding(.leading, 52)
+            LazyVStack(spacing: 8) {
+                ForEach(SkillCategory.allCases) { category in
+                    let matches = SkillSearch.filtered(store.skillPackages, query: query, category: category)
+                    if !matches.isEmpty {
+                        VStack(spacing: 0) {
+                            Button { toggleCategory(category) } label: {
+                                HStack(spacing: 9) {
+                                    Image(systemName: query.isEmpty && !expandedCategories.contains(category)
+                                          ? "chevron.right" : "chevron.down")
+                                        .font(.system(size: 9, weight: .bold))
+                                        .foregroundStyle(DT.ink35(scheme))
+                                    Image(systemName: category.symbol)
+                                        .font(.system(size: 11, weight: .semibold))
+                                        .foregroundStyle(DT.violetText(scheme))
+                                    Text(category.rawValue)
+                                        .font(.system(size: 12.5, weight: .bold))
+                                        .foregroundStyle(DT.ink(scheme))
+                                    Spacer()
+                                    Text("\(matches.filter { equipped.contains($0.id) }.count)/\(matches.count)")
+                                        .font(.system(size: 10.5, weight: .bold, design: .monospaced))
+                                        .foregroundStyle(DT.ink55(scheme))
+                                }
+                                .padding(.horizontal, 12)
+                                .frame(minHeight: 42)
+                                .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+
+                            if !query.isEmpty || expandedCategories.contains(category) {
+                                ForEach(Array(matches.enumerated()), id: \.element.id) { index, skill in
+                                    if index > 0 {
+                                        Rectangle().fill(DT.hairline(scheme)).frame(height: 0.8).padding(.leading, 52)
+                                    }
+                                    skillRow(skill, isOn: equipped.contains(skill.id))
+                                }
+                            }
+                        }
+                        .card()
                     }
-                    skillRow(skill, isOn: equipped.contains(skill.id))
                 }
             }
-            .card()
             .padding(.top, 10)
+
+            if SkillSearch.filtered(store.skillPackages, query: query).isEmpty {
+                ContentUnavailableView.search(text: query)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 20)
+            }
         }
     }
 
@@ -268,13 +341,25 @@ struct AgentSkillsSection: View {
             }
             .buttonStyle(.plain)
             Spacer()
-            Toggle(skill.name, isOn: Binding(
-                get: { isOn },
-                set: { _ in store.toggleSkill(skill.id, agentId: agent.id) }))
-                .labelsHidden()
-                .tint(DT.live(scheme))
+            Button { store.toggleSkill(skill.id, agentId: agent.id) } label: {
+                Image(systemName: isOn ? "checkmark.circle.fill" : "circle")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundStyle(isOn ? DT.violet : DT.ink35(scheme))
+                    .frame(width: 32, height: 32)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("\(isOn ? "Unequip" : "Equip") \(skill.name)")
         }
-        .padding(.horizontal, 12).padding(.vertical, 9)
+        .padding(.horizontal, 12).padding(.vertical, 7)
+    }
+
+    private func toggleCategory(_ category: SkillCategory) {
+        guard query.isEmpty else { return }
+        withAnimation(.easeOut(duration: 0.18)) {
+            if expandedCategories.contains(category) { expandedCategories.remove(category) }
+            else { expandedCategories.insert(category) }
+        }
     }
 }
 
@@ -845,6 +930,8 @@ struct SkillsLibraryView: View {
     @Environment(\.colorScheme) private var scheme
     @State private var newSkill = false
     @State private var newBundle = false
+    @State private var query = ""
+    @State private var expandedCategories: Set<SkillCategory> = []
 
     var body: some View {
         let _ = store.skillsVersion
@@ -855,6 +942,26 @@ struct SkillsLibraryView: View {
                     .lineSpacing(2)
                     .foregroundStyle(DT.ink78(scheme))
                     .padding(.top, 8)
+
+                HStack(spacing: 8) {
+                    Image(systemName: "magnifyingglass")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(DT.ink35(scheme))
+                    TextField("Search \(store.skillPackages.count) skills", text: $query)
+                        .font(.system(size: 13))
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                    if !query.isEmpty {
+                        Button { query = "" } label: {
+                            Image(systemName: "xmark.circle.fill").foregroundStyle(DT.ink35(scheme))
+                        }
+                        .accessibilityLabel("Clear skill search")
+                    }
+                }
+                .padding(.horizontal, 11)
+                .frame(height: 42)
+                .background(DT.surface2(scheme), in: RoundedRectangle(cornerRadius: DT.rControl, style: .continuous))
+                .padding(.top, 14)
 
                 HStack {
                     Eyebrow("KITS")
@@ -883,29 +990,50 @@ struct SkillsLibraryView: View {
                 .padding(.top, 8)
 
                 ForEach(SkillCategory.allCases) { category in
-                    let inCategory = store.skillPackages.filter { $0.category == category }
+                    let inCategory = SkillSearch.filtered(store.skillPackages, query: query, category: category)
                     if !inCategory.isEmpty {
-                        HStack(spacing: 7) {
-                            Image(systemName: category.symbol)
-                                .font(.system(size: 11, weight: .semibold))
-                                .foregroundStyle(DT.ink35(scheme))
-                            Eyebrow(category.rawValue.uppercased())
-                        }
-                        .padding(.top, 20)
                         VStack(spacing: 0) {
-                            ForEach(Array(inCategory.enumerated()), id: \.element.id) { index, skill in
-                                if index > 0 {
-                                    Rectangle().fill(DT.hairline(scheme)).frame(height: 0.8).padding(.leading, 52)
+                            Button { toggleCategory(category) } label: {
+                                HStack(spacing: 9) {
+                                    Image(systemName: query.isEmpty && !expandedCategories.contains(category)
+                                          ? "chevron.right" : "chevron.down")
+                                        .font(.system(size: 9, weight: .bold))
+                                    Image(systemName: category.symbol)
+                                        .font(.system(size: 11, weight: .semibold))
+                                    Text(category.rawValue)
+                                        .font(.system(size: 13, weight: .bold))
+                                    Spacer()
+                                    Text("\(inCategory.count)")
+                                        .font(.system(size: 10.5, weight: .bold, design: .monospaced))
+                                        .foregroundStyle(DT.ink55(scheme))
                                 }
-                                NavigationLink { SkillDetailView(packageId: skill.id) } label: {
-                                    libraryRow(skill)
+                                .foregroundStyle(DT.ink(scheme))
+                                .padding(.horizontal, 12)
+                                .frame(minHeight: 44)
+                                .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                            if !query.isEmpty || expandedCategories.contains(category) {
+                                ForEach(Array(inCategory.enumerated()), id: \.element.id) { index, skill in
+                                    if index > 0 {
+                                        Rectangle().fill(DT.hairline(scheme)).frame(height: 0.8).padding(.leading, 52)
+                                    }
+                                    NavigationLink { SkillDetailView(packageId: skill.id) } label: {
+                                        libraryRow(skill)
+                                    }
+                                    .buttonStyle(Pressable())
                                 }
-                                .buttonStyle(Pressable())
                             }
                         }
                         .card()
-                        .padding(.top, 8)
+                        .padding(.top, 10)
                     }
+                }
+
+                if SkillSearch.filtered(store.skillPackages, query: query).isEmpty {
+                    ContentUnavailableView.search(text: query)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 24)
                 }
 
                 Button { newSkill = true } label: {
@@ -1036,5 +1164,13 @@ struct SkillsLibraryView: View {
         }
         .padding(.horizontal, 12).padding(.vertical, 9)
         .contentShape(Rectangle())
+    }
+
+    private func toggleCategory(_ category: SkillCategory) {
+        guard query.isEmpty else { return }
+        withAnimation(.easeOut(duration: 0.18)) {
+            if expandedCategories.contains(category) { expandedCategories.remove(category) }
+            else { expandedCategories.insert(category) }
+        }
     }
 }
