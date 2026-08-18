@@ -525,30 +525,61 @@ struct SkillDetailView: View {
 
     private func carriersRow(_ skill: SkillPackage) -> some View {
         let carriers = store.carriers(of: skill.id)
-        return HStack(spacing: 7) {
-            if carriers.isEmpty {
-                Text("No one yet — equip it from any agent's profile.")
-                    .font(.system(size: 12))
-                    .foregroundStyle(DT.ink55(scheme))
-            }
-            ForEach(carriers) { agent in
-                HStack(spacing: 5) {
-                    AvatarChip(letter: String(agent.name.prefix(1)), color: agent.color, size: 18)
-                    Text(agent.name)
-                        .font(.system(size: 11, weight: .bold))
-                        .fixedSize()
-                        .foregroundStyle(DT.ink78(scheme))
-                    if store.wireStatus.isLive, store.skillUse(agent.id, skill.id) > 0 {
-                        Text("×\(store.skillUse(agent.id, skill.id))")
-                            .font(.system(size: 9.5, weight: .bold, design: .monospaced))
-                            .foregroundStyle(skill.tint)
-                    }
+        // The log doesn't lie: agents seen exercising a skill they don't
+        // carry get surfaced — equip what the evidence proves.
+        let observed = store.agents.filter {
+            store.skillUse($0.id, skill.id) > 0 && !store.equippedIds($0.id).contains(skill.id)
+        }
+        return VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 7) {
+                if carriers.isEmpty {
+                    Text("No one yet — equip it from any agent's profile.")
+                        .font(.system(size: 12))
+                        .foregroundStyle(DT.ink55(scheme))
                 }
-                .padding(.horizontal, 8).padding(.vertical, 5)
-                .background(DT.surface2(scheme))
-                .clipShape(Capsule())
+                ForEach(carriers) { agent in
+                    HStack(spacing: 5) {
+                        AvatarChip(letter: String(agent.name.prefix(1)), color: agent.color, size: 18)
+                        Text(agent.name)
+                            .font(.system(size: 11, weight: .bold))
+                            .fixedSize()
+                            .foregroundStyle(DT.ink78(scheme))
+                        if store.wireStatus.isLive, store.skillUse(agent.id, skill.id) > 0 {
+                            Text("×\(store.skillUse(agent.id, skill.id))")
+                                .font(.system(size: 9.5, weight: .bold, design: .monospaced))
+                                .foregroundStyle(skill.tint)
+                        }
+                    }
+                    .padding(.horizontal, 8).padding(.vertical, 5)
+                    .background(DT.surface2(scheme))
+                    .clipShape(Capsule())
+                }
+                Spacer()
             }
-            Spacer()
+            ForEach(observed) { agent in
+                Button { store.toggleSkill(skill.id, agentId: agent.id) } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "eye")
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundStyle(skill.tint)
+                        Text("The log saw \(agent.name) do this ×\(store.skillUse(agent.id, skill.id)) — unequipped")
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundStyle(DT.ink78(scheme))
+                        Spacer()
+                        Text("Equip")
+                            .font(.system(size: 11.5, weight: .bold))
+                            .foregroundStyle(DT.violetText(scheme))
+                            .padding(.horizontal, 10).padding(.vertical, 5)
+                            .background(DT.violet.opacity(0.10))
+                            .clipShape(Capsule())
+                    }
+                    .padding(.horizontal, 10).padding(.vertical, 8)
+                    .background(skill.tint.opacity(0.07))
+                    .clipShape(RoundedRectangle(cornerRadius: 9, style: .continuous))
+                }
+                .buttonStyle(Pressable())
+                .accessibilityLabel("\(agent.name) used \(skill.name) \(store.skillUse(agent.id, skill.id)) times without carrying it. Equip it.")
+            }
         }
     }
 }

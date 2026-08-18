@@ -34,10 +34,13 @@ struct MainTabs: View {
                         Spacer()
                         FeedbackBubble()
                             .padding(.trailing, 16)
-                            .padding(.bottom, 96)
+                            // Auto-dodge: drop into the gap the guide bar
+                            // leaves when it hides — less content overlap.
+                            .padding(.bottom, store.tabBarVisible ? 96 : 44)
                     }
                 }
                 .allowsHitTesting(true)
+                .animation(.spring(response: 0.35, dampingFraction: 0.85), value: store.tabBarVisible)
                 .transition(.scale.combined(with: .opacity))
             }
 
