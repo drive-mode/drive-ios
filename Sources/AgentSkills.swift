@@ -26,7 +26,7 @@ enum AgentSkill: String, CaseIterable, Identifiable {
 
     var verb: String {
         switch self {
-        case .directing: return "Choreographs work into Spotlight beats a phone can digest"
+        case .directing: return "Choreographs work into Presenter-stage beats a phone can digest"
         case .tasks: return "Creates and advances tasks, with the dependencies the map draws"
         case .artifacts: return "Publishes plans, diffs, reports, and replays — with lifecycles"
         case .editing: return "Proposes diffs and lands them once you allow it"
