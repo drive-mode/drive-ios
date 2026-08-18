@@ -41,6 +41,12 @@
 			</array>
 		</dict>
 	</dict>
+	<key>UIAppFonts</key>
+	<array>
+		<string>Fonts/SchibstedGrotesk.ttf</string>
+	</array>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Hold to talk in a working session. Audio stays in memory and is discarded — never stored, never transcribed.</string>
 	<key>UILaunchScreen</key>
 	<dict>
 		<key>UIColorName</key>

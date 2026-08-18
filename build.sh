@@ -19,6 +19,7 @@ swiftc -O -parse-as-library \
 
 cp Info.plist "$APP/Info.plist"
 cp Icons/AppIcon60x60@2x.png Icons/AppIcon60x60@3x.png "$APP/" 2>/dev/null || true
+mkdir -p "$APP/Fonts" && cp Fonts/SchibstedGrotesk.ttf "$APP/Fonts/" 2>/dev/null || true
 codesign --force --sign - "$APP" >/dev/null 2>&1 || true
 
 echo "Built $APP"

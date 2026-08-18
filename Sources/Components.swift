@@ -4,14 +4,20 @@ import UIKit
 // MARK: - Accessibility & UX helpers
 
 /// Dynamic Type support for the token-sized brand type: multiplies the design
-/// size by the user's text-size setting (relative to body).
+/// size by the user's text-size setting (relative to body). Rides the bundled
+/// Schibsted Grotesk (variable weight); monospaced design keeps the system
+/// mono, and the custom face falls back to system if the bundle lacks it.
 struct ScaledFont: ViewModifier {
     @ScaledMetric(relativeTo: .body) private var scale: CGFloat = 1
     var size: CGFloat
     var weight: Font.Weight
     var design: Font.Design
     func body(content: Content) -> some View {
-        content.font(.system(size: size * scale, weight: weight, design: design))
+        if design == .monospaced {
+            content.font(.system(size: size * scale, weight: weight, design: design))
+        } else {
+            content.font(.custom("Schibsted Grotesk", size: size * scale).weight(weight))
+        }
     }
 }
 
