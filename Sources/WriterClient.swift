@@ -25,6 +25,24 @@ struct WireParticipant {
     let joinedAt: Date
 }
 
+/// Client-side reduction of the log-carried session lifecycle. This is not a
+/// second source of truth: it is rebuilt from control.session_* events.
+struct WireSessionRecord {
+    let id: String
+    var organizerId: String
+    var title: String
+    var project: String
+    var participantIds: [String]
+    var agendaTaskIds: [String]
+    var note: String
+    var createdAt: Date
+    var scheduledAt: Date?
+    var startedAt: Date?
+    var endedAt: Date?
+    var programId: String?
+    var replayArtifactId: String?
+}
+
 // MARK: - Wire schema (Codable — no dictionary spelunking on the hot path)
 
 private struct WireEnvelope: Decodable {
@@ -38,6 +56,21 @@ private struct WireResult: Decodable {
 
 private struct WireEntry: Decodable {
     let event: WireEvent
+}
+
+private struct WireMutationEnvelope: Decodable {
+    let ok: Bool
+    let result: WireMutationResult?
+    let error: String?
+}
+
+private struct WireMutationResult: Decodable {
+    let event: WireEvent?
+}
+
+private enum WireMutationFailure: Error {
+    case rejected(String)
+    case missingEvent
 }
 
 private struct WireEventParticipant: Decodable {
@@ -67,6 +100,7 @@ private struct WirePayload: Decodable {
     let repo: String?
     let sizeKb: Int?
     // work.direction.beat
+    let programId: String?
     let beatIndex: Int?
     let directorId: String?
     let caption: String?
@@ -89,8 +123,19 @@ private struct WireEvent: Decodable {
     let participant: WireEventParticipant?
     // control.invite
     let inviterId: String?
+    let inviteeId: String?
+    let sessionId: String?
     let title: String?
     let note: String?
+    // control.session_*
+    let organizerId: String?
+    let project: String?
+    let participantIds: [String]?
+    let agendaTaskIds: [String]?
+    let scheduledFor: String?
+    let programId: String?
+    let outcome: String?
+    let replayArtifactId: String?
     // work.generic
     let kind: String?
     let payload: WirePayload?
@@ -166,6 +211,18 @@ extension AppStore {
                 // cursor would never see it. Resync from the top; events are
                 // keyed by id, so replays land idempotently.
                 wireSeq = -1
+                for sessionId in wireReminderScheduled {
+                    NotificationManager.shared.cancelSessionReminder(sessionId)
+                }
+                wireSessions.removeAll()
+                wireBeats.removeAll()
+                wireBeatRelated.removeAll()
+                wireBeatPrograms.removeAll()
+                beats = []
+                wireUpcomingSessions = []
+                wireActiveSession = nil
+                wireActiveProgramId = nil
+                wireReminderScheduled.removeAll()
                 return
             }
             var eventCount = 0
@@ -204,16 +261,53 @@ extension AppStore {
             return
         case "control.invite":
             // Invitations ride the control track straight into the inbox.
+            // Outgoing events are receipts; only invitations addressed to
+            // this person appear as incoming calls to action.
             guard let id = event.id, let inviter = event.inviterId,
+                  let invitee = event.inviteeId,
                   !inbox.contains(where: { $0.id == id }) else { return }
             countSkillUse(inviter, .inviting)
+            let outgoing = Self.isLocalUser(inviter)
+            guard outgoing || Self.isLocalUser(invitee) else { return }
             inbox.insert(InboxItem(
                 id: id, kind: .invite,
-                title: "\(Self.displayName(inviter)) invited you to a working session",
+                title: outgoing
+                    ? "You invited \(Self.displayName(invitee)) to a working session"
+                    : "\(Self.displayName(inviter)) invited you to a working session",
                 body: event.note
                     ?? event.title.map { "\($0) — join when you're ready." }
                     ?? "Join when you're ready.",
-                age: Self.relative(at)), at: 0)
+                age: Self.relative(at), read: outgoing), at: 0)
+            return
+        case "control.session_created":
+            guard let id = event.sessionId, let organizerId = event.organizerId,
+                  let title = event.title, let project = event.project,
+                  let participantIds = event.participantIds,
+                  let agendaTaskIds = event.agendaTaskIds else { return }
+            wireSessions[id] = WireSessionRecord(
+                id: id, organizerId: organizerId, title: title, project: project,
+                participantIds: participantIds, agendaTaskIds: agendaTaskIds,
+                note: event.note ?? "Join when you're ready.", createdAt: at)
+            return
+        case "control.session_scheduled":
+            guard let id = event.sessionId, let raw = event.scheduledFor,
+                  let scheduledAt = Self.parseIso(raw), var session = wireSessions[id] else { return }
+            session.scheduledAt = scheduledAt
+            wireSessions[id] = session
+            return
+        case "control.session_started":
+            guard let id = event.sessionId, let programId = event.programId,
+                  var session = wireSessions[id] else { return }
+            session.startedAt = at
+            session.endedAt = nil
+            session.programId = programId
+            wireSessions[id] = session
+            return
+        case "control.session_ended":
+            guard let id = event.sessionId, var session = wireSessions[id] else { return }
+            session.endedAt = at
+            session.replayArtifactId = event.replayArtifactId
+            wireSessions[id] = session
             return
         case "work.generic":
             break
@@ -311,7 +405,9 @@ extension AppStore {
                 "tests": .test, "decision": .decision, "result": .metric,
             ][kindRaw] ?? .plan
             let directorId = payload.directorId ?? actorId
-            wireBeats[index] = Beat(
+            let programId = payload.programId ?? "legacy"
+            let key = "\(programId)#\(index)"
+            wireBeats[key] = Beat(
                 id: index, kind: beatKind, title: title,
                 director: Self.displayName(directorId),
                 directorColor: Self.agentColors[directorId] ?? Self.fallbackColor(directorId),
@@ -319,10 +415,12 @@ extension AppStore {
                 duration: payload.durationSec ?? 7,
                 steps: payload.steps ?? [],
                 accent: payload.accent ?? [])
-            wireBeatRelated[index] = payload.relatedEventIds ?? []
+            wireBeatRelated[key] = payload.relatedEventIds ?? []
+            wireBeatPrograms[key] = programId
             if wireBeats.count > Self.beatCap, let victim = wireBeats.keys.min() {
                 wireBeats.removeValue(forKey: victim)
                 wireBeatRelated.removeValue(forKey: victim)
+                wireBeatPrograms.removeValue(forKey: victim)
             }
         default:
             break
@@ -341,6 +439,91 @@ extension AppStore {
             "args": ["text": text, "actorId": "harrison"],
         ])
         Task { _ = try? await URLSession.shared.data(for: request) }
+    }
+
+    /// Publish the composer's durable registry records, then one real
+    /// room_invite per selected participant. Returned log events are reduced
+    /// immediately; the next poll replays them idempotently and advances seq.
+    func publishSessionPlan(_ session: UpcomingSession, inviteeIds: [String]) async throws {
+        guard wireStatus.isLive else {
+            throw WireMutationFailure.rejected("writer offline")
+        }
+        let organizerId = "harrison"
+        let participantIds = session.participantIds ?? [organizerId] + inviteeIds
+        let agendaTaskIds = session.agendaTaskIds ?? []
+        let scheduledAt = session.scheduledAt ?? UpcomingSession.scheduledDate(for: session.when)
+
+        let created = try await performWireMutation(tool: "session_create", args: [
+            "sessionId": session.id,
+            "organizerId": organizerId,
+            "title": session.title,
+            "project": session.project,
+            "participantIds": Array(Set(participantIds)).sorted(),
+            "agendaTaskIds": agendaTaskIds,
+            "note": session.note,
+        ])
+        apply(wireEvent: created)
+
+        let scheduled = try await performWireMutation(tool: "session_schedule", args: [
+            "sessionId": session.id,
+            "scheduledFor": Self.isoString(scheduledAt),
+            "actorId": organizerId,
+        ])
+        apply(wireEvent: scheduled)
+
+        if session.when == "Now" {
+            let started = try await performWireMutation(tool: "session_start", args: [
+                "sessionId": session.id,
+                "programId": "program-\(session.id)",
+                "actorId": organizerId,
+            ])
+            apply(wireEvent: started)
+        }
+
+        for inviteeId in inviteeIds {
+            let invitation = try await performWireMutation(tool: "room_invite", args: [
+                "inviterId": organizerId,
+                "inviteeId": inviteeId,
+                "sessionId": session.id,
+                "title": session.title,
+                "note": session.note,
+            ])
+            apply(wireEvent: invitation)
+        }
+        rebuildFromWire()
+    }
+
+    func cancelWireSession(_ sessionId: String) async throws {
+        let ended = try await performWireMutation(tool: "session_end", args: [
+            "sessionId": sessionId,
+            "outcome": "cancelled",
+            "actorId": "harrison",
+        ])
+        apply(wireEvent: ended)
+        rebuildFromWire()
+    }
+
+    private func performWireMutation(
+        tool: String, args: [String: Any]
+    ) async throws -> WireEvent {
+        guard let url = URL(string: "\(writerURL)/rpc") else {
+            throw WireMutationFailure.rejected("invalid writer URL")
+        }
+        var request = URLRequest(url: url, timeoutInterval: 3)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONSerialization.data(withJSONObject: [
+            "tool": tool, "args": args,
+        ])
+        let (data, _) = try await URLSession.shared.data(for: request)
+        let response = try Self.decoder.decode(WireMutationEnvelope.self, from: data)
+        guard response.ok else {
+            throw WireMutationFailure.rejected(response.error ?? "writer rejected mutation")
+        }
+        guard let event = response.result?.event else {
+            throw WireMutationFailure.missingEvent
+        }
+        return event
     }
 
     private func countSkillUse(_ actorId: String, _ skill: AgentSkill) {
@@ -383,13 +566,22 @@ extension AppStore {
         if !wireArtifacts.isEmpty {
             artifacts = Array(wireArtifacts.values).sorted { $0.id < $1.id }
         }
+        rebuildWireSessions()
+
         if !wireBeats.isEmpty {
             // Stage precedence: director-curated steps win; otherwise resolve
             // relatedEventIds against work events seen so far (late arrivals
             // resolve next rebuild); otherwise the structural placeholder.
-            beats = wireBeats.sorted { $0.key < $1.key }.map { index, beat in
+            let activeBeats = wireBeats.filter { key, _ in
+                guard let activeProgram = wireActiveProgramId else { return true }
+                return wireBeatPrograms[key] == activeProgram
+            }
+            beats = activeBeats.sorted {
+                if $0.value.id == $1.value.id { return $0.key < $1.key }
+                return $0.value.id < $1.value.id
+            }.map { key, beat in
                 guard beat.steps.isEmpty else { return beat }
-                let steps = (wireBeatRelated[index] ?? []).compactMap { wireEventTitles[$0] }
+                let steps = (wireBeatRelated[key] ?? []).compactMap { wireEventTitles[$0] }
                 guard !steps.isEmpty else { return beat }
                 return Beat(id: beat.id, kind: beat.kind, title: beat.title,
                             director: beat.director, directorColor: beat.directorColor,
@@ -417,6 +609,54 @@ extension AppStore {
         }
     }
 
+    private func rebuildWireSessions() {
+        let live = wireSessions.values
+            .filter { $0.startedAt != nil && $0.endedAt == nil }
+            .sorted { ($0.startedAt ?? .distantPast) > ($1.startedAt ?? .distantPast) }
+            .first
+        wireActiveSession = live.map(materialize)
+        wireActiveProgramId = live?.programId
+        wireUpcomingSessions = wireSessions.values
+            .filter { $0.startedAt == nil && $0.endedAt == nil }
+            .sorted {
+                ($0.scheduledAt ?? $0.createdAt) < ($1.scheduledAt ?? $1.createdAt)
+            }
+            .map(materialize)
+
+        let activeOrEnded = wireSessions.values.filter {
+            $0.startedAt != nil || $0.endedAt != nil
+        }
+        for session in activeOrEnded where wireReminderScheduled.contains(session.id) {
+            NotificationManager.shared.cancelSessionReminder(session.id)
+            wireReminderScheduled.remove(session.id)
+        }
+        for session in wireSessions.values where session.startedAt == nil && session.endedAt == nil {
+            guard let scheduledAt = session.scheduledAt,
+                  scheduledAt.timeIntervalSinceNow > -60,
+                  !wireReminderScheduled.contains(session.id) else { continue }
+            NotificationManager.shared.scheduleSessionReminder(materialize(session))
+            wireReminderScheduled.insert(session.id)
+        }
+    }
+
+    private func materialize(_ session: WireSessionRecord) -> UpcomingSession {
+        let people = session.participantIds.map { id in
+            wireParticipants[id]?.displayName ?? Self.displayName(id)
+        }
+        return UpcomingSession(
+            id: session.id,
+            title: session.title,
+            project: session.project,
+            when: session.scheduledAt.map { UpcomingSession.displayWhen($0) }
+                ?? "Time not set",
+            people: people,
+            agendaCount: session.agendaTaskIds.count,
+            note: session.note,
+            participantIds: session.participantIds,
+            agendaTaskIds: session.agendaTaskIds,
+            scheduledAt: session.scheduledAt)
+    }
+
     private static func fallbackColor(_ actorId: String) -> Color {
         var hash = 0
         for scalar in actorId.unicodeScalars { hash = (hash &* 31 &+ Int(scalar.value)) & 0xFFFF }
@@ -428,6 +668,10 @@ extension AppStore {
         return actorId.prefix(1).uppercased() + actorId.dropFirst()
     }
 
+    private static func isLocalUser(_ actorId: String) -> Bool {
+        actorId == "harrison" || actorId == "drive:human"
+    }
+
     private static let isoParser: ISO8601DateFormatter = {
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
@@ -436,6 +680,10 @@ extension AppStore {
 
     private static func parseIso(_ raw: String) -> Date? {
         isoParser.date(from: raw) ?? ISO8601DateFormatter().date(from: raw)
+    }
+
+    private static func isoString(_ date: Date) -> String {
+        isoParser.string(from: date)
     }
 
     /// "8s" / "2m" / "3h" / "4d" — the wire's `at`, humanized.

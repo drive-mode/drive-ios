@@ -46,9 +46,14 @@ struct OpenView: View {
                 .padding(.top, 14)
 
             Button {
-                store.joinCall()
+                if store.hasLiveSession {
+                    store.joinCall()
+                } else {
+                    store.launched = true
+                    store.selectedTab = .home
+                }
             } label: {
-                Text("Watch a live session")
+                Text(store.hasLiveSession ? "Watch a live session" : "Open Drive")
                     .font(.system(size: 16, weight: .bold))
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)

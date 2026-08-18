@@ -32,7 +32,7 @@ struct LiveCallView: View {
                 VStack(spacing: 14) {
                     DriveSpinner(size: 44)
                         .foregroundStyle(.white)
-                    Text("Joining Auth middleware…")
+                    Text("Joining \(store.liveSessionTitle)…")
                         .font(.system(size: 13.5, weight: .semibold))
                         .foregroundStyle(.white.opacity(0.78))
                 }
@@ -331,7 +331,7 @@ struct LiveCallView: View {
             .accessibilityLabel("Leave session")
             Spacer()
             VStack(spacing: 2) {
-                Text("Auth middleware")
+                Text(store.liveSessionTitle)
                     .font(.system(size: 15, weight: .bold))
                     .foregroundStyle(.white)
                 HStack(spacing: 5) {

@@ -6,13 +6,15 @@ Baseline = the harness's five primitives and existing packs
 (`work.edit/command/test/plan/decision/generic`, `report_status`,
 `interrupt_raise/ack`, `conversation_publish`, `events_since`).
 
-**The one gap under everything: wall-clock timestamps on the durable log.**
-Ages, TTLs, the activity calendar, streaks, and records are all fake until
-events carry time, not just sequence.
+Every durable event already carries an ISO wall-clock timestamp. The iOS
+client now consumes it for invitation ages, artifact TTL clocks, and
+scheduled-session reminders; remaining aggregate surfaces should follow
+that same source rather than inventing local ages.
 
 | Surface | Runs on today (demo) | Needs from the wire |
 |---|---|---|
 | Directed Spotlight + replays | Scripted `Beat[]` (kind, title, director, caption, duration) | Existing `work.*` events **plus beat grouping**: program id + beat index + director ref + caption line (or a `stage.direct` annotation event). Replay = `events_since` over a session's program |
+| Work session lifecycle | Local `UpcomingSession` fallback when offline | **Implemented in the current three-repo working tree**: typed `control.session_created/scheduled/started/ended`; `control.invite.sessionId`; writer lifecycle tools; iOS NOW/UPCOMING fold and real composer sends. Remaining: per-session replay windows and speaking presence |
 | Tasks + task map | Seeded `TaskItem` (project, agent, state, progress, deps) | **New pack `work.task.*`**: created / state / progress / deps — aligns with the task-bank initiative. Deps are what the map draws |
 | Projects + archive | Name-keyed rooms; state-based auto-file | Project registry (id, name, area) + lifecycle events (archived/restored); **age-based policy needs timestamps** |
 | Activity calendar / contribution wall | Seeded 365-day `DayRecord` | Derivable — count `work.task.done` by day × project. No new events; needs timestamps + project refs |
@@ -43,10 +45,11 @@ events carry time, not just sequence.
    full stage everywhere; precedence steps > relatedEventIds > placeholder.
    Both PRs (harness `control.invite`, mcp fleet packs) are **merged to
    main**.
-5. ~~**`room.invite`**~~ — **landed**: `control.invite` in
-   collaboration-harness (PR #1) → writer `room_invite` → inbox card with
-   real ages, verified. Inbox **read-state sync** remains open (client-side
-   state only today).
+5. ~~**`room.invite`**~~ — **landed**, then extended in the current
+   working tree with `sessionId`: `control.invite` → writer `room_invite`
+   → real composer send → addressed inbox card with real ages. Outgoing
+   invitations become local read receipts; Inbox **read-state sync**
+   remains open (client-side state only today).
 6. ~~**Voice spans + latency**~~ — **already derivable**: `presence.speaking`
    true/false spans + `control.interrupt_ack`, all timestamped. Client-side
    aggregation, no new events.

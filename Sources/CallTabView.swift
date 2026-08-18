@@ -11,6 +11,9 @@ struct UpcomingSession: Codable, Identifiable, Equatable {
     var people: [String]
     var agendaCount: Int
     var note: String
+    var participantIds: [String]? = nil
+    var agendaTaskIds: [String]? = nil
+    var scheduledAt: Date? = nil
 
     static let seed = UpcomingSession(
         id: "up-seed-payments",
@@ -33,6 +36,33 @@ struct UpcomingSession: Codable, Identifiable, Equatable {
         if let data = try? JSONEncoder().encode(sessions) {
             UserDefaults.standard.set(data, forKey: "upcoming.v1")
         }
+    }
+
+    static func scheduledDate(for choice: String, now: Date = Date()) -> Date {
+        switch choice {
+        case "Now":
+            return now
+        case "Later today":
+            return now.addingTimeInterval(2 * 60 * 60)
+        default:
+            let calendar = Calendar.current
+            let tomorrow = calendar.date(byAdding: .day, value: 1, to: now) ?? now
+            return calendar.date(bySettingHour: 10, minute: 0, second: 0, of: tomorrow)
+                ?? tomorrow
+        }
+    }
+
+    static func displayWhen(_ date: Date, now: Date = Date()) -> String {
+        let calendar = Calendar.current
+        if abs(date.timeIntervalSince(now)) < 60 { return "Now" }
+        if calendar.isDate(date, inSameDayAs: now) {
+            return date.formatted(date: .omitted, time: .shortened)
+        }
+        if let tomorrow = calendar.date(byAdding: .day, value: 1, to: now),
+           calendar.isDate(date, inSameDayAs: tomorrow) {
+            return "Tomorrow · \(date.formatted(date: .omitted, time: .shortened))"
+        }
+        return date.formatted(date: .abbreviated, time: .shortened)
     }
 }
 
@@ -57,7 +87,7 @@ struct CallTabView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
                     Eyebrow("NOW").padding(.top, 8)
-                    if store.beats.isEmpty {
+                    if !store.hasLiveSession {
                         quietCard.padding(.top, 10)
                     } else {
                         LiveSessionCard().padding(.top, 10)
@@ -70,9 +100,9 @@ struct CallTabView: View {
                         }
                     }
 
-                    if !store.upcomingSessions.isEmpty {
+                    if !store.displayedUpcomingSessions.isEmpty {
                         Eyebrow("UPCOMING").padding(.top, 24)
-                        ForEach(store.upcomingSessions) { session in
+                        ForEach(store.displayedUpcomingSessions) { session in
                             upcomingRow(session).padding(.top, 10)
                         }
                     }
@@ -214,28 +244,31 @@ struct LiveSessionCard: View {
                 LivePill()
                 Spacer()
                 HStack(spacing: -6) {
-                    AvatarChip(letter: "H", color: DT.violet, size: 26, human: true)
-                        .overlay(Circle().strokeBorder(DT.surface(scheme), lineWidth: 1.5))
-                    ForEach(store.agents.prefix(3)) { agent in
-                        AvatarChip(letter: String(agent.name.prefix(1)), color: agent.color, size: 26)
+                    ForEach(Array(store.liveSessionPeople.prefix(4)), id: \.self) { name in
+                        let agent = store.agents.first { $0.name == name }
+                        AvatarChip(
+                            letter: String(name.prefix(1)),
+                            color: agent?.color ?? DT.violet,
+                            size: 26,
+                            human: name == "Harrison")
                             .overlay(Circle().strokeBorder(DT.surface(scheme), lineWidth: 1.5))
                     }
                 }
             }
-            Text("Ship auth middleware")
+            Text(store.liveSessionTitle)
                 .kerning(-0.4)
                 .scaledFont(19, .heavy)
                 .padding(.top, 12)
-            Text("\(store.agents.count) agents · directed spotlight · rotate for theater")
+            Text("\(store.liveSessionPeople.count) people · directed spotlight · rotate for theater")
                 .font(.system(size: 11.5))
                 .foregroundStyle(DT.ink55(scheme))
                 .padding(.top, 3)
 
             // The ticker: 2 Hz is information cadence, not decoration —
             // the same director clock the Spotlight runs on.
-            TimelineView(.periodic(from: .now, by: 0.5)) { context in
-                let pos = store.directorPosition(at: context.date)
-                if !store.beats.isEmpty {
+            if store.hasLiveProgramBeats {
+                TimelineView(.periodic(from: .now, by: 0.5)) { context in
+                    let pos = store.directorPosition(at: context.date)
                     let beat = store.beats[pos.index]
                     VStack(alignment: .leading, spacing: 8) {
                         HStack(spacing: 8) {
@@ -261,9 +294,18 @@ struct LiveSessionCard: View {
                     .background(DT.well.opacity(scheme == .dark ? 0.7 : 0.05))
                     .clipShape(RoundedRectangle(cornerRadius: DT.rCard, style: .continuous))
                     .padding(.top, 12)
-                    .accessibilityElement(children: .ignore)
-                    .accessibilityLabel("Now: beat \(pos.index + 1) of \(store.beats.count), \(beat.kind.rawValue): \(beat.title)")
+                        .accessibilityElement(children: .ignore)
+                        .accessibilityLabel("Now: beat \(pos.index + 1) of \(store.beats.count), \(beat.kind.rawValue): \(beat.title)")
                 }
+            } else {
+                Text("Waiting for the first directed beat…")
+                    .scaledFont(12.5, .semibold)
+                    .foregroundStyle(DT.ink55(scheme))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(11)
+                    .background(DT.well.opacity(scheme == .dark ? 0.7 : 0.05))
+                    .clipShape(RoundedRectangle(cornerRadius: DT.rCard, style: .continuous))
+                    .padding(.top, 12)
             }
 
             Button { store.joinCall() } label: {
@@ -444,6 +486,8 @@ struct SessionComposerSheet: View {
     @State private var pickedPeople: Set<String> = []
     @State private var when = "Later today"
     @State private var note = "Join when you're ready."
+    @State private var sending = false
+    @State private var sendError: String?
 
     private var projectOptions: [String] {
         Array(store.orderedProjects.prefix(8).map(\.name))
@@ -532,13 +576,13 @@ struct SessionComposerSheet: View {
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 7) {
                                 ForEach(store.agents) { agent in
-                                    let picked = pickedPeople.contains(agent.name)
+                                    let picked = pickedPeople.contains(agent.id)
                                     let directs = store.equippedIds(agent.id).contains("directing")
                                     Button {
                                         if picked {
-                                            pickedPeople.remove(agent.name)
+                                            pickedPeople.remove(agent.id)
                                         } else {
-                                            pickedPeople.insert(agent.name)
+                                            pickedPeople.insert(agent.id)
                                         }
                                     } label: {
                                         HStack(spacing: 6) {
@@ -598,19 +642,43 @@ struct SessionComposerSheet: View {
                             .padding(.top, 7)
 
                         Button {
+                            let inviteeIds = pickedPeople.isEmpty
+                                ? [store.agents.first(where: { $0.id == "maya" })?.id
+                                    ?? store.agents.first?.id].compactMap { $0 }
+                                : pickedPeople.sorted()
+                            let selectedNames = inviteeIds.map { id in
+                                store.agents.first(where: { $0.id == id })?.name
+                                    ?? AppStore.displayName(id)
+                            }
+                            let scheduledAt = UpcomingSession.scheduledDate(for: when)
                             let session = UpcomingSession(
-                                id: "up-\(Int(Date().timeIntervalSince1970))",
+                                id: "session-\(UUID().uuidString.lowercased())",
                                 title: title.trimmingCharacters(in: .whitespaces),
                                 project: project,
                                 when: when,
-                                people: pickedPeople.isEmpty ? ["Maya"] : pickedPeople.sorted(),
+                                people: ["Harrison"] + selectedNames,
                                 agendaCount: pickedAgenda.count,
-                                note: note)
-                            store.planSession(session)
-                            UINotificationFeedbackGenerator().notificationOccurred(.success)
-                            dismiss()
+                                note: note,
+                                participantIds: ["harrison"] + inviteeIds,
+                                agendaTaskIds: pickedAgenda.sorted(),
+                                scheduledAt: scheduledAt)
+                            Task {
+                                sending = true
+                                sendError = nil
+                                let sent = await store.planSession(
+                                    session, inviteeIds: inviteeIds)
+                                sending = false
+                                if sent {
+                                    UINotificationFeedbackGenerator()
+                                        .notificationOccurred(.success)
+                                    dismiss()
+                                } else {
+                                    sendError = store.lastSessionError
+                                        ?? "The writer did not accept the session. Try again."
+                                }
+                            }
                         } label: {
-                            Text("Send invitations")
+                            Text(sending ? "Sending…" : "Send invitations")
                                 .scaledFont(14, .bold)
                                 .foregroundStyle(.white)
                                 .frame(maxWidth: .infinity)
@@ -619,9 +687,19 @@ struct SessionComposerSheet: View {
                                 .clipShape(RoundedRectangle(cornerRadius: DT.rControl, style: .continuous))
                         }
                         .buttonStyle(Pressable())
-                        .disabled(title.trimmingCharacters(in: .whitespaces).isEmpty)
+                        .disabled(title.trimmingCharacters(in: .whitespaces).isEmpty || sending)
                         .padding(.top, 20)
-                        Text("People like being invited. Preview: invitations stay on this device until the hub connects — then they go out for real.")
+                        if let sendError {
+                            Text(sendError)
+                                .font(.system(size: 10.5, weight: .semibold))
+                                .foregroundStyle(Color.red)
+                                .padding(.top, 8)
+                        }
+                        Text(store.wireStatus.isLive
+                            ? "Live: the session and invitations are published to the room log."
+                            : store.wireDropped
+                                ? "Reconnect before sending so the room log stays the source of truth."
+                                : "Offline preview: this session stays on this device until the writer reconnects.")
                             .font(.system(size: 10.5))
                             .foregroundStyle(DT.ink35(scheme))
                             .padding(.top, 8)

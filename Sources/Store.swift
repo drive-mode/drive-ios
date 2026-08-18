@@ -342,14 +342,63 @@ final class AppStore: ObservableObject {
         didSet { MemoryFile.save(memoryFiles) }
     }
 
-    // MARK: Work page — sessions that exist before they're live
-    // (docs/WORK-PAGE.md). Composed on-device in the preview; the wire's
-    // session registry takes over in P1.
+    // MARK: Work page — sessions that exist before they're live. The durable
+    // registry is wire truth when connected; these persisted rows are the
+    // explicitly labeled offline fallback (docs/WORK-PAGE.md).
     @Published var upcomingSessions: [UpcomingSession] = UpcomingSession.load() {
         didSet { UpcomingSession.save(upcomingSessions) }
     }
+    @Published var wireUpcomingSessions: [UpcomingSession] = []
+    @Published var wireActiveSession: UpcomingSession?
+    @Published var wireActiveProgramId: String?
+    @Published var lastSessionError: String?
 
-    func planSession(_ session: UpcomingSession) {
+    /// Once a live wire has supplied registry rows, a drop keeps the last
+    /// synced session view intact under the reconnect chip. Falling back to
+    /// unrelated on-device rows would make NOW and UPCOMING disagree.
+    var usesWireSessionRegistry: Bool {
+        wireStatus.isLive || (wireDropped && !wireSessions.isEmpty)
+    }
+
+    var displayedUpcomingSessions: [UpcomingSession] {
+        usesWireSessionRegistry ? wireUpcomingSessions : upcomingSessions
+    }
+
+    var hasLiveSession: Bool {
+        usesWireSessionRegistry ? wireActiveSession != nil : !beats.isEmpty
+    }
+
+    var liveSessionTitle: String {
+        usesWireSessionRegistry
+            ? wireActiveSession?.title ?? "Working session"
+            : "Ship auth middleware"
+    }
+
+    var liveSessionPeople: [String] {
+        if usesWireSessionRegistry { return wireActiveSession?.people ?? [] }
+        return ["Harrison"] + agents.map(\.name)
+    }
+
+    var hasLiveProgramBeats: Bool {
+        usesWireSessionRegistry ? !wireBeats.isEmpty && !beats.isEmpty : !beats.isEmpty
+    }
+
+    func planSession(_ session: UpcomingSession, inviteeIds: [String]) async -> Bool {
+        lastSessionError = nil
+        if wireDropped {
+            lastSessionError = "Reconnect to the room log before sending invitations."
+            return false
+        }
+        if wireStatus.isLive {
+            do {
+                try await publishSessionPlan(session, inviteeIds: inviteeIds)
+                return true
+            } catch {
+                lastSessionError = "Writer didn’t finish publishing. Check the room log before retrying."
+                return false
+            }
+        }
+
         upcomingSessions.insert(session, at: 0)
         inbox.insert(InboxItem(
             id: "up-\(session.id)", kind: .invite,
@@ -357,9 +406,16 @@ final class AppStore: ObservableObject {
             body: "\(session.title) — \(session.when). \(session.agendaCount) agenda item\(session.agendaCount == 1 ? "" : "s").",
             age: "now", read: true), at: 0)
         NotificationManager.shared.scheduleSessionReminder(session)
+        return true
     }
 
     func removeUpcoming(_ id: String) {
+        if wireStatus.isLive {
+            Task { [weak self] in
+                try? await self?.cancelWireSession(id)
+            }
+            return
+        }
         withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
             upcomingSessions.removeAll { $0.id == id }
         }
@@ -467,8 +523,11 @@ final class AppStore: ObservableObject {
     var wireTaskOrder: [String] = []
     var wireArtifacts: [String: Artifact] = [:]
     var wireArtifactOrder: [String] = []
-    var wireBeats: [Int: Beat] = [:]
-    var wireBeatRelated: [Int: [String]] = [:]
+    var wireBeats: [String: Beat] = [:]
+    var wireBeatRelated: [String: [String]] = [:]
+    var wireBeatPrograms: [String: String] = [:]
+    var wireSessions: [String: WireSessionRecord] = [:]
+    var wireReminderScheduled: Set<String> = []
     /// Room roster + latest per-actor work line, from control.join / work.*.
     var wireParticipants: [String: WireParticipant] = [:]
     var wireActorStatus: [String: (line: String, at: Date)] = [:]

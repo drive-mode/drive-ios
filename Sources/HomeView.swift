@@ -173,8 +173,13 @@ struct HomeView: View {
                     .clipShape(RoundedRectangle(cornerRadius: DT.rControl, style: .continuous))
                     .padding(.top, 14)
 
-                    Eyebrow("IN SESSION").padding(.top, 24)
-                    LiveHeroCard().padding(.top, 10)
+                    Eyebrow(store.hasLiveSession ? "IN SESSION" : "WORK")
+                        .padding(.top, 24)
+                    if store.hasLiveSession {
+                        LiveHeroCard().padding(.top, 10)
+                    } else {
+                        HomeQuietSessionCard().padding(.top, 10)
+                    }
 
                     HStack {
                         Eyebrow("TODAY")
@@ -390,12 +395,12 @@ struct LiveHeroCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             LivePill(onGradient: true).foregroundStyle(.white)
-            Text("Ship auth middleware")
+            Text(store.liveSessionTitle)
                 .kerning(-0.5)
                 .scaledFont(23, .heavy)
                 .foregroundStyle(.white)
                 .padding(.top, 12)
-            Text("3 people · 2 agents · 12m")
+            Text("\(store.liveSessionPeople.count) people · live now")
                 .scaledFont(13)
                 .foregroundStyle(.white.opacity(0.78))
                 .padding(.top, 5)
@@ -403,7 +408,9 @@ struct LiveHeroCard: View {
                 HStack(spacing: 7) {
                     Image(systemName: "sparkles.tv")
                         .font(.system(size: 11, weight: .semibold))
-                    Text("Directed spotlight · \(store.beats.count) beats · rotate for theater")
+                    Text(store.hasLiveProgramBeats
+                        ? "Directed spotlight · \(store.beats.count) beats · rotate for theater"
+                        : "Directed spotlight · waiting for the first beat")
                         .font(.system(size: 11.5, weight: .semibold))
                 }
                 .foregroundStyle(.white.opacity(0.85))
@@ -414,8 +421,13 @@ struct LiveHeroCard: View {
             }
             HStack {
                 HStack(spacing: -7) {
-                    ForEach([("A", Color(hex: 0x7A3FD4)), ("M", Color(hex: 0x5B8DEF)), ("J", Color(hex: 0xE8A13C))], id: \.0) { pair in
-                        AvatarChip(letter: pair.0, color: pair.1, size: 28, human: true)
+                    ForEach(Array(store.liveSessionPeople.prefix(4)), id: \.self) { name in
+                        let agent = store.agents.first { $0.name == name }
+                        AvatarChip(
+                            letter: String(name.prefix(1)),
+                            color: agent?.color ?? DT.violet,
+                            size: 28,
+                            human: name == "Harrison")
                             .overlay(Circle().strokeBorder(.white.opacity(0.9), lineWidth: 2))
                     }
                 }
@@ -444,6 +456,44 @@ struct LiveHeroCard: View {
         }
         .clipShape(RoundedRectangle(cornerRadius: DT.rHero, style: .continuous))
         .shadow(color: DT.violet.opacity(scheme == .dark ? 0.18 : 0.28), radius: 15, y: 8)
+    }
+}
+
+struct HomeQuietSessionCard: View {
+    @EnvironmentObject var store: AppStore
+    @Environment(\.colorScheme) private var scheme
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "moon.stars")
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(DT.violetText(scheme))
+                .frame(width: 38, height: 38)
+                .background(DT.violet.opacity(0.10))
+                .clipShape(RoundedRectangle(cornerRadius: DT.rControl, style: .continuous))
+            VStack(alignment: .leading, spacing: 2) {
+                Text("No session live")
+                    .scaledFont(14.5, .bold)
+                Text(store.displayedUpcomingSessions.isEmpty
+                    ? "Plan one from Work when you’re ready."
+                    : "\(store.displayedUpcomingSessions.count) coming up — open Work to review.")
+                    .font(.system(size: 11.5))
+                    .foregroundStyle(DT.ink55(scheme))
+            }
+            Spacer()
+            Button { store.selectedTab = .work } label: {
+                Text("Open Work")
+                    .scaledFont(12.5, .bold)
+                    .foregroundStyle(DT.violetText(scheme))
+                    .padding(.horizontal, 12).padding(.vertical, 8)
+                    .background(DT.violet.opacity(0.10))
+                    .clipShape(Capsule())
+            }
+            .buttonStyle(Pressable())
+        }
+        .padding(14)
+        .card(radius: DT.rHero)
+        .accessibilityElement(children: .contain)
     }
 }
 
