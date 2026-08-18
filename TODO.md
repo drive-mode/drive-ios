@@ -273,7 +273,7 @@ existing entries in §9 remain the source of detail.
 
 ### Now · committed core UX
 
-- [ ] **Chat-first Work hub** — open on a visually quiet, target-aware chat
+- [x] **Chat-first Work hub** — open on a visually quiet, target-aware chat
       composer. Name the selected GitHub repository, device folder, or saved
       file set without exposing an unapproved raw path. Put **New Chat** and
       **Call** in the top-right, visible without scrolling. New Chat starts a
@@ -282,18 +282,18 @@ existing entries in §9 remain the source of detail.
       secondary Calls / History flows. Do not build a second chat engine:
       converge on the managed chat catalog/runtime when its release gate opens,
       with an honest local preview until then.
-- [ ] **Navigation escape hatch** — every non-Home root surface gets a visible
+- [x] **Navigation escape hatch** — every non-Home root surface gets a visible
       Drive-mark Home control with a VoiceOver label and hint. Pushed screens
       retain native back navigation. Page titles remain titles; they do not
       hide a second back behavior.
-- [ ] **One Settings modal** — replace separate settings destinations with one
+- [x] **One Settings modal** — replace separate settings destinations with one
       responsive container: sheet on iPhone, form sheet/sidebar on iPad.
       Entrypoints select the relevant tab (Profile → Account, Work → Work,
       agent profile → Agents). A shared draft store survives tab changes and
-      accidental dismissal; reopening restores drafts until Save or Reset.
+      accidental dismissal; reopening restores drafts until Save.
       Persisted switch/picker preferences keep their existing immediate-save
       behavior.
-- [ ] **Agents at fleet scale** — make Memory and Skills two equal, independent
+- [x] **Agents at fleet scale** — make Memory and Skills two equal, independent
       controls, each with its own icon, label, hit target, and chevron. Add
       skill search, collapsed categories, result counts, and compact
       checkmark-style equip controls instead of the bright default green
@@ -302,13 +302,13 @@ existing entries in §9 remain the source of detail.
 
 ### Next · contracts and connected capability
 
-- [ ] **Profile account surfaces** — Profile links open the shared Settings
+- [x] **Profile account surfaces** — Profile links open the shared Settings
       modal directly on **Billing & payments**, **Usage**, and **Analytics**.
       Billing is account-service truth (plan, payment method, invoices); Usage
       is model/call/resource consumption split by hosted vs local; Analytics is
       user-visible work outcomes derived from the durable event log. Never
       present seeded numbers as live account data.
-- [ ] **Call presets + configurator** — persist one default call preset plus a
+- [x] **Call presets + configurator** — persist one default call preset plus a
       preference for immediate launch vs always configure. The configurator is
       a feature-isolated sheet/module that chooses opaque targets, agents, and
       Presenter-eligible agents. On the web it may ship as an MFE; native iOS
@@ -319,7 +319,7 @@ existing entries in §9 remain the source of detail.
       on-device separately from the name, plus execution location (hosted or
       on-device). Exact model/version ids, endpoints, credentials, prompts,
       tool policy, and routing configuration never cross.
-- [ ] **Agent Titles** — add temporary, scoped, auditable grants that attach a
+- [x] **Agent Titles** — add temporary, scoped, auditable grants that attach a
       reviewed skill bundle, opaque resource grants, delegated-agent refs, and
       bounded abilities to an agent. `Presenter` replaces “spotlight owner” as
       the title that grants typed-stage publishing. Multiple unrelated titles
@@ -332,10 +332,10 @@ existing entries in §9 remain the source of detail.
       logic, scoring, tool/model maps, and compiler remain proprietary host
       implementation. Customization is a reviewed input, not the product's
       orchestration source code.
-- [ ] **System-model local AI spike** — first evaluate Apple
+- [x] **System-model local AI spike** — first evaluate Apple
       `SystemLanguageModel` behind runtime availability checks, with read-only
-      tools over user-approved security-scoped files/folders. Bound the first
-      experience to local summarization, extraction, navigation, tagging, and
+      tools over user-approved security-scoped files. Bound the first
+      experience to local summarization, extraction, navigation, and
       triage; do not claim full coding autonomy or advanced reasoning. Handle
       unsupported hardware, Apple Intelligence disabled/not-ready, revoked file
       access, context limits, cancellation, and offline use explicitly. This

@@ -1,4 +1,5 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 enum SettingsTab: String, CaseIterable, Identifiable {
     case general = "General"
@@ -449,13 +450,113 @@ private struct AnalyticsSettingsPanel: View {
 }
 
 private struct LocalAISettingsPanel: View {
+    @EnvironmentObject private var localAI: LocalAIStore
+    @Environment(\.colorScheme) private var scheme
+    @State private var showingFileImporter = false
+
     var body: some View {
-        settingsPanel(title: "On-device AI", intro: "Availability is checked on the device before local work is offered.") {
-            Label("System model integration arrives in the dedicated local-AI slice.", systemImage: "iphone.gen3")
-                .font(.system(size: 13, weight: .semibold))
+        settingsPanel(title: "On-device AI", intro: "Use Apple's built-in system model for small, read-only file tasks.") {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(alignment: .top, spacing: 10) {
+                    Image(systemName: localAI.availability.symbol)
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundStyle(localAI.availability == .ready ? DT.live(scheme) : Color.orange)
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(localAI.availability.title)
+                            .font(.system(size: 14, weight: .bold))
+                        Text(localAI.availability.detail)
+                            .font(.system(size: 11.5))
+                            .foregroundStyle(DT.ink55(scheme))
+                    }
+                    Spacer()
+                    Button("Check again") { localAI.refreshAvailability() }
+                        .font(.system(size: 11, weight: .bold))
+                }
+            }
+            .padding(16).card()
+
+            VStack(alignment: .leading, spacing: 12) {
+                Picker("Local task", selection: $localAI.selectedTask) {
+                    ForEach(LocalAITaskKind.allCases) { task in
+                        Text(task.rawValue).tag(task)
+                    }
+                }
+                .pickerStyle(.menu)
+
+                Text(localAI.selectedTask.purpose)
+                    .font(.system(size: 11.5))
+                    .foregroundStyle(DT.ink55(scheme))
+
+                Button {
+                    showingFileImporter = true
+                } label: {
+                    Label(localAI.selectedFileName ?? "Choose a file", systemImage: "doc.badge.plus")
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .buttonStyle(.bordered)
+
+                Button {
+                    if localAI.runState == .running {
+                        localAI.cancelSelectedTask()
+                    } else {
+                        localAI.startSelectedTask()
+                    }
+                } label: {
+                    Label(
+                        localAI.runState == .running ? "Cancel local task" : "Run on device",
+                        systemImage: localAI.runState == .running ? "xmark.circle" : "iphone.gen3.radiowaves.left.and.right"
+                    )
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(localAI.runState == .running ? Color.secondary : DT.violet)
+                .disabled(localAI.runState != .running && !localAI.canRun)
+
+                if let message = localAI.runState.message {
+                    Label(message, systemImage: localAI.runState == .completed ? "checkmark.seal" : "info.circle")
+                        .font(.system(size: 11.5, weight: .semibold))
+                        .foregroundStyle(localAI.runState == .fileAccessRevoked ? Color.orange : DT.ink55(scheme))
+                }
+            }
+            .padding(16).card()
+
+            if let result = localAI.result {
+                VStack(alignment: .leading, spacing: 8) {
+                    Label("Local result", systemImage: "text.alignleft")
+                        .font(.system(size: 12, weight: .bold))
+                    Text(result)
+                        .font(.system(size: 13))
+                        .textSelection(.enabled)
+                    if let receipt = localAI.lastReceipt {
+                        Text("\(receipt.executionLocation) · Network used: \(receipt.networkUsed ? "Yes" : "No")")
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundStyle(DT.ink55(scheme))
+                    }
+                }
                 .padding(16).card()
-            Text("Unsupported devices and unavailable models will stay explicit; Drive will not claim local execution when it is not available.")
-                .font(.system(size: 11)).foregroundStyle(.secondary)
+            }
+
+            VStack(alignment: .leading, spacing: 6) {
+                Label("Read-only security-scoped access", systemImage: "lock.doc")
+                Label("32 KB text limit for bounded tasks", systemImage: "gauge.with.dots.needle.33percent")
+                Label("No cloud fallback or full coding autonomy", systemImage: "cloud.slash")
+                Label("No edits, writes, or hidden background access", systemImage: "pencil.slash")
+            }
+            .font(.system(size: 11.5, weight: .semibold))
+            .foregroundStyle(DT.ink55(scheme))
+            .padding(16).card()
+        }
+        .fileImporter(
+            isPresented: $showingFileImporter,
+            allowedContentTypes: [.plainText, .sourceCode, .json, .commaSeparatedText],
+            allowsMultipleSelection: false
+        ) { result in
+            switch result {
+            case .success(let urls):
+                if let url = urls.first { localAI.selectFile(url) }
+            case .failure:
+                break
+            }
         }
     }
 }
