@@ -26,6 +26,63 @@ final class AppStore: ObservableObject {
     @Published var agents = DemoData.agents
     @Published var interrupts = DemoData.interrupts
 
+    // MARK: Chat-first Work
+
+    @Published var workTargets = WorkTargetRef.previews
+    @Published var selectedWorkTargetID = WorkTargetRef.previews[0].id
+    @Published var workChatMessages: [WorkChatMessage] = []
+    @Published var defaultCallPreset = CallPreset.loadDefault() {
+        didSet { defaultCallPreset.saveDefault() }
+    }
+
+    var selectedWorkTarget: WorkTargetRef {
+        workTargets.first { $0.id == selectedWorkTargetID }
+            ?? workTargets[0]
+    }
+
+    var callPresetForCurrentTarget: CallPreset {
+        var preset = defaultCallPreset
+        if !preset.targetIDs.contains(selectedWorkTargetID) {
+            preset.targetIDs = [selectedWorkTargetID]
+        }
+        preset.presenterCandidateIDs = preset.presenterCandidateIDs.filter(preset.agentIDs.contains)
+        return preset
+    }
+
+    func selectWorkTarget(_ id: String) {
+        guard workTargets.contains(where: { $0.id == id }) else { return }
+        selectedWorkTargetID = id
+    }
+
+    func startNewWorkChat() {
+        workChatMessages.removeAll()
+    }
+
+    @discardableResult
+    func sendWorkChat(_ text: String) -> Bool {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty, selectedWorkTarget.canUse else { return false }
+        workChatMessages.append(WorkChatMessage(text: trimmed))
+        postConversation(trimmed)
+        return true
+    }
+
+    func launchCall(preset: CallPreset, saveAsDefault: Bool) {
+        let validTargetIDs = preset.targetIDs.filter { id in
+            workTargets.contains { $0.id == id && $0.canUse }
+        }
+        let validAgentIDs = preset.agentIDs.filter { id in agents.contains { $0.id == id } }
+        guard !validTargetIDs.isEmpty, !validAgentIDs.isEmpty else { return }
+
+        var sanitized = preset
+        sanitized.targetIDs = validTargetIDs
+        sanitized.agentIDs = validAgentIDs
+        sanitized.presenterCandidateIDs = preset.presenterCandidateIDs.filter(validAgentIDs.contains)
+        if saveAsDefault { defaultCallPreset = sanitized }
+        selectedWorkTargetID = validTargetIDs[0]
+        joinCall()
+    }
+
     func openSettings(_ tab: SettingsTab, source: SettingsSource) {
         settingsRoute = SettingsRoute(initialTab: tab, source: source)
     }

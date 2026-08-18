@@ -27,7 +27,7 @@ struct MainTabs: View {
 
             // Feedback door — only while the program AND this device's
             // opt-in are both on, and never over the session plane.
-            if store.feedbackAvailable && !store.inCall {
+            if store.feedbackAvailable && !store.inCall && store.selectedTab == .home {
                 HStack {
                     Spacer()
                     VStack {

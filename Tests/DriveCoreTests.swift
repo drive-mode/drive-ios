@@ -70,4 +70,57 @@ final class DriveCoreTests: XCTestCase {
         XCTAssertEqual(route.source, .profile)
         XCTAssertGreaterThan(SettingsTab.allCases.count, 5)
     }
+
+    func testWorkTargetsExposeOnlySafeDisplayLocations() {
+        XCTAssertGreaterThanOrEqual(WorkTargetRef.previews.count, 3)
+        for target in WorkTargetRef.previews {
+            XCTAssertFalse(target.displayLocation.contains("/Users/"))
+            XCTAssertFalse(target.displayLocation.contains("file://"))
+            XCTAssertFalse(target.opaqueReference.isEmpty)
+        }
+        XCTAssertTrue(WorkTargetRef.previews[0].canUse)
+        XCTAssertFalse(WorkTargetRef.previews[2].canUse)
+    }
+
+    func testCallLaunchDecisionRequiresACompleteDefaultPreset() {
+        XCTAssertEqual(
+            CallLaunchDecision.resolve(preference: "Launch default preset", preset: .fallback),
+            .launchDefault)
+        XCTAssertEqual(
+            CallLaunchDecision.resolve(preference: "Configure each call", preset: .fallback),
+            .configure)
+        let incomplete = CallPreset(
+            id: "empty", name: "Empty", targetIDs: [], agentIDs: ["maya"],
+            presenterCandidateIDs: [])
+        XCTAssertEqual(
+            CallLaunchDecision.resolve(preference: "Launch default preset", preset: incomplete),
+            .configure)
+    }
+
+    func testCallPresetRoundTripsThroughTheDefaultStore() throws {
+        let suite = "DriveCoreTests.CallPreset.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let preset = CallPreset(
+            id: "preset-test", name: "Review", targetIDs: ["target-drive-ios"],
+            agentIDs: ["maya", "coder"], presenterCandidateIDs: ["maya"])
+
+        preset.saveDefault(defaults: defaults)
+
+        XCTAssertEqual(CallPreset.loadDefault(defaults: defaults), preset)
+    }
+
+    @MainActor
+    func testWorkChatRejectsUnavailableTargetsAndStartsClean() {
+        let store = AppStore()
+        XCTAssertTrue(store.sendWorkChat("Review the current changes"))
+        XCTAssertEqual(store.workChatMessages.map(\.text), ["Review the current changes"])
+
+        store.startNewWorkChat()
+        XCTAssertTrue(store.workChatMessages.isEmpty)
+
+        store.selectWorkTarget("target-device-folder")
+        XCTAssertFalse(store.sendWorkChat("Read this folder"))
+        XCTAssertTrue(store.workChatMessages.isEmpty)
+    }
 }

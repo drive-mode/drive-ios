@@ -66,11 +66,12 @@ struct UpcomingSession: Codable, Identifiable, Equatable {
     }
 }
 
-// MARK: - The Work page: the session lifecycle, top to bottom
+// MARK: - Secondary Calls flow: the session lifecycle, top to bottom
 // NOW → INVITATIONS → UPCOMING → PLAN → EARLIER (docs/WORK-PAGE.md)
 
-struct CallTabView: View {
+struct WorkCallsView: View {
     @EnvironmentObject var store: AppStore
+    @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var scheme
     @State private var composing = false
 
@@ -146,11 +147,10 @@ struct CallTabView: View {
             }
             .tabSwipe()
             .background(DT.page(scheme).ignoresSafeArea())
-            .navigationTitle("Work")
+            .navigationTitle("Calls")
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) { HomeToolbarButton() }
-                ToolbarItem(placement: .topBarTrailing) {
-                    SettingsToolbarButton(tab: .calls, source: .work)
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Done") { dismiss() }
                 }
             }
             .sheet(isPresented: $composing) {
