@@ -240,18 +240,288 @@ blocked/review tasks → people with **directing-skill sparks** → when →
 note → Send: creates the upcoming session + inbox receipt, honesty line)
 → EARLIER (session records = replay artifact + session-memory hook,
 Play → the replay player). Verified live incl. a composed session
-landing in UPCOMING. Open (P1/P2 per doc): wire session registry, real
-`room_invite` sends from the composer, per-session replay windows,
-presence on the live card, T-minus push (pairs w/ notification prefs);
+landing in UPCOMING. P1 working tree (2026-08-18): typed session
+created/scheduled/started/ended events now drive NOW/UPCOMING; the
+composer publishes the ordered lifecycle plus session-linked
+`room_invite`s; reminders use the scheduled timestamp. Verified on the
+existing iPhone 17 Pro via accessibility labels and writer-log readback.
+Open (remaining P1/P2): per-session replay windows and speaking presence;
 owner: composer on Home too?
 
 Open:
-- [ ] "Observed but unequipped" surfacing — Maya published artifacts on
-      the log without the skill equipped; the library could suggest
-      equipping what the log proves an agent already does.
+- [x] "Observed but unequipped" surfacing — durable-log evidence now
+      suggests and equips missing skills (`4a0c53c`).
 - [ ] Skill policy sync to host (rides the approval-sync ask, DATA-NEEDS).
 - [ ] Per-skill approval granularity host contract (UI models it already).
 - [ ] Memory host contract (file-sync channel, write attribution, session
       TTLs) + memory-aware preheat; add-note composer surfaces.
 - [ ] Skill file *bodies* on device (shape shown today; contents ride the
       skills-as-folders host contract); real model-backed generation.
+
+## 12 · Chat-first Work, account surfaces & Agent Titles (2026-08-18)
+
+This is a product-direction change, not another layer on the current Work
+page. Work becomes the quiet place to start or resume a chat against an
+explicit target; the shipped session lifecycle remains useful, but moves
+behind Calls / History instead of filling the default surface. The unfinished
+§11 P1/P2 work is re-scoped under this initiative rather than tracked twice.
+
+**Roadmap change:** navigation, Work, Settings, and fleet configuration move
+forward now. Skill-policy and memory contracts remain enabling infrastructure.
+Showcase P1 and the hosted feedback route move to Later to make room; their
+existing entries in §9 remain the source of detail.
+
+### Now · committed core UX
+
+- [x] **Chat-first Work hub** — open on a visually quiet, target-aware chat
+      composer. Name the selected GitHub repository, device folder, or saved
+      file set without exposing an unapproved raw path. Put **New Chat** and
+      **Call** in the top-right, visible without scrolling. New Chat starts a
+      clean managed chat; Call uses the default preset or opens the
+      configurator. Invitations, upcoming sessions, and replays move to
+      secondary Calls / History flows. Do not build a second chat engine:
+      converge on the managed chat catalog/runtime when its release gate opens,
+      with an honest local preview until then.
+- [x] **Navigation escape hatch** — every non-Home root surface gets a visible
+      Drive-mark Home control with a VoiceOver label and hint. Pushed screens
+      retain native back navigation. Page titles remain titles; they do not
+      hide a second back behavior.
+- [x] **One Settings modal** — replace separate settings destinations with one
+      responsive container: sheet on iPhone, form sheet/sidebar on iPad.
+      Entrypoints select the relevant tab (Profile → Account, Work → Work,
+      agent profile → Agents). A shared draft store survives tab changes and
+      accidental dismissal; reopening restores drafts until Save.
+      Persisted switch/picker preferences keep their existing immediate-save
+      behavior.
+- [x] **Agents at fleet scale** — make Memory and Skills two equal, independent
+      controls, each with its own icon, label, hit target, and chevron. Add
+      skill search, collapsed categories, result counts, and compact
+      checkmark-style equip controls instead of the bright default green
+      switches. Agent profiles show a collapsed loadout summary first and
+      expand categories on demand. Prove the interaction with 500+ skills.
+
+### Next · contracts and connected capability
+
+- [x] **Profile account surfaces** — Profile links open the shared Settings
+      modal directly on **Billing & payments**, **Usage**, and **Analytics**.
+      Billing is account-service truth (plan, payment method, invoices); Usage
+      is model/call/resource consumption split by hosted vs local; Analytics is
+      user-visible work outcomes derived from the durable event log. Never
+      present seeded numbers as live account data.
+- [x] **Call presets + configurator** — persist one default call preset plus a
+      preference for immediate launch vs always configure. The configurator is
+      a feature-isolated sheet/module that chooses opaque targets, agents, and
+      Presenter-eligible agents. On the web it may ship as an MFE; native iOS
+      consumes the same typed contract rather than embedding a web surface.
+- [x] **Persona + model family + title** — keep editable persona names such as
+      Maya and Scout. Cline remains the coordinator for routing and presentation
+      handoffs. Show an allowlisted family badge such as Claude, Codex, or Apple
+      on-device separately from the name, plus execution location (hosted or
+      on-device). Exact model/version ids, endpoints, credentials, prompts,
+      tool policy, and routing configuration never cross.
+- [x] **Agent Titles** — add temporary, scoped, auditable grants that attach a
+      reviewed skill bundle, opaque resource grants, delegated-agent refs, and
+      bounded abilities to an agent. `Presenter` replaces “spotlight owner” as
+      the title that grants typed-stage publishing. Multiple unrelated titles
+      may coexist, but only one active Presenter owns a stage; grant, transfer,
+      expiry, and revoke are durable events. “Can present” means typed beats,
+      artifacts, and views only — never pixel capture or screen streaming.
+- [x] **Protect the Director boundary** — the built-in orchestration policy is
+      signed, versioned, host-side, and non-exportable. Members may fork or add
+      an overlay for allowed Director behavior, but the base prompts, routing
+      logic, scoring, tool/model maps, and compiler remain proprietary host
+      implementation. Customization is a reviewed input, not the product's
+      orchestration source code.
+- [x] **System-model local AI spike** — first evaluate Apple
+      `SystemLanguageModel` behind runtime availability checks, with read-only
+      tools over user-approved security-scoped files. Bound the first
+      experience to local summarization, extraction, navigation, and
+      triage; do not claim full coding autonomy or advanced reasoning. Handle
+      unsupported hardware, Apple Intelligence disabled/not-ready, revoked file
+      access, context limits, cancellation, and offline use explicitly. This
+      depends on an Xcode project, iPad/device-family support, and privacy-policy
+      review. References: [Foundation Models](https://developer.apple.com/documentation/FoundationModels),
+      [capabilities and limitations](https://developer.apple.com/documentation/FoundationModels/generating-content-and-performing-tasks-with-foundation-models),
+      [security-scoped file importer](https://developer.apple.com/documentation/swiftui/view/fileimporter%28ispresented%3Aallowedcontenttypes%3Aoncompletion%3A%29).
+
+### Later · directional bets
+
+- [ ] **Custom local models** — evaluate downloadable Core AI / MLX coding
+      models only after the system-model spike establishes thermals, memory,
+      storage, context, battery, and App Store constraints on phones/tablets.
+- [ ] **Consent-based automatic UI/UX experiments** — reuse the existing
+      presentation-only experiment flag lifecycle, then add stable assignment,
+      exposure events, outcome metrics, sample-size/stop rules, guardrails, and
+      a data-policy revision with re-consent. Experiments may not widen data
+      collection, bypass approvals, or silently promote generated UI.
+- [ ] **Deferred to fund the reset** — Showcase P1 and the hosted feedback
+      route stay in §9 but do not compete with the Now work above.
+
+### Planned interface contracts
+
+- `SettingsTab` and `SettingsRoute(initialTab, source)` open the shared modal;
+  `SettingsDraftStore` owns unsaved drafts across presentation lifecycles.
+- `WorkTargetRef` represents an opaque repository, directory, file set, or
+  device sandbox target with label, access posture, source, and connection
+  state. A display path is presentation metadata, never transport authority.
+- `CallPreset` references targets, agents, launch behavior, and eligible
+  Presenter candidates; it carries ids and policy, not secrets or raw paths.
+- `AgentRuntimeBadge` exposes only an allowlisted model-family label and
+  execution location.
+- `AgentTitleGrant` references the agent, title, scope, skill bundle, resource
+  grants, delegated agents, abilities, grant/revoke timestamps, and expiry.
+  Titles transfer references; they do not embed skill/resource bodies.
+
+### Acceptance gates
+
+- Work opens on the target-aware composer; New Chat and Call are reachable
+  without scrolling, and Calls / History preserve the useful §11 lifecycle.
+- Dismissing Settings and reopening from another entry preserves drafts while
+  selecting the newly requested tab; Save and Reset clear the draft correctly.
+- Every root surface has a visible, VoiceOver-operable route Home, while pushed
+  screens still navigate back normally.
+- Skill search and folding remain responsive and visually legible with 500+
+  entries; equip state is clear without a wall of green switches.
+- Presenter ownership is exclusive, temporary, replayable from durable events,
+  and incapable of pixel capture.
+- Local mode fails honestly for unsupported devices, unavailable models,
+  revoked file access, and offline/low-resource states.
+
+## 13 · Deterministic cross-repo verification (2026-08-18)
+
+The current session-registry demo spans `drive-ios`, `drivemode-mcp`, and
+`collaboration-harness`, but its successful verification still depends on
+scratchpad seed scripts, remembered process state, manual simulator steps, and
+logs gathered from several places. Build a repeatable developer workflow around
+the durable protocol before adding more session behavior. This is a developer-
+experience track alongside §12, not application scope or a replacement for the
+hands-on interaction and VoiceOver passes already called out in §§3/9/11.
+
+**Resolved boundaries:** `collaboration-harness` owns protocol schemas and
+canonical fixtures; `drivemode-mcp` owns the executable orchestration and writer
+replay; `drive-ios` owns launch-only determinism and accessible automation
+surfaces. The CLI owns reproducible mechanics, while product judgment and task
+selection remain with a human or thin agent skill. Machine state is discovered
+or generated from repository truth rather than maintained as a second handoff
+source that can silently drift.
+
+### Now · contract, feasibility, deterministic inputs
+
+- [ ] **Specify the `drive-dev` contract before implementation** — define
+      `doctor`, `check --all`, `writer --fixture <name>`, and `verify
+      <scenario>` commands with one versioned JSON result envelope, documented
+      phase names, stable exit-code classes, absolute artifact paths, and
+      actionable failure details. Reserve `next --json` for explicitly ranked
+      backlog/configuration data; it must not invent priorities from dirty-tree
+      heuristics. No command may require a developer-specific path, simulator
+      UDID, or fixed port.
+- [ ] **Prove the simulator/UI adapter boundary** — determine which checks and
+      actions can run in a normal executable and which require an agent-facing
+      XcodeBuildMCP workflow. Do not couple `drive-dev` to private daemon state
+      or scrape MCP internals. The spike must leave one supported adapter
+      contract, an honest missing-capability result, and a path that works with
+      the current `build.sh`; an Xcode project remains a useful follow-up, not a
+      prerequisite unless the spike proves XCTest is required.
+- [ ] **Add a deterministic iOS launch configuration** — stable accessibility
+      identifiers for the session entry, lifecycle controls, invitations,
+      upcoming rows, replay, and evidence-bearing states; process-only overrides
+      for writer URL and onboarding; injectable clock/age values; and reduced
+      nonessential animation in automation mode. Keep useful accessibility
+      labels, values, traits, and hints—the identifier is not the VoiceOver
+      name. Normal launches must retain production behavior, and test launches
+      must not mutate persistent defaults.
+- [ ] **Create canonical versioned fixtures** — in `collaboration-harness`, add
+      a Zod-validated lifecycle fixture for create → schedule → start → invite
+      → end with one shared session id and explicit ordering rules. In
+      `drivemode-mcp`, replay that fixture through the real writer boundary and
+      add a richer preview scenario covering roster, beats, tasks, artifacts,
+      invitations, and upcoming sessions. Reject malformed or incompatible
+      fixture versions with a phase-specific error.
+
+### Next · one-command verification and recovery
+
+- [ ] **Implement `drive-dev` in `drivemode-mcp/tools/drive-dev`** — preflight
+      all three repositories and required toolchains; reuse an already booted
+      matching simulator when safe; choose an available ephemeral writer port;
+      retain the exact child PID; seed through the canonical replay path; build
+      and install once; launch with temporary configuration; exercise the UI
+      through stable identifiers; and assert lifecycle order and shared ids
+      against writer readback. Never kill by port alone or terminate an
+      unrelated writer/app process.
+- [ ] **Produce a self-contained evidence bundle** — every verification run
+      writes a versioned report plus command/runtime metadata, writer and app
+      logs, assertion results, and named screenshots to one run directory.
+      JSON output references stable absolute paths and distinguishes preflight,
+      writer, fixture, build, install, launch, UI-action, protocol-assertion,
+      evidence, and cleanup failures without masking the primary cause.
+- [ ] **Make cleanup transactional and interruption-safe** — record only state
+      the run owns, restore launch configuration and simulator/app state on
+      success, failure, and Ctrl-C, and report any incomplete restoration.
+      Cover expired snapshots, missing or ambiguous simulators, writer startup,
+      fixture rejection, build/install/launch failures, stale UI references,
+      assertion failures, and evidence-write failures. Run the scenario twice
+      against the same booted simulator to prove idempotence and absence of
+      leaked listeners or persistent settings.
+- [ ] **Add cross-repo checks** — `drive-dev check --all --json` runs each
+      repository's supported validation (`bun run check` / `bun test` and the
+      iOS build or selected test adapter), records the starting worktree state,
+      and confirms verification introduced no tracked diff. Existing developer
+      changes are reported and preserved, never cleaned or rewritten.
+
+### Later · generated handoff, skill wrapper, workflow polish
+
+- [ ] **Generate, do not hand-maintain, handoff state** — expose current
+      baselines, repository revisions/status, available scenarios, verification
+      command, evidence paths, explicit owner gates, and any backlog-ranked next
+      item as generated JSON/YAML under a gitignored `.drive-dev/` workspace.
+      If a committed manifest is needed, limit it to stable repository roles,
+      commands, and schema versions; current status and hashes stay generated.
+- [ ] **Add a thin user-level verification skill after the CLI stabilizes** —
+      with owner approval, teach the skill to call the public `drive-dev`
+      contract, interpret its structured result, and link evidence. It must not
+      duplicate shell orchestration, embed developer paths, or bypass cleanup
+      and policy gates.
+- [ ] **Document and measure the workflow** — quick start, result schema,
+      scenario authoring, artifact layout, recovery/troubleshooting, and the
+      boundary between automated evidence and hands-on checks. Record median
+      setup/verification time and manual intervention count; target a reduction
+      from the current roughly 20–30 minute flow to 3–5 minutes without trading
+      away failure diagnostics.
+- [ ] **Revisit project-native UI tests** — after the adapter spike and an
+      Xcode project exist, decide whether selected external UI steps should move
+      into XCTest/XCUITest. Keep microphone hold behavior, SwiftUI toggle
+      semantics, drag reorder, and full VoiceOver navigation as named hands-on
+      gates until automation demonstrates equivalent coverage.
+
+### Planned developer contracts
+
+- `DriveDevResultV1` carries command, scenario, run id, status, failed phase,
+  exit class, timings, diagnostics, artifact directory, and owned-resource
+  cleanup results; stdout stays machine-readable and human progress goes to
+  stderr.
+- `DriveDevScenarioManifest` pins fixture/schema versions, required app
+  capabilities, UI steps, durable assertions, evidence requests, and supported
+  adapter versions without containing machine-local paths or secrets.
+- `DriveAutomationLaunchConfig` is process-scoped and includes writer endpoint,
+  onboarding disposition, deterministic clock seed, and animation posture. It
+  is ignored unless an explicit automation launch flag is present.
+- `DriveDevRunState` records only resources created or changed by the current
+  run (child PID, selected simulator, installed-app/config snapshot, temporary
+  files), enabling precise rollback without broad process or filesystem cleanup.
+
+### Acceptance gates
+
+- A fresh developer can run one documented command from any location inside the
+  workspace; it discovers the three repositories and reuses a suitable booted
+  simulator without a hardcoded UDID, user path, or port.
+- The canonical session scenario is validated at the schema boundary, rendered
+  through the app, and asserted from durable writer events with one session id
+  and the required lifecycle ordering.
+- Success and every tested failure produce a phase-specific result and a stable
+  absolute evidence directory; Ctrl-C still performs owned-resource cleanup.
+- Persistent app configuration and all three tracked worktrees match their
+  pre-run state. Pre-existing changes remain untouched, unrelated processes are
+  not killed, and two consecutive runs pass without leaked state.
+- The automated report names the remaining hands-on checks rather than implying
+  coverage of microphone gestures, native control feel, reorder gestures, or a
+  complete VoiceOver audit.

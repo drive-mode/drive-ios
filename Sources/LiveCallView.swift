@@ -32,7 +32,7 @@ struct LiveCallView: View {
                 VStack(spacing: 14) {
                     DriveSpinner(size: 44)
                         .foregroundStyle(.white)
-                    Text("Joining Auth middleware…")
+                    Text("Joining \(store.liveSessionTitle)…")
                         .font(.system(size: 13.5, weight: .semibold))
                         .foregroundStyle(.white.opacity(0.78))
                 }
@@ -67,15 +67,17 @@ struct LiveCallView: View {
         .statusBarHidden(theater)
     }
 
-    // MARK: Portrait — spotlight fills between thin chrome and the hold strip
+    // MARK: Portrait — Presenter stage fills between chrome and the hold strip
 
     private var portraitLayout: some View {
         VStack(spacing: 0) {
             header
             presenceChips.padding(.top, 12)
-            DirectedSpotlight()
+            PresenterTitleControl()
+                .padding(.top, 10)
+            PresenterStage()
                 .padding(.horizontal, 12)
-                .padding(.top, 14)
+                .padding(.top, 10)
             if !store.sessionMessages.isEmpty {
                 sentBubbles
                     .padding(.horizontal, 16)
@@ -171,7 +173,7 @@ struct LiveCallView: View {
 
     // MARK: Theater — rotate the phone: content edge-to-edge, chrome floats
 
-    /// Floating chrome over the theater spotlight wears pseudo-glass, not a
+    /// Floating chrome over the Presenter stage wears pseudo-glass, not a
     /// material: a live blur over a surface animating at 30fps makes the
     /// compositor re-sample every frame. An opaque raised fill with a
     /// hairline reads identically on the dark plane and costs nothing.
@@ -179,7 +181,7 @@ struct LiveCallView: View {
 
     private var theaterLayout: some View {
         ZStack {
-            DirectedSpotlight(theater: true)
+            PresenterStage(theater: true)
                 .ignoresSafeArea()
 
             VStack {
@@ -206,6 +208,7 @@ struct LiveCallView: View {
                     .padding(.horizontal, 11).padding(.vertical, 7)
                     .background(theaterGlass, in: Capsule())
                     .overlay(Capsule().strokeBorder(.white.opacity(0.12), lineWidth: 0.8))
+                    PresenterTitleControl(compact: true)
                 }
                 .padding(.horizontal, 14)
                 .padding(.top, 8)
@@ -331,7 +334,7 @@ struct LiveCallView: View {
             .accessibilityLabel("Leave session")
             Spacer()
             VStack(spacing: 2) {
-                Text("Auth middleware")
+                Text(store.liveSessionTitle)
                     .font(.system(size: 15, weight: .bold))
                     .foregroundStyle(.white)
                 HStack(spacing: 5) {
@@ -356,7 +359,7 @@ struct LiveCallView: View {
             }
             .buttonStyle(Pressable())
             .accessibilityLabel("Enter theater")
-            .accessibilityHint("Rotates the spotlight to fill the screen")
+            .accessibilityHint("Rotates the Presenter stage to fill the screen")
         }
         .padding(.horizontal, 16)
         .padding(.top, 6)

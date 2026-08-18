@@ -1,7 +1,9 @@
 # Handoff — Drive iOS (MC1 preview)
 
-Written 2026-08-18. Everything below is true as of `49d255a` on
-`main` at **github.com/drive-mode/drive-ios** (private).
+Written 2026-08-18. Updated for the current working tree based on
+`399e33d` on `main` at **github.com/drive-mode/drive-ios** (private).
+The session-registry pass described below is not committed yet and spans
+`drive-ios`, `drivemode-mcp`, and `collaboration-harness`.
 
 ## What this is
 
@@ -67,7 +69,9 @@ a bug even if it compiles:
 - `WriterClient.swift` — the wire. Polls `POST /rpc {events_since}` with an
   adaptive cadence (1s in-session/bursts → 8s idle, exponential backoff to
   30s offline, paused in background), parses with Codable structs, and
-  maps events into tasks/artifacts/beats/agents/interrupts/inbox. Beat
+  maps events into tasks/artifacts/beats/agents/interrupts/inbox and the
+  working-session registry. It also publishes the composer's typed
+  create → schedule → start → invite mutations. Beat
   stage precedence: **curated `steps` → `relatedEventIds` resolution →
   structural placeholder**. Handles writer restarts (`latestSeq < cursor`
   → resync).
@@ -95,16 +99,31 @@ a bug even if it compiles:
 | `DATA-NEEDS.md` | What each surface needs from the transport (the contract) |
 | `TODO.md` | The living backlog, §-numbered |
 
-## Sibling repos (both on `main`, PRs merged)
+## Repo state
 
-- **drivemode-mcp** — writer + packs (`packs-tasks`, `packs-artifacts`,
-  `packs-direction` incl. the `steps`/`accent` stage lines). Check with
+- **drive-ios** — baseline `main` is `399e33d`; the current worktree folds
+  typed session lifecycle events into NOW/UPCOMING, publishes real
+  invitations from the composer, and drives scheduled reminders from the
+  wire timestamp.
+- **drivemode-mcp** — current worktree adds `session_create`,
+  `session_schedule`, `session_start`, and `session_end` across HTTP, MCP,
+  and stdio. Check with
   `mise x bun@1.3.14 node@22.23.2 -- bun run check`.
-- **collaboration-harness** — protocol/kernel; carries `control.invite`.
+- **collaboration-harness** — current worktree adds typed
+  `control.session_created/scheduled/started/ended` events and lets
+  `control.invite` carry the related `sessionId`.
+
+Keep these three diffs together: the iOS decoder deliberately depends on
+the protocol and writer changes, even though each repository still checks
+independently.
 
 ## Verification reality (read this before trusting a screenshot)
 
-The simulator MCP drives taps, swipes, and text well. It **cannot**
+XcodeBuildMCP drives accessibility-labeled taps, swipes, and text well.
+Enable both the `simulator` and `ui-automation` workflows, call
+`session_show_defaults`, and reuse the booted simulator rather than
+creating another device. Refresh `snapshot_ui` after every navigation or
+sheet change because element refs are screen-specific. It **cannot**
 reliably drive: SwiftUI `Toggle`s, long-press/hold (synthetic dwell
 registers as a tap), or drag-reorder. Anything gated behind those is
 marked "hands-on" in TODO. Workarounds used here: set defaults directly
@@ -119,18 +138,27 @@ Two footguns that cost time:
 - The shell's cwd resets between commands; `cd` into `drive-ios`
   explicitly or `./build.sh` silently doesn't run.
 
+Session-registry verification used the existing booted iPhone 17 Pro.
+Accessibility-label taps drove **Plan a session → Exports refactor → Now
+→ Send invitations**. The writer log then contained ordered
+`control.session_created`, `control.session_scheduled`,
+`control.session_started`, and `control.invite` events sharing one session
+id; the Work page switched to the new title and honestly rendered
+"Waiting for the first directed beat…". XcodeBuildMCP's launch and daemon
+logs are under `~/Library/Developer/XcodeBuildMCP/workspaces/`.
+
 ## Where to pick up
 
 Highest-value next moves, in order:
 
-1. **Wire the session registry** (WORK-PAGE P1): session created/started/
-   ended events so NOW/UPCOMING derive from the log, and the composer's
-   Send publishes real `room_invite`s instead of local state.
-2. **Policy sync to the host** — approvals *and* skill loadouts
+1. **Policy sync to the host** — approvals *and* skill loadouts
    (`{agentId, skill, equipped, gated}`) over a typed channel. The UI
    already models per-skill granularity; the host contract doesn't.
-3. **Memory host contract** — file sync per scope, write attribution,
+2. **Memory host contract** — file sync per scope, write attribution,
    session-note TTLs (DATA-NEEDS + docs/MEMORY.md).
+3. **Finish Work P1/P2** — enumerate replay records from per-session event
+   windows, then add live speaking presence. The registry, real composer
+   invitations, and timestamped reminders are in this working tree.
 4. **Xcode project** — unblocks the streak widget / Live Activity and
    real distribution.
 5. **Integrations P0** (`initiatives/integrations-vcs`, still awaiting a

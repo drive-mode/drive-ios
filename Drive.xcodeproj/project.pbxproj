@@ -1,0 +1,306 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		000000000000000000002100 /* ActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001100 /* ActivityView.swift */; };
+		000000000000000000002101 /* AgentMemory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001101 /* AgentMemory.swift */; };
+		000000000000000000002102 /* AgentSkills.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001102 /* AgentSkills.swift */; };
+		000000000000000000002103 /* AgentsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001103 /* AgentsView.swift */; };
+		000000000000000000002104 /* ApprovalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001104 /* ApprovalView.swift */; };
+		000000000000000000002105 /* ArtifactDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001105 /* ArtifactDetailView.swift */; };
+		000000000000000000002106 /* ArtifactsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001106 /* ArtifactsView.swift */; };
+		000000000000000000002107 /* CallTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001107 /* CallTabView.swift */; };
+		000000000000000000002108 /* ClineBotShape.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001108 /* ClineBotShape.swift */; };
+		000000000000000000002109 /* Components.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001109 /* Components.swift */; };
+		00000000000000000000210A /* ConversationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000110A /* ConversationView.swift */; };
+		00000000000000000000210B /* DriveApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000110B /* DriveApp.swift */; };
+		00000000000000000000210C /* DriveMarkShape.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000110C /* DriveMarkShape.swift */; };
+		00000000000000000000210D /* FeedbackMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000110D /* FeedbackMode.swift */; };
+		00000000000000000000210E /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000110E /* HomeView.swift */; };
+		00000000000000000000210F /* InboxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000110F /* InboxView.swift */; };
+		000000000000000000002110 /* IntentEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001110 /* IntentEngine.swift */; };
+		000000000000000000002111 /* LiveCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001111 /* LiveCallView.swift */; };
+		000000000000000000002112 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001112 /* Models.swift */; };
+		000000000000000000002113 /* NeedsYouView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001113 /* NeedsYouView.swift */; };
+		000000000000000000002114 /* Notifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001114 /* Notifications.swift */; };
+		000000000000000000002115 /* OpenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001115 /* OpenView.swift */; };
+		000000000000000000002116 /* PolicyViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001116 /* PolicyViews.swift */; };
+		000000000000000000002117 /* ProfileCustomize.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001117 /* ProfileCustomize.swift */; };
+		000000000000000000002118 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001118 /* ProfileView.swift */; };
+		000000000000000000002119 /* ProjectMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001119 /* ProjectMapView.swift */; };
+		00000000000000000000211A /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000111A /* SettingsView.swift */; };
+		00000000000000000000211B /* ShowcaseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000111B /* ShowcaseView.swift */; };
+		00000000000000000000211C /* SkillPackages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000111C /* SkillPackages.swift */; };
+		00000000000000000000211D /* SpotlightDirector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000111D /* SpotlightDirector.swift */; };
+		00000000000000000000211E /* Store.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000111E /* Store.swift */; };
+		00000000000000000000211F /* TasksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00000000000000000000111F /* TasksView.swift */; };
+		000000000000000000002120 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001120 /* Theme.swift */; };
+		000000000000000000002121 /* VoiceCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001121 /* VoiceCapture.swift */; };
+		000000000000000000002122 /* WriterClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001122 /* WriterClient.swift */; };
+		000000000000000000002123 /* WorkHub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001123 /* WorkHub.swift */; };
+		000000000000000000002124 /* AgentTitles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001124 /* AgentTitles.swift */; };
+		000000000000000000002125 /* LocalAI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001125 /* LocalAI.swift */; };
+		000000000000000000002000 /* Fonts in Resources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001001 /* Fonts */; };
+		000000000000000000002001 /* AppIcon60x60@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001002 /* AppIcon60x60@2x.png */; };
+		000000000000000000002002 /* AppIcon60x60@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001003 /* AppIcon60x60@3x.png */; };
+		000000000000000000002003 /* AppIcon1024.png in Resources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001004 /* AppIcon1024.png */; };
+		000000000000000000002004 /* DriveCoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001005 /* DriveCoreTests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		000000000000000000008000 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 000000000000000000007000 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 000000000000000000005000;
+			remoteInfo = Drive;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		000000000000000000001100 /* ActivityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityView.swift; sourceTree = "<group>"; };
+		000000000000000000001101 /* AgentMemory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentMemory.swift; sourceTree = "<group>"; };
+		000000000000000000001102 /* AgentSkills.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentSkills.swift; sourceTree = "<group>"; };
+		000000000000000000001103 /* AgentsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentsView.swift; sourceTree = "<group>"; };
+		000000000000000000001104 /* ApprovalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApprovalView.swift; sourceTree = "<group>"; };
+		000000000000000000001105 /* ArtifactDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArtifactDetailView.swift; sourceTree = "<group>"; };
+		000000000000000000001106 /* ArtifactsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArtifactsView.swift; sourceTree = "<group>"; };
+		000000000000000000001107 /* CallTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallTabView.swift; sourceTree = "<group>"; };
+		000000000000000000001108 /* ClineBotShape.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClineBotShape.swift; sourceTree = "<group>"; };
+		000000000000000000001109 /* Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Components.swift; sourceTree = "<group>"; };
+		00000000000000000000110A /* ConversationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationView.swift; sourceTree = "<group>"; };
+		00000000000000000000110B /* DriveApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriveApp.swift; sourceTree = "<group>"; };
+		00000000000000000000110C /* DriveMarkShape.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriveMarkShape.swift; sourceTree = "<group>"; };
+		00000000000000000000110D /* FeedbackMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackMode.swift; sourceTree = "<group>"; };
+		00000000000000000000110E /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		00000000000000000000110F /* InboxView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InboxView.swift; sourceTree = "<group>"; };
+		000000000000000000001110 /* IntentEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentEngine.swift; sourceTree = "<group>"; };
+		000000000000000000001111 /* LiveCallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveCallView.swift; sourceTree = "<group>"; };
+		000000000000000000001112 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		000000000000000000001113 /* NeedsYouView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NeedsYouView.swift; sourceTree = "<group>"; };
+		000000000000000000001114 /* Notifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notifications.swift; sourceTree = "<group>"; };
+		000000000000000000001115 /* OpenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenView.swift; sourceTree = "<group>"; };
+		000000000000000000001116 /* PolicyViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PolicyViews.swift; sourceTree = "<group>"; };
+		000000000000000000001117 /* ProfileCustomize.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileCustomize.swift; sourceTree = "<group>"; };
+		000000000000000000001118 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
+		000000000000000000001119 /* ProjectMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectMapView.swift; sourceTree = "<group>"; };
+		00000000000000000000111A /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		00000000000000000000111B /* ShowcaseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShowcaseView.swift; sourceTree = "<group>"; };
+		00000000000000000000111C /* SkillPackages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillPackages.swift; sourceTree = "<group>"; };
+		00000000000000000000111D /* SpotlightDirector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpotlightDirector.swift; sourceTree = "<group>"; };
+		00000000000000000000111E /* Store.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Store.swift; sourceTree = "<group>"; };
+		00000000000000000000111F /* TasksView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TasksView.swift; sourceTree = "<group>"; };
+		000000000000000000001120 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		000000000000000000001121 /* VoiceCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceCapture.swift; sourceTree = "<group>"; };
+		000000000000000000001122 /* WriterClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WriterClient.swift; sourceTree = "<group>"; };
+		000000000000000000001123 /* WorkHub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkHub.swift; sourceTree = "<group>"; };
+		000000000000000000001124 /* AgentTitles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentTitles.swift; sourceTree = "<group>"; };
+		000000000000000000001125 /* LocalAI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalAI.swift; sourceTree = "<group>"; };
+		000000000000000000001000 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		000000000000000000001001 /* Fonts */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Fonts; sourceTree = "<group>"; };
+		000000000000000000001002 /* AppIcon60x60@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "AppIcon60x60@2x.png"; sourceTree = "<group>"; };
+		000000000000000000001003 /* AppIcon60x60@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "AppIcon60x60@3x.png"; sourceTree = "<group>"; };
+		000000000000000000001004 /* AppIcon1024.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = AppIcon1024.png; sourceTree = "<group>"; };
+		000000000000000000001005 /* DriveCoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriveCoreTests.swift; sourceTree = "<group>"; };
+		000000000000000000009000 /* Drive.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Drive.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		000000000000000000009001 /* DriveTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DriveTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		000000000000000000004001 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+		000000000000000000004004 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		000000000000000000003000 = {
+			isa = PBXGroup;
+			children = (
+				000000000000000000003002 /* Sources */,
+				000000000000000000003003 /* Tests */,
+				000000000000000000003004 /* Icons */,
+				000000000000000000001001 /* Fonts */,
+				000000000000000000001000 /* Info.plist */,
+				000000000000000000003001 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		000000000000000000003001 /* Products */ = {isa = PBXGroup; children = (000000000000000000009000 /* Drive.app */, 000000000000000000009001 /* DriveTests.xctest */,); name = Products; sourceTree = "<group>"; };
+		000000000000000000003002 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				000000000000000000001100 /* ActivityView.swift */,
+				000000000000000000001101 /* AgentMemory.swift */,
+				000000000000000000001102 /* AgentSkills.swift */,
+				000000000000000000001103 /* AgentsView.swift */,
+				000000000000000000001104 /* ApprovalView.swift */,
+				000000000000000000001105 /* ArtifactDetailView.swift */,
+				000000000000000000001106 /* ArtifactsView.swift */,
+				000000000000000000001107 /* CallTabView.swift */,
+				000000000000000000001108 /* ClineBotShape.swift */,
+				000000000000000000001109 /* Components.swift */,
+				00000000000000000000110A /* ConversationView.swift */,
+				00000000000000000000110B /* DriveApp.swift */,
+				00000000000000000000110C /* DriveMarkShape.swift */,
+				00000000000000000000110D /* FeedbackMode.swift */,
+				00000000000000000000110E /* HomeView.swift */,
+				00000000000000000000110F /* InboxView.swift */,
+				000000000000000000001110 /* IntentEngine.swift */,
+				000000000000000000001111 /* LiveCallView.swift */,
+				000000000000000000001112 /* Models.swift */,
+				000000000000000000001113 /* NeedsYouView.swift */,
+				000000000000000000001114 /* Notifications.swift */,
+				000000000000000000001115 /* OpenView.swift */,
+				000000000000000000001116 /* PolicyViews.swift */,
+				000000000000000000001117 /* ProfileCustomize.swift */,
+				000000000000000000001118 /* ProfileView.swift */,
+				000000000000000000001119 /* ProjectMapView.swift */,
+				00000000000000000000111A /* SettingsView.swift */,
+				00000000000000000000111B /* ShowcaseView.swift */,
+				00000000000000000000111C /* SkillPackages.swift */,
+				00000000000000000000111D /* SpotlightDirector.swift */,
+				00000000000000000000111E /* Store.swift */,
+				00000000000000000000111F /* TasksView.swift */,
+				000000000000000000001120 /* Theme.swift */,
+				000000000000000000001121 /* VoiceCapture.swift */,
+				000000000000000000001122 /* WriterClient.swift */,
+				000000000000000000001123 /* WorkHub.swift */,
+				000000000000000000001124 /* AgentTitles.swift */,
+				000000000000000000001125 /* LocalAI.swift */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		000000000000000000003003 /* Tests */ = {isa = PBXGroup; children = (000000000000000000001005 /* DriveCoreTests.swift */,); path = Tests; sourceTree = "<group>"; };
+		000000000000000000003004 /* Icons */ = {isa = PBXGroup; children = (000000000000000000001002 /* AppIcon60x60@2x.png */, 000000000000000000001003 /* AppIcon60x60@3x.png */, 000000000000000000001004 /* AppIcon1024.png */,); path = Icons; sourceTree = "<group>"; };
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		000000000000000000005000 /* Drive */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 000000000000000000006101 /* Build configuration list for PBXNativeTarget "Drive" */;
+			buildPhases = (000000000000000000004000 /* Sources */, 000000000000000000004001 /* Frameworks */, 000000000000000000004002 /* Resources */,);
+			buildRules = ();
+			dependencies = ();
+			name = Drive;
+			productName = Drive;
+			productReference = 000000000000000000009000 /* Drive.app */;
+			productType = "com.apple.product-type.application";
+		};
+		000000000000000000005001 /* DriveTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 000000000000000000006102 /* Build configuration list for PBXNativeTarget "DriveTests" */;
+			buildPhases = (000000000000000000004003 /* Sources */, 000000000000000000004004 /* Frameworks */, 000000000000000000004005 /* Resources */,);
+			buildRules = ();
+			dependencies = (000000000000000000008001 /* PBXTargetDependency */,);
+			name = DriveTests;
+			productName = DriveTests;
+			productReference = 000000000000000000009001 /* DriveTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		000000000000000000007000 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2660;
+				LastUpgradeCheck = 2660;
+				TargetAttributes = {
+					000000000000000000005000 = {CreatedOnToolsVersion = 26.0;};
+					000000000000000000005001 = {CreatedOnToolsVersion = 26.0; TestTargetID = 000000000000000000005000;};
+				};
+			};
+			buildConfigurationList = 000000000000000000006100 /* Build configuration list for PBXProject "Drive" */;
+			compatibilityVersion = "Xcode 16.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (en, Base,);
+			mainGroup = 000000000000000000003000;
+			productRefGroup = 000000000000000000003001 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (000000000000000000005000 /* Drive */, 000000000000000000005001 /* DriveTests */,);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		000000000000000000004002 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (000000000000000000002000 /* Fonts in Resources */, 000000000000000000002001 /* AppIcon60x60@2x.png in Resources */, 000000000000000000002002 /* AppIcon60x60@3x.png in Resources */, 000000000000000000002003 /* AppIcon1024.png in Resources */,); runOnlyForDeploymentPostprocessing = 0; };
+		000000000000000000004005 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		000000000000000000004000 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				000000000000000000002100 /* ActivityView.swift in Sources */,
+				000000000000000000002101 /* AgentMemory.swift in Sources */,
+				000000000000000000002102 /* AgentSkills.swift in Sources */,
+				000000000000000000002103 /* AgentsView.swift in Sources */,
+				000000000000000000002104 /* ApprovalView.swift in Sources */,
+				000000000000000000002105 /* ArtifactDetailView.swift in Sources */,
+				000000000000000000002106 /* ArtifactsView.swift in Sources */,
+				000000000000000000002107 /* CallTabView.swift in Sources */,
+				000000000000000000002108 /* ClineBotShape.swift in Sources */,
+				000000000000000000002109 /* Components.swift in Sources */,
+				00000000000000000000210A /* ConversationView.swift in Sources */,
+				00000000000000000000210B /* DriveApp.swift in Sources */,
+				00000000000000000000210C /* DriveMarkShape.swift in Sources */,
+				00000000000000000000210D /* FeedbackMode.swift in Sources */,
+				00000000000000000000210E /* HomeView.swift in Sources */,
+				00000000000000000000210F /* InboxView.swift in Sources */,
+				000000000000000000002110 /* IntentEngine.swift in Sources */,
+				000000000000000000002111 /* LiveCallView.swift in Sources */,
+				000000000000000000002112 /* Models.swift in Sources */,
+				000000000000000000002113 /* NeedsYouView.swift in Sources */,
+				000000000000000000002114 /* Notifications.swift in Sources */,
+				000000000000000000002115 /* OpenView.swift in Sources */,
+				000000000000000000002116 /* PolicyViews.swift in Sources */,
+				000000000000000000002117 /* ProfileCustomize.swift in Sources */,
+				000000000000000000002118 /* ProfileView.swift in Sources */,
+				000000000000000000002119 /* ProjectMapView.swift in Sources */,
+				00000000000000000000211A /* SettingsView.swift in Sources */,
+				00000000000000000000211B /* ShowcaseView.swift in Sources */,
+				00000000000000000000211C /* SkillPackages.swift in Sources */,
+				00000000000000000000211D /* SpotlightDirector.swift in Sources */,
+				00000000000000000000211E /* Store.swift in Sources */,
+				00000000000000000000211F /* TasksView.swift in Sources */,
+				000000000000000000002120 /* Theme.swift in Sources */,
+				000000000000000000002121 /* VoiceCapture.swift in Sources */,
+				000000000000000000002122 /* WriterClient.swift in Sources */,
+				000000000000000000002123 /* WorkHub.swift in Sources */,
+				000000000000000000002124 /* AgentTitles.swift in Sources */,
+				000000000000000000002125 /* LocalAI.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		000000000000000000004003 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (000000000000000000002004 /* DriveCoreTests.swift in Sources */,); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		000000000000000000008001 /* PBXTargetDependency */ = {isa = PBXTargetDependency; target = 000000000000000000005000 /* Drive */; targetProxy = 000000000000000000008000 /* PBXContainerItemProxy */;};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		000000000000000000006000 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = {ALWAYS_SEARCH_USER_PATHS = NO; CLANG_ENABLE_MODULES = YES; COPY_PHASE_STRIP = NO; DEBUG_INFORMATION_FORMAT = dwarf; ENABLE_TESTABILITY = YES; GCC_OPTIMIZATION_LEVEL = 0; IPHONEOS_DEPLOYMENT_TARGET = 17.0; SDKROOT = iphoneos; SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)"; SWIFT_OPTIMIZATION_LEVEL = "-Onone"; SWIFT_VERSION = 5.0;}; name = Debug;};
+		000000000000000000006001 /* Release */ = {isa = XCBuildConfiguration; buildSettings = {ALWAYS_SEARCH_USER_PATHS = NO; CLANG_ENABLE_MODULES = YES; COPY_PHASE_STRIP = YES; DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym"; IPHONEOS_DEPLOYMENT_TARGET = 17.0; SDKROOT = iphoneos; SWIFT_COMPILATION_MODE = wholemodule; SWIFT_VERSION = 5.0; VALIDATE_PRODUCT = YES;}; name = Release;};
+		000000000000000000006002 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 1; GENERATE_INFOPLIST_FILE = NO; INFOPLIST_FILE = Info.plist; LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks"; MARKETING_VERSION = 0.1; PRODUCT_BUNDLE_IDENTIFIER = ai.drivemode.drive.preview; PRODUCT_NAME = "$(TARGET_NAME)"; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; SUPPORTS_MACCATALYST = NO; SWIFT_EMIT_LOC_STRINGS = YES; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = "1,2";}; name = Debug;};
+		000000000000000000006003 /* Release */ = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 1; GENERATE_INFOPLIST_FILE = NO; INFOPLIST_FILE = Info.plist; LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks"; MARKETING_VERSION = 0.1; PRODUCT_BUNDLE_IDENTIFIER = ai.drivemode.drive.preview; PRODUCT_NAME = "$(TARGET_NAME)"; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; SUPPORTS_MACCATALYST = NO; SWIFT_EMIT_LOC_STRINGS = YES; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = "1,2";}; name = Release;};
+		000000000000000000006004 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = {BUNDLE_LOADER = "$(TEST_HOST)"; CODE_SIGN_STYLE = Automatic; GENERATE_INFOPLIST_FILE = YES; IPHONEOS_DEPLOYMENT_TARGET = 17.0; LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks"; PRODUCT_BUNDLE_IDENTIFIER = ai.drivemode.drive.preview.tests; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = "1,2"; TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Drive.app/Drive";}; name = Debug;};
+		000000000000000000006005 /* Release */ = {isa = XCBuildConfiguration; buildSettings = {BUNDLE_LOADER = "$(TEST_HOST)"; CODE_SIGN_STYLE = Automatic; GENERATE_INFOPLIST_FILE = YES; IPHONEOS_DEPLOYMENT_TARGET = 17.0; LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks"; PRODUCT_BUNDLE_IDENTIFIER = ai.drivemode.drive.preview.tests; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = "1,2"; TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Drive.app/Drive";}; name = Release;};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		000000000000000000006100 /* Build configuration list for PBXProject "Drive" */ = {isa = XCConfigurationList; buildConfigurations = (000000000000000000006000 /* Debug */, 000000000000000000006001 /* Release */,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release;};
+		000000000000000000006101 /* Build configuration list for PBXNativeTarget "Drive" */ = {isa = XCConfigurationList; buildConfigurations = (000000000000000000006002 /* Debug */, 000000000000000000006003 /* Release */,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release;};
+		000000000000000000006102 /* Build configuration list for PBXNativeTarget "DriveTests" */ = {isa = XCConfigurationList; buildConfigurations = (000000000000000000006004 /* Debug */, 000000000000000000006005 /* Release */,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release;};
+/* End XCConfigurationList section */
+	};
+	rootObject = 000000000000000000007000 /* Project object */;
+}

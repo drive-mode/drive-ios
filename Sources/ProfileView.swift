@@ -8,6 +8,8 @@ struct ProfileView: View {
     // The stat blocks are modules: yours to show, hide, and reorder.
     @AppStorage("profile.order") private var orderRaw = ProfileModule.defaultOrder
     @AppStorage("profile.hidden") private var hiddenRaw = ""
+    @AppStorage("profile.displayName") private var profileName = "Harrison"
+    @AppStorage("profile.email") private var profileEmail = "harrison@quant-h2.com"
     @State private var customizing = false
 
     private var activeModules: [ProfileModule] {
@@ -66,10 +68,10 @@ struct ProfileView: View {
         HStack(spacing: 13) {
             AvatarChip(letter: "H", color: DT.violet, size: 46, human: true)
             VStack(alignment: .leading, spacing: 2) {
-                Text("Your week, Harrison")
+                Text("Your week, \(profileName)")
                     .font(.system(size: 21, weight: .heavy))
                     .kerning(-0.5)
-                Text(verbatim: "harrison@quant-h2.com")
+                Text(verbatim: profileEmail)
                     .font(.system(size: 11.5))
                     .foregroundStyle(DT.ink55(scheme))
             }
@@ -324,15 +326,33 @@ struct ProfileView: View {
 
     private var settingsLinks: some View {
         VStack(spacing: 0) {
-            NavigationLink { ConfigSettingsView() } label: {
+            Button { store.openSettings(.general, source: .profile) } label: {
                 settingsRow(icon: "slider.horizontal.3", label: "Configuration",
                             sub: "Appearance · voice · approval defaults")
             }
             .buttonStyle(Pressable())
             Rectangle().fill(DT.hairline(scheme)).frame(height: 0.8).padding(.leading, 54)
-            NavigationLink { PrivacyAccountView() } label: {
+            Button { store.openSettings(.privacy, source: .profile) } label: {
                 settingsRow(icon: "lock", label: "Privacy & account",
                             sub: "Transcripts · work events · sign-in")
+            }
+            .buttonStyle(Pressable())
+            Rectangle().fill(DT.hairline(scheme)).frame(height: 0.8).padding(.leading, 54)
+            Button { store.openSettings(.billingPayments, source: .profile) } label: {
+                settingsRow(icon: "creditcard", label: "Billing & payments",
+                            sub: "Plan · payment method · renewal")
+            }
+            .buttonStyle(Pressable())
+            Rectangle().fill(DT.hairline(scheme)).frame(height: 0.8).padding(.leading, 54)
+            Button { store.openSettings(.usage, source: .profile) } label: {
+                settingsRow(icon: "gauge.with.dots.needle.50percent", label: "Usage",
+                            sub: "Model work · calls · resources")
+            }
+            .buttonStyle(Pressable())
+            Rectangle().fill(DT.hairline(scheme)).frame(height: 0.8).padding(.leading, 54)
+            Button { store.openSettings(.analytics, source: .profile) } label: {
+                settingsRow(icon: "chart.xyaxis.line", label: "Analytics",
+                            sub: "Shipped work · attention · artifacts")
             }
             .buttonStyle(Pressable())
         }

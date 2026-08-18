@@ -53,9 +53,11 @@ the only verb.
 - **Quiet state** (no live session): the card becomes an honest quiet
   state — "No session live" — with the two real actions: *Plan a
   session* and *Watch the last replay*. Never a fake LIVE.
-- **Wire truth**: live when the wire carries beats (or demo world
-  offline); the ticker reads the same `directorPosition` the Spotlight
-  uses — one clock, no drift.
+- **Wire truth**: live when the session registry carries a started,
+  unended session (or the demo world is offline). Until that session's
+  first directed beat arrives, the card says so instead of borrowing a
+  different program. Once beats arrive, the ticker reads the same
+  `directorPosition` the Spotlight uses — one clock, no drift.
 
 ### 2 · INVITATIONS — the entry ritual, surfaced
 Unarchived invitations from the inbox render here as first-class rows:
@@ -76,9 +78,10 @@ A sheet, not a lie:
 3. **People** — agent chips with **skill hints** (a directing badge shows
    who can run the room — the skills system feeding session setup).
 4. **Note** — the invitation line, prefilled with the session language.
-5. **Send invitations** — creates the upcoming session, drops the
-   invitation into the inbox stream, haptic. Honesty line: invitations
-   go out for real when the hub connects; today they stay on-device.
+5. **Send invitations** — on a live wire, publishes create → schedule →
+   optional start → one session-linked invite per selected agent. Offline
+   preview keeps an explicitly local session; a dropped wire asks the user
+   to reconnect instead of silently forking state.
 
 ### 5 · EARLIER — session records, not dead rows
 Every replay artifact is a session record card: title, beats/duration
@@ -88,8 +91,8 @@ hook** with a link into the memory file. Records = replay + notes,
 the durable pair the session leaves behind.
 
 ### Page-wide UX decisions
-- **States**: live / quiet / wire-dropped (records and upcoming still
-  work; the reconnect chip stays Home's job) / first-run (quiet state +
+- **States**: live / quiet / wire-dropped (last synced registry remains
+  coherent; mutations wait for reconnect) / first-run (quiet state +
   seeded upcoming makes the page legible before any session).
 - **Motion**: ticker at 2 Hz periodic (information, not decoration —
   allowed under Reduce Motion; the LivePill still stills itself).
@@ -112,10 +115,11 @@ the durable pair the session leaves behind.
   on-device. Ticker off the store clock; invitations from the inbox
   store; upcoming persisted (`upcoming.v1`); composer local; records
   from replay artifacts + session memory.
-- **P1 — wire**: session registry events (created/scheduled/started/
-  ended) so NOW/UPCOMING derive from the log; composer's Send publishes
-  real `room_invite`s; records enumerate per-session programs via
-  `events_since` windows instead of artifact stand-ins.
+- **P1 — wire (partly shipped in the 2026-08-18 working tree)**: typed
+  session created/scheduled/started/ended events now drive NOW/UPCOMING;
+  the composer publishes real session-linked `room_invite`s; scheduled
+  timestamps drive reminders. Remaining: records enumerate per-session
+  programs via `events_since` windows instead of artifact stand-ins.
 - **P2 — presence & voice**: who's speaking on the live card; join
   straight into hold-to-talk; scheduled-session push at T-minus.
 - **Design ops**: capture the rebuilt page to the design project's

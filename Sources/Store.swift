@@ -17,6 +17,7 @@ final class AppStore: ObservableObject {
     var wireBackoff: Double = 1.5
     @Published var launched = false
     @Published var selectedTab: AppTab = .home
+    @Published var settingsRoute: SettingsRoute?
     @Published var inCall = false
     @Published var showApproval = false
     @Published var editAllowed = false
@@ -24,6 +25,71 @@ final class AppStore: ObservableObject {
     @Published var handRaised = false
     @Published var agents = DemoData.agents
     @Published var interrupts = DemoData.interrupts
+
+    // MARK: Chat-first Work
+
+    @Published var workTargets = WorkTargetRef.previews
+    @Published var selectedWorkTargetID = WorkTargetRef.previews[0].id
+    @Published var workChatMessages: [WorkChatMessage] = []
+    @Published var defaultCallPreset = CallPreset.loadDefault() {
+        didSet { defaultCallPreset.saveDefault() }
+    }
+    @Published var activeCallPresenterCandidateIDs: [String] = []
+    @Published var titleGrantsByID: [String: AgentTitleGrant] = [:]
+    @Published var titleEventLog: [AgentTitleEventReceipt] = []
+    @Published var titleMutationError: String?
+
+    var selectedWorkTarget: WorkTargetRef {
+        workTargets.first { $0.id == selectedWorkTargetID }
+            ?? workTargets[0]
+    }
+
+    var callPresetForCurrentTarget: CallPreset {
+        var preset = defaultCallPreset
+        if !preset.targetIDs.contains(selectedWorkTargetID) {
+            preset.targetIDs = [selectedWorkTargetID]
+        }
+        preset.presenterCandidateIDs = preset.presenterCandidateIDs.filter(preset.agentIDs.contains)
+        return preset
+    }
+
+    func selectWorkTarget(_ id: String) {
+        guard workTargets.contains(where: { $0.id == id }) else { return }
+        selectedWorkTargetID = id
+    }
+
+    func startNewWorkChat() {
+        workChatMessages.removeAll()
+    }
+
+    @discardableResult
+    func sendWorkChat(_ text: String) -> Bool {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty, selectedWorkTarget.canUse else { return false }
+        workChatMessages.append(WorkChatMessage(text: trimmed))
+        postConversation(trimmed)
+        return true
+    }
+
+    func launchCall(preset: CallPreset, saveAsDefault: Bool) {
+        let validTargetIDs = preset.targetIDs.filter { id in
+            workTargets.contains { $0.id == id && $0.canUse }
+        }
+        let validAgentIDs = preset.agentIDs.filter { id in agents.contains { $0.id == id } }
+        guard !validTargetIDs.isEmpty, !validAgentIDs.isEmpty else { return }
+
+        var sanitized = preset
+        sanitized.targetIDs = validTargetIDs
+        sanitized.agentIDs = validAgentIDs
+        sanitized.presenterCandidateIDs = preset.presenterCandidateIDs.filter(validAgentIDs.contains)
+        if saveAsDefault { defaultCallPreset = sanitized }
+        selectedWorkTargetID = validTargetIDs[0]
+        joinCall(presenterCandidates: sanitized.presenterCandidateIDs)
+    }
+
+    func openSettings(_ tab: SettingsTab, source: SettingsSource) {
+        settingsRoute = SettingsRoute(initialTab: tab, source: source)
+    }
     /// First paint carries only the curated narrative; the generated fleet
     /// (~220 projects, ~1,200 tasks) is seeded off-main right after launch.
     @Published var tasks = DemoData.curatedTasks {
@@ -342,14 +408,63 @@ final class AppStore: ObservableObject {
         didSet { MemoryFile.save(memoryFiles) }
     }
 
-    // MARK: Work page — sessions that exist before they're live
-    // (docs/WORK-PAGE.md). Composed on-device in the preview; the wire's
-    // session registry takes over in P1.
+    // MARK: Work page — sessions that exist before they're live. The durable
+    // registry is wire truth when connected; these persisted rows are the
+    // explicitly labeled offline fallback (docs/WORK-PAGE.md).
     @Published var upcomingSessions: [UpcomingSession] = UpcomingSession.load() {
         didSet { UpcomingSession.save(upcomingSessions) }
     }
+    @Published var wireUpcomingSessions: [UpcomingSession] = []
+    @Published var wireActiveSession: UpcomingSession?
+    @Published var wireActiveProgramId: String?
+    @Published var lastSessionError: String?
 
-    func planSession(_ session: UpcomingSession) {
+    /// Once a live wire has supplied registry rows, a drop keeps the last
+    /// synced session view intact under the reconnect chip. Falling back to
+    /// unrelated on-device rows would make NOW and UPCOMING disagree.
+    var usesWireSessionRegistry: Bool {
+        wireStatus.isLive || (wireDropped && !wireSessions.isEmpty)
+    }
+
+    var displayedUpcomingSessions: [UpcomingSession] {
+        usesWireSessionRegistry ? wireUpcomingSessions : upcomingSessions
+    }
+
+    var hasLiveSession: Bool {
+        usesWireSessionRegistry ? wireActiveSession != nil : !beats.isEmpty
+    }
+
+    var liveSessionTitle: String {
+        usesWireSessionRegistry
+            ? wireActiveSession?.title ?? "Working session"
+            : "Ship auth middleware"
+    }
+
+    var liveSessionPeople: [String] {
+        if usesWireSessionRegistry { return wireActiveSession?.people ?? [] }
+        return ["Harrison"] + agents.map(\.name)
+    }
+
+    var hasLiveProgramBeats: Bool {
+        usesWireSessionRegistry ? !wireBeats.isEmpty && !beats.isEmpty : !beats.isEmpty
+    }
+
+    func planSession(_ session: UpcomingSession, inviteeIds: [String]) async -> Bool {
+        lastSessionError = nil
+        if wireDropped {
+            lastSessionError = "Reconnect to the room log before sending invitations."
+            return false
+        }
+        if wireStatus.isLive {
+            do {
+                try await publishSessionPlan(session, inviteeIds: inviteeIds)
+                return true
+            } catch {
+                lastSessionError = "Writer didn’t finish publishing. Check the room log before retrying."
+                return false
+            }
+        }
+
         upcomingSessions.insert(session, at: 0)
         inbox.insert(InboxItem(
             id: "up-\(session.id)", kind: .invite,
@@ -357,9 +472,16 @@ final class AppStore: ObservableObject {
             body: "\(session.title) — \(session.when). \(session.agendaCount) agenda item\(session.agendaCount == 1 ? "" : "s").",
             age: "now", read: true), at: 0)
         NotificationManager.shared.scheduleSessionReminder(session)
+        return true
     }
 
     func removeUpcoming(_ id: String) {
+        if wireStatus.isLive {
+            Task { [weak self] in
+                try? await self?.cancelWireSession(id)
+            }
+            return
+        }
         withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
             upcomingSessions.removeAll { $0.id == id }
         }
@@ -467,8 +589,11 @@ final class AppStore: ObservableObject {
     var wireTaskOrder: [String] = []
     var wireArtifacts: [String: Artifact] = [:]
     var wireArtifactOrder: [String] = []
-    var wireBeats: [Int: Beat] = [:]
-    var wireBeatRelated: [Int: [String]] = [:]
+    var wireBeats: [String: Beat] = [:]
+    var wireBeatRelated: [String: [String]] = [:]
+    var wireBeatPrograms: [String: String] = [:]
+    var wireSessions: [String: WireSessionRecord] = [:]
+    var wireReminderScheduled: Set<String> = []
     /// Room roster + latest per-actor work line, from control.join / work.*.
     var wireParticipants: [String: WireParticipant] = [:]
     var wireActorStatus: [String: (line: String, at: Date)] = [:]
@@ -476,7 +601,7 @@ final class AppStore: ObservableObject {
     var wireEventTitles: [String: String] = [:]
     var wireEventOrder: [String] = []
 
-    // Director state for the Spotlight program
+    // Director state for the Presenter-stage program
     @Published var beats = DemoData.beats
     @Published var callStart = Date()
     @Published var beatSkew: TimeInterval = 0
@@ -559,12 +684,18 @@ final class AppStore: ObservableObject {
 
     // MARK: Call lifecycle
 
-    func joinCall() {
+    func joinCall(presenterCandidates: [String]? = nil) {
         launched = true
         inCall = true
         callStart = Date()
         beatSkew = 0
         intent.record(.work)
+        if let presenterCandidates {
+            activeCallPresenterCandidateIDs = presenterCandidates
+        } else if activeCallPresenterCandidateIDs.isEmpty {
+            activeCallPresenterCandidateIDs = defaultCallPreset.presenterCandidateIDs
+        }
+        activateDefaultPresenterIfNeeded()
         if !editAllowed {
             approvalTask?.cancel()
             approvalTask = Task { [weak self] in
@@ -576,10 +707,12 @@ final class AppStore: ObservableObject {
     }
 
     func leaveCall() {
+        revokePresenter()
         inCall = false
         showApproval = false
         approvalTask?.cancel()
         sessionMessages.removeAll()   // conversation lives in memory only
+        activeCallPresenterCandidateIDs.removeAll()
     }
 
     // MARK: In-session typing — the voice lane's quiet sibling

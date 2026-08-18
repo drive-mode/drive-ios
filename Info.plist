@@ -22,10 +22,6 @@
 	<string>1</string>
 	<key>MinimumOSVersion</key>
 	<string>17.0</string>
-	<key>UIDeviceFamily</key>
-	<array>
-		<integer>1</integer>
-	</array>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsLocalNetworking</key>

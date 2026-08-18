@@ -1,8 +1,8 @@
 import Foundation
 import UserNotifications
 
-/// Local session notifications: planned sessions remind you (preview
-/// timing), and the notification's Join action drops you straight into
+/// Local session notifications: planned sessions remind you at their real
+/// registry time, and the notification's Join action drops you straight into
 /// the session. Honors the NOTIFICATIONS preferences; permission is asked
 /// the first time something would actually fire — never at launch.
 final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
@@ -23,9 +23,6 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         center.setNotificationCategories([session])
     }
 
-    /// Preview timing: "Now" fires shortly (so the flow is demonstrable);
-    /// the labels say so. Real scheduling lands with the wire session
-    /// registry (docs/WORK-PAGE.md P1).
     func scheduleSessionReminder(_ session: UpcomingSession) {
         let invitesOn = UserDefaults.standard.object(forKey: "notify.invite") == nil
             ? true : UserDefaults.standard.bool(forKey: "notify.invite")
@@ -39,16 +36,16 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
             content.body = "\(session.people.joined(separator: " & ")) · \(session.when) — \(session.note)"
             content.categoryIdentifier = "SESSION"
             content.sound = .default
-            let delay: TimeInterval
-            switch session.when {
-            case "Now": delay = 8
-            case "Later today": delay = 45
-            default: delay = 90
-            }
+            let delay = max(2, session.scheduledAt?.timeIntervalSinceNow ?? 8)
             let trigger = UNTimeIntervalNotificationTrigger(timeInterval: delay, repeats: false)
             center.add(UNNotificationRequest(
                 identifier: "session-\(session.id)", content: content, trigger: trigger))
         }
+    }
+
+    func cancelSessionReminder(_ sessionId: String) {
+        UNUserNotificationCenter.current().removePendingNotificationRequests(
+            withIdentifiers: ["session-\(sessionId)"])
     }
 
     /// Settings → "Send a test reminder": asks for permission if needed and
