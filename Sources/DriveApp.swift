@@ -33,6 +33,7 @@ struct RootView: View {
         .onAppear {
             store.startWire()
             store.sweepExperiments()   // the one-week rule enforces itself
+            NotificationManager.shared.configure(store: store)
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active {

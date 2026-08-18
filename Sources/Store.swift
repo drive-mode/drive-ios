@@ -356,6 +356,7 @@ final class AppStore: ObservableObject {
             title: "You invited \(session.people.joined(separator: " & ")) to a working session",
             body: "\(session.title) — \(session.when). \(session.agendaCount) agenda item\(session.agendaCount == 1 ? "" : "s").",
             age: "now", read: true), at: 0)
+        NotificationManager.shared.scheduleSessionReminder(session)
     }
 
     func removeUpcoming(_ id: String) {

@@ -117,6 +117,20 @@ struct ConfigSettingsView: View {
                     hairline
                     pickerRow("If unanswered", selection: $escalation,
                               options: ["Do nothing", "Nudge after 10m", "Escalate to Slack"])
+                    hairline
+                    Button { NotificationManager.shared.sendTestReminder() } label: {
+                        HStack {
+                            Text("Send a test reminder").scaledFont(15)
+                                .foregroundStyle(DT.violetText(scheme))
+                            Spacer()
+                            Image(systemName: "bell.badge")
+                                .font(.system(size: 13))
+                                .foregroundStyle(DT.ink35(scheme))
+                        }
+                        .padding(.horizontal, 14).padding(.vertical, 6).frame(minHeight: 46)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
                 }
                 .card()
                 .padding(.top, 7)
