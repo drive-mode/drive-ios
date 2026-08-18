@@ -409,8 +409,8 @@ struct LiveHeroCard: View {
                     Image(systemName: "sparkles.tv")
                         .font(.system(size: 11, weight: .semibold))
                     Text(store.hasLiveProgramBeats
-                        ? "Directed spotlight · \(store.beats.count) beats · rotate for theater"
-                        : "Directed spotlight · waiting for the first beat")
+                        ? "Presenter stage · \(store.beats.count) beats · rotate for theater"
+                        : "Presenter stage · waiting for the first beat")
                         .font(.system(size: 11.5, weight: .semibold))
                 }
                 .foregroundStyle(.white.opacity(0.85))

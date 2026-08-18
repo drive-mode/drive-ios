@@ -342,6 +342,8 @@ private struct CallSettingsPanel: View {
 
 private struct AgentSettingsPanel: View {
     @Environment(\.colorScheme) private var scheme
+    @AppStorage("director.overlay.pace") private var directorPace = "Balanced"
+    @AppStorage("director.overlay.handoffs") private var suggestHandoffs = true
     var body: some View {
         settingsPanel(title: "Agents", intro: "Persona names stay editable; runtime identity is shown separately.") {
             VStack(alignment: .leading, spacing: 10) {
@@ -352,6 +354,34 @@ private struct AgentSettingsPanel: View {
             .font(.system(size: 13, weight: .semibold))
             .foregroundStyle(DT.ink78(scheme))
             .padding(16).card()
+
+            let policy = DirectorPolicyDescriptor.builtIn
+            VStack(alignment: .leading, spacing: 0) {
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Director policy").font(.system(size: 14, weight: .bold))
+                        Text("\(policy.version) · \(policy.signatureStatus) · Host-only")
+                            .font(.system(size: 10, design: .monospaced)).foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    Image(systemName: "checkmark.shield.fill").foregroundStyle(DT.violet)
+                }
+                .padding(14)
+                Divider().padding(.leading, 14)
+                Picker("Presentation pace", selection: $directorPace) {
+                    Text("Calm").tag("Calm")
+                    Text("Balanced").tag("Balanced")
+                    Text("Fast").tag("Fast")
+                }
+                .padding(14)
+                Divider().padding(.leading, 14)
+                Toggle("Suggest Presenter handoffs", isOn: $suggestHandoffs)
+                    .tint(DT.violet)
+                    .padding(14)
+            }
+            .card()
+            Text("These are safe user overlays. The signed prompts, routing, tools, scoring, and model configuration are not editable or exportable.")
+                .font(.system(size: 11)).foregroundStyle(.secondary)
         }
     }
 }

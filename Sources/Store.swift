@@ -34,6 +34,10 @@ final class AppStore: ObservableObject {
     @Published var defaultCallPreset = CallPreset.loadDefault() {
         didSet { defaultCallPreset.saveDefault() }
     }
+    @Published var activeCallPresenterCandidateIDs: [String] = []
+    @Published var titleGrantsByID: [String: AgentTitleGrant] = [:]
+    @Published var titleEventLog: [AgentTitleEventReceipt] = []
+    @Published var titleMutationError: String?
 
     var selectedWorkTarget: WorkTargetRef {
         workTargets.first { $0.id == selectedWorkTargetID }
@@ -80,7 +84,7 @@ final class AppStore: ObservableObject {
         sanitized.presenterCandidateIDs = preset.presenterCandidateIDs.filter(validAgentIDs.contains)
         if saveAsDefault { defaultCallPreset = sanitized }
         selectedWorkTargetID = validTargetIDs[0]
-        joinCall()
+        joinCall(presenterCandidates: sanitized.presenterCandidateIDs)
     }
 
     func openSettings(_ tab: SettingsTab, source: SettingsSource) {
@@ -597,7 +601,7 @@ final class AppStore: ObservableObject {
     var wireEventTitles: [String: String] = [:]
     var wireEventOrder: [String] = []
 
-    // Director state for the Spotlight program
+    // Director state for the Presenter-stage program
     @Published var beats = DemoData.beats
     @Published var callStart = Date()
     @Published var beatSkew: TimeInterval = 0
@@ -680,12 +684,18 @@ final class AppStore: ObservableObject {
 
     // MARK: Call lifecycle
 
-    func joinCall() {
+    func joinCall(presenterCandidates: [String]? = nil) {
         launched = true
         inCall = true
         callStart = Date()
         beatSkew = 0
         intent.record(.work)
+        if let presenterCandidates {
+            activeCallPresenterCandidateIDs = presenterCandidates
+        } else if activeCallPresenterCandidateIDs.isEmpty {
+            activeCallPresenterCandidateIDs = defaultCallPreset.presenterCandidateIDs
+        }
+        activateDefaultPresenterIfNeeded()
         if !editAllowed {
             approvalTask?.cancel()
             approvalTask = Task { [weak self] in
@@ -697,10 +707,12 @@ final class AppStore: ObservableObject {
     }
 
     func leaveCall() {
+        revokePresenter()
         inCall = false
         showApproval = false
         approvalTask?.cancel()
         sessionMessages.removeAll()   // conversation lives in memory only
+        activeCallPresenterCandidateIDs.removeAll()
     }
 
     // MARK: In-session typing — the voice lane's quiet sibling

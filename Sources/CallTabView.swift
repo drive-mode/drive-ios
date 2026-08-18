@@ -265,13 +265,13 @@ struct LiveSessionCard: View {
                 .kerning(-0.4)
                 .scaledFont(19, .heavy)
                 .padding(.top, 12)
-            Text("\(store.liveSessionPeople.count) people · directed spotlight · rotate for theater")
+            Text("\(store.liveSessionPeople.count) people · Presenter stage · rotate for theater")
                 .font(.system(size: 11.5))
                 .foregroundStyle(DT.ink55(scheme))
                 .padding(.top, 3)
 
             // The ticker: 2 Hz is information cadence, not decoration —
-            // the same director clock the Spotlight runs on.
+            // the same director clock the Presenter stage runs on.
             if store.hasLiveProgramBeats {
                 TimelineView(.periodic(from: .now, by: 0.5)) { context in
                     let pos = store.directorPosition(at: context.date)

@@ -320,16 +320,16 @@ extension DemoData {
                   body: "Answer one interrupt today to keep it rolling.",
                   age: "1h", read: true),
         InboxItem(id: "n6", kind: .product, title: "Theater mode is here",
-                  body: "Rotate your phone in any working session — the Spotlight goes full-bleed with floating controls.",
+                  body: "Rotate your phone in any working session — the Presenter stage goes full-bleed with floating controls.",
                   age: "3h"),
         InboxItem(id: "n7", kind: .tip, title: "Scrub beats like stories",
-                  body: "Swipe or tap the edges of the Spotlight to move between plan, diagram, and test beats.",
+                  body: "Swipe or tap the Presenter stage edges to move between plan, diagram, and test beats.",
                   age: "5h", read: true),
         InboxItem(id: "n8", kind: .shipped, title: "223 tasks filed to the archive",
                   body: "Your sweep kept the desk clear — everything stays searchable.",
                   age: "1d", read: true),
         InboxItem(id: "n9", kind: .product, title: "Drive 0.2 release notes",
-                  body: "Task map, directed Spotlight, ambient guide bar, and the working-sessions rename.",
+                  body: "Task map, Presenter stage, ambient guide bar, and the working-sessions rename.",
                   age: "2d", read: true),
         InboxItem(id: "n10", kind: .invite, title: "Scout invited you to a working session",
                   body: "Sessions hardening — token rotation walkthrough.",
@@ -366,9 +366,9 @@ struct ConvMessage: Identifiable {
     let time: String
 }
 
-// MARK: - Directed Spotlight
+// MARK: - Presenter stage
 
-/// One beat of the directed program. The Spotlight never streams pixels —
+/// One beat of the directed program. The Presenter stage never streams pixels —
 /// agents publish typed work events and the director choreographs them
 /// into something a phone can digest (portrait or theater).
 enum BeatKind: String, Equatable {
@@ -496,7 +496,7 @@ enum DemoData {
     static let badges: [Badge] = [
         Badge(id: "unblocker", symbol: "key.fill", name: "Unblocker", note: "Cleared 5 blocked agents", earned: true),
         Badge(id: "night", symbol: "moon.stars.fill", name: "Night Shift", note: "Approved after midnight", earned: true),
-        Badge(id: "theater", symbol: "rectangle.landscape.rotate", name: "Theater Debut", note: "First rotated spotlight", earned: true),
+        Badge(id: "theater", symbol: "rectangle.landscape.rotate", name: "Theater Debut", note: "First rotated Presenter stage", earned: true),
         Badge(id: "sweep", symbol: "sparkles", name: "Clean Desk", note: "First archive sweep", earned: true),
         Badge(id: "century", symbol: "100.circle", name: "Century", note: "100 tasks shipped", earned: false),
         Badge(id: "marathon", symbol: "timer", name: "Marathon", note: "10 hours in session", earned: false),
@@ -627,7 +627,7 @@ enum DemoScale {
     private static let projectNouns = ["billing", "search", "onboarding", "presence", "exports", "webhooks",
                                        "analytics", "notifications", "migrations", "caching", "rate limits",
                                        "review flow", "secrets", "telemetry", "design tokens", "replays",
-                                       "transcripts", "packs", "roster", "invites", "sessions", "spotlight",
+                                       "transcripts", "packs", "roster", "invites", "sessions", "presenter",
                                        "interrupts", "voice", "artifacts", "checkpoints", "sandboxes", "quotas"]
     private static let projectShapes = ["%@ refactor", "%@ hardening", "%@ v2", "Ship %@", "%@ cleanup", "%@ rollout", "%@ audit"]
     private static let verbs = ["Migrate", "Gate", "Rotate", "Bump", "Wire", "Split", "Cache", "Throttle",

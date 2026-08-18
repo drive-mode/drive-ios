@@ -147,4 +147,53 @@ final class DriveCoreTests: XCTestCase {
         XCTAssertTrue(testing.allSatisfy { $0.category == .quality })
         XCTAssertTrue(SkillSearch.filtered(packages, query: "no-such-skill").isEmpty)
     }
+
+    @MainActor
+    func testPresenterIsExclusiveAndTransfersAtomically() throws {
+        let store = AppStore()
+        let now = Date().addingTimeInterval(-2)
+        let maya = store.makePresenterGrant(agentId: "maya", at: now, duration: 600)
+        let scout = store.makePresenterGrant(agentId: "scout", at: now.addingTimeInterval(1), duration: 600)
+
+        XCTAssertTrue(store.applyTitleGrant(maya, eventId: "grant-maya"))
+        XCTAssertFalse(store.applyTitleGrant(scout, eventId: "competing-grant"))
+        XCTAssertEqual(store.activePresenterGrant?.agentId, "maya")
+
+        store.applyTitleTransfer(
+            fromGrantId: maya.id,
+            toGrant: scout,
+            at: now.addingTimeInterval(1),
+            eventId: "transfer-scout")
+
+        XCTAssertEqual(store.activePresenterGrant?.agentId, "scout")
+        XCTAssertNotNil(store.titleGrantsByID[maya.id]?.revokedAt)
+        XCTAssertEqual(store.titleEventLog.map(\.kind), [.granted, .transferred])
+    }
+
+    @MainActor
+    func testPresenterGrantIsTemporaryReferenceOnlyAndRevocable() {
+        let store = AppStore()
+        let start = Date().addingTimeInterval(-3)
+        let grant = store.makePresenterGrant(agentId: "maya", at: start, duration: 30)
+
+        XCTAssertEqual(grant.permissions, [.stagePresent])
+        XCTAssertEqual(grant.resourceGrantRefs, ["typed-stage"])
+        XCTAssertTrue(grant.isActive(at: start.addingTimeInterval(29)))
+        XCTAssertFalse(grant.isActive(at: start.addingTimeInterval(31)))
+        XCTAssertFalse(grant.resourceGrantRefs.joined().localizedCaseInsensitiveContains("pixel"))
+
+        XCTAssertTrue(store.applyTitleGrant(grant, eventId: "grant-short"))
+        store.applyTitleRevocation(
+            grantId: grant.id, at: start.addingTimeInterval(2),
+            reason: "revoked", eventId: "revoke-short")
+        XCTAssertNil(store.activePresenterGrant)
+        XCTAssertEqual(store.titleEventLog.last?.kind, .revoked)
+    }
+
+    func testDirectorPolicyBoundaryIsNonExportable() {
+        let policy = DirectorPolicyDescriptor.builtIn
+        XCTAssertFalse(policy.exportable)
+        XCTAssertEqual(policy.signatureStatus, "Verified")
+        XCTAssertTrue(policy.version.hasPrefix("director-host-"))
+    }
 }

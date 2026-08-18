@@ -43,6 +43,7 @@
 		000000000000000000002121 /* VoiceCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001121 /* VoiceCapture.swift */; };
 		000000000000000000002122 /* WriterClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001122 /* WriterClient.swift */; };
 		000000000000000000002123 /* WorkHub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001123 /* WorkHub.swift */; };
+		000000000000000000002124 /* AgentTitles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001124 /* AgentTitles.swift */; };
 		000000000000000000002000 /* Fonts in Resources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001001 /* Fonts */; };
 		000000000000000000002001 /* AppIcon60x60@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001002 /* AppIcon60x60@2x.png */; };
 		000000000000000000002002 /* AppIcon60x60@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 000000000000000000001003 /* AppIcon60x60@3x.png */; };
@@ -97,6 +98,7 @@
 		000000000000000000001121 /* VoiceCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceCapture.swift; sourceTree = "<group>"; };
 		000000000000000000001122 /* WriterClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WriterClient.swift; sourceTree = "<group>"; };
 		000000000000000000001123 /* WorkHub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkHub.swift; sourceTree = "<group>"; };
+		000000000000000000001124 /* AgentTitles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentTitles.swift; sourceTree = "<group>"; };
 		000000000000000000001000 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		000000000000000000001001 /* Fonts */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Fonts; sourceTree = "<group>"; };
 		000000000000000000001002 /* AppIcon60x60@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "AppIcon60x60@2x.png"; sourceTree = "<group>"; };
@@ -165,6 +167,7 @@
 				000000000000000000001121 /* VoiceCapture.swift */,
 				000000000000000000001122 /* WriterClient.swift */,
 				000000000000000000001123 /* WorkHub.swift */,
+				000000000000000000001124 /* AgentTitles.swift */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -269,6 +272,7 @@
 				000000000000000000002121 /* VoiceCapture.swift in Sources */,
 				000000000000000000002122 /* WriterClient.swift in Sources */,
 				000000000000000000002123 /* WorkHub.swift in Sources */,
+				000000000000000000002124 /* AgentTitles.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
