@@ -23,13 +23,17 @@ struct AgentsView: View {
                         Eyebrow("AGENTS")
                         Spacer()
                         NavigationLink { MemoryBrowserView() } label: {
-                            HStack(spacing: 4) {
+                            HStack(spacing: 5) {
                                 Image(systemName: "brain")
                                     .font(.system(size: 10, weight: .semibold))
                                 Text("Memory")
                                     .font(.system(size: 12, weight: .bold))
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 8, weight: .bold))
                             }
                             .foregroundStyle(DT.violetText(scheme))
+                            .padding(.horizontal, 9).frame(height: 30)
+                            .background(DT.violet.opacity(0.08), in: Capsule())
                         }
                         .buttonStyle(Pressable())
                         .accessibilityHint("The fleet's notebooks — agent, session, task, project, and plan memory")
@@ -43,6 +47,8 @@ struct AgentsView: View {
                                     .font(.system(size: 9, weight: .bold))
                             }
                             .foregroundStyle(DT.violetText(scheme))
+                            .padding(.horizontal, 9).frame(height: 30)
+                            .background(DT.violet.opacity(0.08), in: Capsule())
                         }
                         .buttonStyle(Pressable())
                         .accessibilityHint("Every capability the fleet can carry, and who carries it")
@@ -95,6 +101,12 @@ struct AgentsView: View {
             .tabSwipe()
             .background(DT.page(scheme).ignoresSafeArea())
             .navigationTitle("Agents")
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) { HomeToolbarButton() }
+                ToolbarItem(placement: .topBarTrailing) {
+                    SettingsToolbarButton(tab: .agents, source: .agents)
+                }
+            }
         }
     }
 
@@ -128,10 +140,7 @@ struct AgentsView: View {
                 HStack(spacing: 6) {
                     Text(agent.name).font(.system(size: 15, weight: .semibold))
                         .foregroundStyle(DT.ink(scheme))
-                    Text(agent.role)
-                        .font(.system(size: 10, weight: .semibold))
-                        .tracking(0.5)
-                        .foregroundStyle(DT.ink35(scheme))
+                    AgentRuntimeBadgeView(badge: .forAgentID(agent.id))
                 }
                 Text(agent.statusLine)
                     .font(.system(size: 12))
@@ -157,6 +166,21 @@ struct AgentsView: View {
         .overlay(RoundedRectangle(cornerRadius: DT.rCard, style: .continuous)
             .strokeBorder(agent.state == .needsYou ? DT.violet.opacity(0.28) : DT.hairline(scheme), lineWidth: 0.8))
         .shadow(color: scheme == .dark ? .clear : DT.inkLight.opacity(0.03), radius: 2, y: 1)
+    }
+}
+
+struct AgentRuntimeBadgeView: View {
+    let badge: AgentRuntimeBadge
+
+    var body: some View {
+        Text(badge.label)
+            .font(.system(size: 8.5, weight: .bold))
+            .fixedSize(horizontal: true, vertical: false)
+            .foregroundStyle(.secondary)
+            .padding(.horizontal, 6)
+            .frame(height: 18)
+            .background(.secondary.opacity(0.08), in: Capsule())
+            .accessibilityLabel("Runtime \(badge.family.rawValue), \(badge.executionLocation.rawValue)")
     }
 }
 
@@ -382,6 +406,8 @@ struct AgentDetailView: View {
     @AppStorage private var editsNeedApproval: Bool
     @AppStorage private var commandsNeedApproval: Bool
     @AppStorage private var autoLandGreen: Bool
+    @State private var skillsExpanded = false
+    @State private var memoryExpanded = false
 
     init(agent: Agent) {
         self.agent = agent
@@ -398,6 +424,7 @@ struct AgentDetailView: View {
                     VStack(alignment: .leading, spacing: 3) {
                         HStack(spacing: 7) {
                             Text(agent.name).font(.system(size: 20, weight: .heavy))
+                            AgentRuntimeBadgeView(badge: .forAgentID(agent.id))
                             StateChip(state: agent.state)
                         }
                         Text("\(agent.role.capitalized) · in Auth middleware")
@@ -417,50 +444,7 @@ struct AgentDetailView: View {
                 }
                 .padding(.top, 10)
 
-                HStack(spacing: 12) {
-                    Eyebrow("SKILLS")
-                    Spacer()
-                    Button { store.setAllSkills(agent.id, on: true) } label: {
-                        Text("All")
-                            .font(.system(size: 12, weight: .bold))
-                            .foregroundStyle(DT.violetText(scheme))
-                    }
-                    .buttonStyle(Pressable())
-                    .accessibilityLabel("Equip all skills")
-                    Button { store.setAllSkills(agent.id, on: false) } label: {
-                        Text("None")
-                            .font(.system(size: 12, weight: .bold))
-                            .foregroundStyle(DT.ink55(scheme))
-                    }
-                    .buttonStyle(Pressable())
-                    .accessibilityLabel("Unequip all skills")
-                    NavigationLink { SkillsLibraryView() } label: {
-                        HStack(spacing: 4) {
-                            Text("Library")
-                                .font(.system(size: 12, weight: .bold))
-                            Image(systemName: "chevron.right")
-                                .font(.system(size: 9, weight: .bold))
-                        }
-                        .foregroundStyle(DT.violetText(scheme))
-                    }
-                    .buttonStyle(Pressable())
-                }
-                .padding(.top, 22)
-                .padding(.horizontal, 14)
-                AgentSkillsSection(agent: agent).padding(.top, 7)
-                Text("Sealed skills act only after you allow — the approvals below are the gate. Kits equip a set at once; rows open the package to read, edit, and review.")
-                    .font(.system(size: 10.5))
-                    .foregroundStyle(DT.ink55(scheme))
-                    .padding(.top, 7)
-                    .padding(.horizontal, 14)
-
-                Eyebrow("MEMORY").padding(.top, 22).padding(.leading, 14)
-                AgentMemorySection(agent: agent).padding(.top, 7)
-                Text("The agent's own notebook — durable files plus per-session notes. Hooks load at session start; bodies load when relevant.")
-                    .font(.system(size: 10.5))
-                    .foregroundStyle(DT.ink55(scheme))
-                    .padding(.top, 7)
-                    .padding(.horizontal, 14)
+                capabilitySections.padding(.top, 18)
 
                 Eyebrow("LINEAGE").padding(.top, 22).padding(.leading, 14)
                 AgentLineage(agent: agent).padding(.top, 7)
@@ -523,6 +507,73 @@ struct AgentDetailView: View {
 
     private var hairline: some View {
         Rectangle().fill(DT.hairline(scheme)).frame(height: 0.8).padding(.leading, 14)
+    }
+
+    private var capabilitySections: some View {
+        VStack(spacing: 10) {
+            DisclosureGroup(isExpanded: $skillsExpanded) {
+                VStack(alignment: .leading, spacing: 10) {
+                    HStack(spacing: 14) {
+                        Button("All") { store.setAllSkills(agent.id, on: true) }
+                            .accessibilityLabel("Equip all skills")
+                        Button("None") { store.setAllSkills(agent.id, on: false) }
+                            .accessibilityLabel("Unequip all skills")
+                        Spacer()
+                        NavigationLink("Open library") { SkillsLibraryView() }
+                    }
+                    .font(.system(size: 11.5, weight: .bold))
+                    .foregroundStyle(DT.violetText(scheme))
+                    AgentSkillsSection(agent: agent)
+                    Text("Search and open only the categories you need. Approval gates remain authoritative.")
+                        .font(.system(size: 10.5))
+                        .foregroundStyle(DT.ink55(scheme))
+                }
+                .padding(.top, 10)
+            } label: {
+                capabilityLabel(
+                    title: "Skills",
+                    symbol: "square.stack.3d.up",
+                    detail: "\(store.equippedSkills(agent.id).count) equipped · \(store.skillPackages.count) available")
+            }
+            .tint(DT.violetText(scheme))
+            .padding(14)
+            .card()
+
+            DisclosureGroup(isExpanded: $memoryExpanded) {
+                VStack(alignment: .leading, spacing: 10) {
+                    AgentMemorySection(agent: agent)
+                    NavigationLink("Open memory browser") { MemoryBrowserView() }
+                        .font(.system(size: 11.5, weight: .bold))
+                        .foregroundStyle(DT.violetText(scheme))
+                    Text("Hooks load at session start; bodies load only when relevant.")
+                        .font(.system(size: 10.5))
+                        .foregroundStyle(DT.ink55(scheme))
+                }
+                .padding(.top, 10)
+            } label: {
+                capabilityLabel(
+                    title: "Memory",
+                    symbol: "brain",
+                    detail: "\(store.agentMemory(agent.id).count) files")
+            }
+            .tint(DT.violetText(scheme))
+            .padding(14)
+            .card()
+        }
+    }
+
+    private func capabilityLabel(title: String, symbol: String, detail: String) -> some View {
+        HStack(spacing: 10) {
+            Image(systemName: symbol)
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(DT.violetText(scheme))
+                .frame(width: 30, height: 30)
+                .background(DT.violet.opacity(0.10), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title).font(.system(size: 14, weight: .bold)).foregroundStyle(DT.ink(scheme))
+                Text(detail).font(.system(size: 10.5)).foregroundStyle(DT.ink55(scheme))
+            }
+        }
     }
 
     private func stat(_ value: String, _ label: String) -> some View {
