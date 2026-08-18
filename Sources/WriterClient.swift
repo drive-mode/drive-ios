@@ -1,8 +1,9 @@
 import SwiftUI
 
 /// Consumption of the drivemode-mcp writer: poll `/rpc events_since`,
-/// map typed events into app state. Offline → seeded demo world; live →
-/// the wire is the truth for tasks, artifacts, beats, agents, interrupts.
+/// map typed events into app state. Offline Debug → labeled demo world;
+/// offline Release → empty disconnected state; live → the wire is the truth
+/// for tasks, artifacts, beats, agents, and interrupts.
 enum WireStatus: Equatable {
     case offline
     case live(latestSeq: Int, events: Int)
@@ -187,7 +188,10 @@ extension AppStore {
     private static let eventTitleCap = 4000
 
     func startWire() {
-        guard wireTask == nil else { return }
+        guard wireTask == nil, configuration.permitsWriterURL(writerURL) else {
+            wireStatus = .offline
+            return
+        }
         wireTask = Task { [weak self] in
             while !Task.isCancelled {
                 await self?.pollWire()

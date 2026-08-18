@@ -1,29 +1,37 @@
-# Drive iOS — MC1 consumer shell (preview)
+# Drive iOS — product preview
 
-SwiftUI implementation of the **Frontier phone shell** design for Drive —
-voice-first pair programming. Stay on a call with your agents, watch work land
-on the Spotlight, steer from anywhere.
+SwiftUI implementation of Drive's iPhone and iPad experience: start a chat
+against an explicit repository or file target, move into a live call when the
+work benefits from it, and steer a fleet of agents from anywhere.
 
-**Maturity: PLANNED · design-intent demo, wire-consuming.** Every surface
-renders and the demo narrative flows (join session → approval interrupt →
-Allow → change lands → Status Hub / Needs you update). With the
-`drivemode-mcp` writer running, tasks, artifacts, beats (including staged
-related work events), agents, interrupts, and invitations all come off the
-durable log; offline, the seeded demo world (~750 tasks / 220 projects)
-carries the same shapes. No voice yet.
+**Maturity: implemented preview, not a released app.** The current stacked-PR
+tip contains the chat-first Work hub, unified Settings, iPhone/iPad project and
+tests, scalable skills, Presenter titles, and a bounded Apple system-model
+spike. Those changes are still on open pull requests rather than `main`. The
+Debug builds retain the clearly labeled preview world. Release builds now fail
+closed behind one configuration policy: no demo seeds, fake account/sign-in,
+Showcase, experiments, billing, or loopback writer. Managed chat, production
+targets/accounts, final distribution identity, and App Store submission remain
+release work. See [TODO.md](TODO.md) for the delivery
+snapshot and [docs/APP-STORE-REVIEW.md](docs/APP-STORE-REVIEW.md) for the release
+gate.
 
 ## Design SoT
 
-- Artboards: **Drivecode Design System** project on claude.ai/design → `ios/` groups
-  (synced from `../design-artboards/`)
-- Brand locks: `../cline-drivecode/docs/drivecode/design/brand/MOBILE-BRAND-STYLING.md`
-- Tokens live in [`Sources/Theme.swift`](Sources/Theme.swift) (`DT`) and alias the Hub variables
+- Artboards: **Drivecode Design System** project on claude.ai/design → `ios/`
+  groups. Any `../design-artboards/` mirror is workspace-only, not part of this
+  standalone repository.
+- Brand locks: [mobile brand styling](https://github.com/drive-mode/cline-drivecode/blob/main/docs/drivecode/design/brand/MOBILE-BRAND-STYLING.md)
+- Tokens live in [`Sources/Theme.swift`](Sources/Theme.swift) (`DT`) and alias
+  the Hub variables.
 
 ## Build, test, and run
 
 `Drive.xcodeproj` is the primary build path and carries the shared `Drive`
-scheme, iPhone + iPad support, and the `DriveTests` unit-test target. Select an
-iOS Simulator in Xcode and run or test the shared scheme.
+scheme, iPhone + iPad support, and the `DriveTests` + `DriveUITests` targets.
+The UI target launches the production channel and runs root-surface smoke and
+accessibility audits. Select an iOS Simulator in Xcode and run or test the
+shared scheme.
 
 The direct compiler script remains a lightweight preview fallback:
 
@@ -35,41 +43,43 @@ xcrun simctl launch booted ai.drivemode.drive.preview
 
 ## Surfaces
 
-Tabs: **Home · Call · Agents · Tasks**, profile off Home's avatar.
+Tabs: **Home · Work · Agents · Tasks**, profile off Home's avatar.
 
 | Screen | File | Notes |
 |---|---|---|
-| Open | `Sources/OpenView.swift` | Brand hero · Preview chip · one violet verb |
+| Open | `Sources/OpenView.swift` | Brand hero and one violet verb; preview/auth theater is absent from Release |
 | Home (+tabs) | `Sources/HomeView.swift` | Live hero · today tiles · needs-you pill · profile |
-| Work tab | `Sources/CallTabView.swift` | **The session lifecycle page** (docs/WORK-PAGE.md): NOW (live card with a 2 Hz beat ticker off the director clock) → INVITATIONS (Join now / Later) → UPCOMING → **Plan a session** composer (project → agenda from what needs a human → people with directing-skill sparks → send) → EARLIER (session records: replay + session-memory hook). Honest quiet state when nothing's live |
-| **Directed Spotlight** | `Sources/SpotlightDirector.swift` | The star: typed beats (plan / diagram / edit / run / tests / decision / result), story rail, tap-to-scrub, looping program |
+| Work tab | `Sources/WorkHub.swift` | **Chat first**: selected opaque repository/folder/file-set target, quiet composer, and visible New Chat + Call actions. Calls and History retain the session lifecycle without filling the default surface; see [docs/WORK-PAGE.md](docs/WORK-PAGE.md) |
+| **Spotlight** | `Sources/SpotlightDirector.swift`, `Sources/AgentTitles.swift` | User-facing shared surface for typed beats (plan / diagram / edit / run / tests / decision / result), writable by one temporary, exclusive, auditable Presenter. No pixel streaming |
 | Live call | `Sources/LiveCallView.swift` | Portrait + **theater** (landscape) layouts · rotate control (`requestGeometryUpdate`) · glass hold strip |
 | Approval | `Sources/ApprovalView.swift` | Light sheet over dark call · Deny / Allow |
-| Agents | `Sources/AgentsView.swift` | Status-hub tiles + rows (loadout chips) → per-agent profile: **skills** (equip/unequip, gated seals, wire-observed usage), appearance, approvals, reporting |
+| Agents | `Sources/AgentsView.swift` | Status-hub tiles + rows → per-agent profile with separate Memory and Skills controls, collapsed loadout summaries, searchable/foldable skill categories, compact selection, runtime-family badge, appearance, approvals, and reporting |
 | Skills | `Sources/AgentSkills.swift` | The registry + library: a skill is a **typed capability with an approval posture** — its event-kind footprint on the wire, who carries it, how often the log saw it used. Prompts/tools/models never cross (docs/SKILLS.md) |
 | Tasks | `Sources/TasksView.swift` | **Fleet scale** (~750 tasks · 220 projects seeded): attention rail → lazy project grid (agg cards, state bars) → search across everything; virtualized all-tasks list |
 | Project map | `Sources/ProjectMapView.swift` | Per-project dependency map, positions **computed** (topological layers, wrapped columns, 18-node cap) — any project renders readable |
 | Needs you | `Sources/NeedsYouView.swift` | Interrupt triage — cards open the conversation |
 | Conversation | `Sources/ConversationView.swift` | The thread an interrupt points at: report_status trail · agent ask · quick replies · voice |
-| Profile | `Sources/ProfileView.swift` | **Your week**: Steer/Answer/Ship rings (Activity-style, animated), personable insights, day chart with crowned best day, trend arrows, records, streak, badges — every block a **module you show/hide/reorder** (Customize sheet + "Ask Cline for a layout"); showcase entry; settings entries |
+| Profile | `Sources/ProfileView.swift` | Preview: modular Steer/Answer/Ship week and Showcase. Release: zero-seed account state and observed counts only; billing remains hidden until connected |
 | Artifacts | `Sources/ArtifactsView.swift` | Kind-colored gallery + **lifecycle**: permanent ("keeps") vs ephemeral (TTL badge, auto-files to archive); group by project/repo/day/type; filter by kind/size/life; sort; context-menu TTL control |
 | Artifact detail | `Sources/ArtifactDetailView.swift` | Every artifact opens: **replays play their beat program** (self-clocked `ReplayPlayer`, scrubbable), diffs render as diffs, others get a directed-summary preview — plus lineage, inline lifecycle chips, Open in session, Share |
 | Activity | `Sources/ActivityView.swift` | The Today calendar: week bars, month calendar + **GitHub-style contribution wall** (darker squares = more activity, 5-level violet scale, horizontal year scroll), custom range — tap a day/square for per-project breakdown |
-| Settings | `Sources/SettingsView.swift` | Configuration + Privacy & account · WIRE status + intent diagnostics · FEEDBACK & EXPERIMENTS · POLICIES |
-| Showcase | `Sources/ShowcaseView.swift` | **Drivemode "by Cline"** (P0): your profile as a grid of project squares; project pages with README, DEMO (the directed replay), and People (team · join-session CTA · friend comments); FROM FRIENDS rail on Home. Private by default — see docs/SOCIAL.md |
-| Feedback mode | `Sources/FeedbackMode.swift` | Two-switch program + opt-in (consent-gated); ephemeral design chat with Cline that drafts structured suggestions; **experiments with a hard 7-day clock** — try a variant, watch the app change, revert any time. docs/FEEDBACK-MODE.md is the contract |
+| Settings | `Sources/SettingsView.swift` | One responsive modal (sheet on iPhone, split form on iPad) with deep-linked tabs, cached drafts, Save, and Reset. Billing/feedback/writer preview controls are unavailable in Release; Usage and Analytics show observed values only |
+| On-device AI | `Sources/LocalAI.swift` | iOS 26 availability-gated `SystemLanguageModel` tasks over one user-selected, security-scoped text file; read-only, bounded, offline, and no cloud fallback |
+| Showcase | `Sources/ShowcaseView.swift` | Debug-preview-only until the hosted UGC moderation gate passes; see docs/SOCIAL.md |
+| Feedback mode | `Sources/FeedbackMode.swift` | Debug-preview-only experiment program; excluded from Release pending consent/data-policy work |
 | Policies | `Sources/PolicyViews.swift` | Privacy / Data / Feedback-mode policies rendered in-app; the feedback policy is the consent gate. Full text in docs/ |
 | Inbox | `Sources/InboxView.swift` | Tray icon + unread badge on Home. Two voices — **For you** (approvals, blocked asks, invitations, ships, streaks) and **Product** (news, tips) — with read/unread, swipe archive/delete, filters, Read-all, context menus, and inline act (Deny/Allow, Reply, Join session) |
 
-**Language:** sessions, not calls. The tab is **Work**; people are *invited to a
-working session* (pair programming with a friend), never "called." Avoid
-naming that makes people dodge the feature.
+**Language:** the tab is **Work**. **Chat** is the default asynchronous entry;
+**Call** is the explicit real-time action. Invitations and durable records may
+still call the resulting collaboration a working session. The UI should never
+hide a call behind a vague Start action.
 
 **Guide bar:** ambient — hides after ~6s idle; summoned by pressing the
 bottom-center grabber or swiping up there. Never auto-appears on tab swipes:
 a swiping user already knows the way.
 
-The Spotlight never streams pixels — agents publish typed work events
+Spotlight never streams pixels — agents publish typed work events
 (the harness's `work.plan` / `work.edit` / `work.test` / `work.decision` packs)
 and the director choreographs them into beats a phone can digest, portrait
 or rotated. Beats loop as the room's replayable program.
@@ -80,7 +90,7 @@ The main agent is **Cline** — every agent wears the Cline bot mark
 (`ClineBotShape.swift`, converted 1:1 from the upstream icon), told apart by
 color; humans keep initials. Agent detail carries **Lineage**: the pie of the
 agent's tasks by project, russian-doll project▸task rows, sessions they
-direct, artifacts they produced — all derived from durable-log `actorId`, a
+direct, artifacts they produced — all derived from current-writer `actorId`, a
 query not a picture.
 
 ## Intent & preheat
@@ -140,13 +150,22 @@ escalation preference — persisted now, applied the moment push lands.
 - **Reduce Motion**: system setting *or* the in-app toggle stills the waveform, live pulse, and beat decoration.
 - **Haptics** on hold-to-talk, tab swipes, and beat skips.
 
-## Next (build-out)
+## Next (release-critical)
 
-- [x] Wire to `drivemode-mcp` writer — tasks, artifacts, beats (+related
-      events), agents, interrupts, invitations, reconnect UX all consume
-      `events_since` (see TODO §5)
-- [ ] Real voice: hold-to-talk capture, in-memory only (privacy-strict — no transcript persistence)
-- [ ] Push for interrupts → Needs you as notification landing surface (preferences already in Settings)
-- [ ] Bundle Schibsted Grotesk (needs OTF/TTF from design)
-- [ ] Owner decisions: naming lockup, mic default, PWA — variant cards staged in the design project
-- [x] Xcode project with shared simulator scheme, iPhone/iPad target, and unit tests
+- [ ] Land the open cross-repository PR stack in dependency order and restore
+      green CI on the Cline Presenter coordinator PR.
+- [ ] Replace the local Work chat and preview target registry with the managed
+      chat catalog/runtime plus authenticated, revocable target resolution.
+- [ ] Connect Profile account surfaces to production account, billing, usage,
+      analytics, sign-in, and in-app account-deletion services; decide the
+      StoreKit business model before exposing paid digital functionality.
+- [ ] Finish the host trust contracts: approval/skill policy sync, memory file
+      sync and attribution, and real skill package bodies/generation.
+- [x] Add a fail-closed Release channel, target-bundled privacy manifest,
+      Settings Reset, production-root XCUITest/accessibility audits, and omit
+      local-network configuration from the built Release `Info.plist`.
+- [ ] Complete the remaining identity, signing, icon, hosted-service, privacy
+      labels/policies, physical-device, TestFlight, and App Review gates in
+      [docs/APP-STORE-REVIEW.md](docs/APP-STORE-REVIEW.md).
+- [ ] Build the deterministic cross-repository verification workflow in TODO
+      §13 so release evidence does not depend on remembered simulator steps.

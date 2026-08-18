@@ -108,24 +108,26 @@ struct WorkCallsView: View {
                         }
                     }
 
-                    Button { composing = true } label: {
-                        HStack(spacing: 9) {
-                            Image(systemName: "calendar.badge.plus")
-                                .font(.system(size: 14, weight: .bold))
-                            Text("Plan a session")
-                                .scaledFont(15, .bold)
+                    if store.configuration.previewContentEnabled {
+                        Button { composing = true } label: {
+                            HStack(spacing: 9) {
+                                Image(systemName: "calendar.badge.plus")
+                                    .font(.system(size: 14, weight: .bold))
+                                Text("Plan a session")
+                                    .scaledFont(15, .bold)
+                            }
+                            .foregroundStyle(DT.violetText(scheme))
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 48)
+                            .background(DT.violet.opacity(0.10))
+                            .clipShape(RoundedRectangle(cornerRadius: DT.rCard, style: .continuous))
+                            .overlay(RoundedRectangle(cornerRadius: DT.rCard, style: .continuous)
+                                .strokeBorder(DT.violet.opacity(0.22), lineWidth: 0.8))
                         }
-                        .foregroundStyle(DT.violetText(scheme))
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 48)
-                        .background(DT.violet.opacity(0.10))
-                        .clipShape(RoundedRectangle(cornerRadius: DT.rCard, style: .continuous))
-                        .overlay(RoundedRectangle(cornerRadius: DT.rCard, style: .continuous)
-                            .strokeBorder(DT.violet.opacity(0.22), lineWidth: 0.8))
+                        .buttonStyle(Pressable())
+                        .padding(.top, 14)
+                        .accessibilityHint("Pick a project, an agenda, and who to invite")
                     }
-                    .buttonStyle(Pressable())
-                    .padding(.top, 14)
-                    .accessibilityHint("Pick a project, an agenda, and who to invite")
 
                     if !replayRecords.isEmpty {
                         Eyebrow("EARLIER").padding(.top, 24)
@@ -134,7 +136,9 @@ struct WorkCallsView: View {
                         }
                     }
 
-                    Text("Sessions replay as their directed program — every beat, readable after the fact. Conversation is never stored.")
+                    Text(store.configuration.previewContentEnabled
+                         ? "Sessions replay as their directed program — every beat, readable after the fact. Preview conversation is not persisted."
+                         : "Calls and history appear after an approved host supplies authenticated session records.")
                         .font(.system(size: 10.5))
                         .foregroundStyle(DT.ink35(scheme))
                         .frame(maxWidth: .infinity)
@@ -169,32 +173,41 @@ struct WorkCallsView: View {
                     .scaledFont(15, .bold)
                 Spacer()
             }
-            Text("Plan one, or catch up on what already happened.")
+            Text(store.configuration.previewContentEnabled
+                 ? "Plan one, or catch up on what already happened."
+                 : "Connect an approved host and work target before starting a call.")
                 .font(.system(size: 12))
                 .foregroundStyle(DT.ink55(scheme))
-            HStack(spacing: 9) {
-                Button { composing = true } label: {
-                    Text("Plan a session")
-                        .scaledFont(13, .bold)
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 42)
-                        .background(DT.heroGradient)
-                        .clipShape(RoundedRectangle(cornerRadius: DT.rControl, style: .continuous))
-                }
-                .buttonStyle(Pressable())
-                if let last = replayRecords.first {
-                    NavigationLink { ArtifactDetailView(artifactId: last.id) } label: {
-                        Text("Watch the last replay")
+            if store.configuration.previewContentEnabled {
+                HStack(spacing: 9) {
+                    Button { composing = true } label: {
+                        Text("Plan a session")
                             .scaledFont(13, .bold)
-                            .foregroundStyle(DT.violetText(scheme))
+                            .foregroundStyle(.white)
                             .frame(maxWidth: .infinity)
                             .frame(height: 42)
-                            .background(DT.violet.opacity(0.10))
+                            .background(DT.heroGradient)
                             .clipShape(RoundedRectangle(cornerRadius: DT.rControl, style: .continuous))
                     }
                     .buttonStyle(Pressable())
+                    if let last = replayRecords.first {
+                        NavigationLink { ArtifactDetailView(artifactId: last.id) } label: {
+                            Text("Watch the last replay")
+                                .scaledFont(13, .bold)
+                                .foregroundStyle(DT.violetText(scheme))
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 42)
+                                .background(DT.violet.opacity(0.10))
+                                .clipShape(RoundedRectangle(cornerRadius: DT.rControl, style: .continuous))
+                        }
+                        .buttonStyle(Pressable())
+                    }
                 }
+            } else {
+                Label("Host connection required", systemImage: "network.slash")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(DT.ink55(scheme))
+                    .frame(minHeight: 44)
             }
         }
         .padding(16)

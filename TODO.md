@@ -1,15 +1,20 @@
 # Drive iOS — backlog
 
-> §1 and §7 closed 2026-08-17 (same day). §2b perf audit fully applied,
-> §2 policy/notification controls, §3 artifact detail + map zoom/cluster +
-> brand-chrome Dynamic Type, and §5 wire consumption (agents, interrupts,
-> beat stage content, reconnect) closed 2026-08-17 (evening pass, verified
-> on-simulator against a live writer). Data requirements for §5 specified in
-> [DATA-NEEDS.md](DATA-NEEDS.md).
+Audited 2026-08-18 against repository state, the approved 12-PR stack, local
+verification, and current pull-request status. A checked box means the work is
+implemented and verified on the named branch; it does **not** mean the change is
+merged, distributed, or backed by a production service.
 
-Audited 2026-08-17 against the full working-session history. Everything asked
-for in-session **shipped and was verified on-simulator** except the items
-below (plus three call-language strings caught and fixed in the audit).
+Delivery snapshot:
+
+- `drive-ios` PRs [#1](https://github.com/drive-mode/drive-ios/pull/1)–[#7](https://github.com/drive-mode/drive-ios/pull/7) are an open cleanly based stack from session registry through the bounded system-model spike. No required checks are configured on those PRs.
+- `collaboration-harness` [#2](https://github.com/drive-mode/collaboration-harness/pull/2)–[#3](https://github.com/drive-mode/collaboration-harness/pull/3) and `drivemode-mcp` [#2](https://github.com/drive-mode/drivemode-mcp/pull/2)–[#3](https://github.com/drive-mode/drivemode-mcp/pull/3) are open dependency stacks.
+- Cline coordinator [#17](https://github.com/drive-mode/cline-drivecode/pull/17) is open with failing integration CI: Hub/CLI fixtures and the stage reducer do not yet supply the required `presenterGrantId` field. The focused Presenter tests pass locally, but this PR is not merge-ready.
+
+The app is therefore an implemented **preview on open branches**, not shipped
+product. Data requirements for the durable surfaces remain in
+[DATA-NEEDS.md](DATA-NEEDS.md); App Store readiness is planned in
+[docs/APP-STORE-REVIEW.md](docs/APP-STORE-REVIEW.md).
 
 ## 1 · Quick wins (small, high trust)
 
@@ -75,8 +80,9 @@ cells instantiate menus; flat task rows never had them.
       Settings has "Send a test reminder" (also the permission path).
       Verified: push went from "not authorized" → delivered, activation
       joined the session. Real remote push waits on the hub.
-- [ ] **Streak widget / Live Activity** for the lock screen (needs an app
-      extension → waits on the Xcode project, §4).
+- [ ] **Streak widget / Live Activity** for the lock screen. The Xcode project
+      now exists; this still needs an extension target, ActivityKit/widget
+      product decision, entitlements, lifecycle behavior, and release review.
 - [x] Task map: **pinch-zoom + pan** (clamped, 2.6× max, double-tap reset,
       zoom badge) + **overflow clusters** past the 18-node cap — one chip per
       state ("+4 done") that filters the task list below.
@@ -92,14 +98,14 @@ cells instantiate menus; flat task rows never had them.
       Fonts (`Fonts/`, `UIAppFonts`, copied by build.sh) now drives every
       `scaledFont` call site; mono sites keep the system face. The blocker
       was never the license.
-- [ ] **Xcode project (or xcodegen)** once resources/entitlements grow beyond
-      the swiftc pipeline.
+- [x] **Xcode project** with a shared `Drive` scheme, iPhone/iPad device family,
+      and `DriveTests`; `build.sh` remains a simulator-preview fallback.
 
 ## 5 · Data-dependent (unblocks when transport lands)
 
 - [x] **Wire to `drivemode-mcp` — first consumption landed** (2026-08-17):
       `WriterClient` polls `events_since`; tasks, artifacts, session beats,
-      projects, and ages all render from the durable log when the writer runs
+      projects, and ages all render from the current writer's append-only log
       (demo world offline). `room.invite` shipped through the whole stack
       (harness PR #1 → writer `room_invite` → inbox card, real ages).
 - [x] **Wire consumption, second pass** (2026-08-17 evening, all verified
@@ -127,7 +133,8 @@ cells instantiate menus; flat task rows never had them.
 
 ## 6 · Integrations (plan approved, build awaiting green light)
 
-Per `initiatives/integrations-vcs` — P0 order: connector ADR + credential
+The workspace-only `cline-drivecode/docs/drivecode/plans/cline-drivemode/initiatives/integrations-vcs`
+plan currently owns the detail. P0 order: connector ADR + credential
 generalization → `packs-vcs`/`comms.*` zod (+ secret-shape rejection) →
 tier-0 remote health in Status Hub → GitHub App adapter (device flow, PR,
 webhooks) → Slack interrupts + deep links → **Connections settings surface**
@@ -209,7 +216,7 @@ may publish, and what needs a human first. Never prompts/tools/models
       chips on roster rows, boundary footnote updated.
 - [x] **Skill library** — every capability, its wire footprint, who
       carries it (tappable into agent profiles), usage per carrier.
-- [x] **Observed usage** — counted off the durable log per actorId (beats
+- [x] **Observed usage** — counted off the current-writer log per actorId (beats
       → director; diff artifacts also count as editing evidence, reports
       as testing). Verified live: Maya ×4 directing, Cline ×4 tasks.
 
@@ -230,8 +237,8 @@ fully equipped, package detail + improver, browser with 11 seeded files.
 
 ## 11 · Work page, ground up (2026-08-17 late pass 3)
 
-Reviewed → redesigned → planned in `docs/WORK-PAGE.md`; P0 shipped and
-verified: the tab is now **the session lifecycle page** — NOW (live card
+Historical P0, reviewed and verified before the chat-first reset in §12: Work
+was rebuilt as **the session lifecycle page** — NOW (live card
 w/ 2 Hz beat ticker on the director clock; honest quiet state with real
 actions when nothing's live) → INVITATIONS (inbox invites surfaced, Join
 now/Later) → UPCOMING (persisted `upcoming.v1`, context-menu remove) →
@@ -245,11 +252,13 @@ created/scheduled/started/ended events now drive NOW/UPCOMING; the
 composer publishes the ordered lifecycle plus session-linked
 `room_invite`s; reminders use the scheduled timestamp. Verified on the
 existing iPhone 17 Pro via accessibility labels and writer-log readback.
-Open (remaining P1/P2): per-session replay windows and speaking presence;
-owner: composer on Home too?
+The product direction changed on 2026-08-18. This lifecycle is no longer Work's
+default; it is retained in secondary Calls/History flows under §12 and
+`docs/WORK-PAGE.md`. Open P1/P2 remains per-session replay windows and speaking
+presence; owner decision: composer on Home too?
 
 Open:
-- [x] "Observed but unequipped" surfacing — durable-log evidence now
+- [x] "Observed but unequipped" surfacing — current-writer evidence now
       suggests and equips missing skills (`4a0c53c`).
 - [ ] Skill policy sync to host (rides the approval-sync ask, DATA-NEEDS).
 - [ ] Per-skill approval granularity host contract (UI models it already).
@@ -302,12 +311,13 @@ existing entries in §9 remain the source of detail.
 
 ### Next · contracts and connected capability
 
-- [x] **Profile account surfaces** — Profile links open the shared Settings
+- [x] **Profile account surface shells** — Profile links open the shared Settings
       modal directly on **Billing & payments**, **Usage**, and **Analytics**.
-      Billing is account-service truth (plan, payment method, invoices); Usage
-      is model/call/resource consumption split by hosted vs local; Analytics is
-      user-visible work outcomes derived from the durable event log. Never
-      present seeded numbers as live account data.
+      Billing is explicitly backed by `PreviewAccountService`; Usage and
+      Analytics only show observable current-writer/local counts. Production account
+      plan, payment method, invoices, provider consumption, and cross-device
+      outcomes remain connected-service work below. Seeded numbers are never
+      presented as live account data.
 - [x] **Call presets + configurator** — persist one default call preset plus a
       preference for immediate launch vs always configure. The configurator is
       a feature-isolated sheet/module that chooses opaque targets, agents, and
@@ -377,7 +387,8 @@ existing entries in §9 remain the source of detail.
 - Work opens on the target-aware composer; New Chat and Call are reachable
   without scrolling, and Calls / History preserve the useful §11 lifecycle.
 - Dismissing Settings and reopening from another entry preserves drafts while
-  selecting the newly requested tab; Save and Reset clear the draft correctly.
+  selecting the newly requested tab; Save clears the draft correctly and Reset
+  restores the last saved snapshot without discarding cached state on close.
 - Every root surface has a visible, VoiceOver-operable route Home, while pushed
   screens still navigate back normally.
 - Skill search and folding remain responsive and visually legible with 500+
@@ -386,6 +397,56 @@ existing entries in §9 remain the source of detail.
   and incapable of pixel capture.
 - Local mode fails honestly for unsupported devices, unavailable models,
   revoked file access, and offline/low-resource states.
+
+### Remaining connected implementation
+
+- [ ] **Land the 12-PR stack** in dependency order and repair Cline PR #17's
+      required `presenterGrantId` propagation through Hub/CLI fixtures and the
+      stage reducer before treating Presenter coordination as delivered.
+- [ ] **Connect managed chat** — replace the one-sided in-memory Work message
+      list with the managed chat catalog/runtime: stable chat ids, agent
+      responses/streaming, persistence, resume, cancellation, and honest error
+      recovery.
+- [ ] **Connect real Work targets** — replace `WorkTargetRef.previews` with
+      authenticated repository and saved-file discovery plus security-scoped
+      device selection, revocation, reconnection, and host-side opaque-ref
+      resolution.
+- [ ] **Connect account truth** — production sign-in/account service, billing
+      and invoices, hosted/local usage, durable user-visible analytics, and
+      in-app account deletion. Decide StoreKit vs a permitted business-account
+      model before exposing paid digital features.
+- [x] **Finish Settings draft controls** — Reset restores the last saved
+      snapshot, Save persists the draft, accidental dismissal keeps edits, and
+      unit coverage exercises the reset/persistence boundary.
+- [ ] **Resolve call presets through the host** and verify default launch,
+      configurator launch, Presenter rejection/transfer/expiry/revoke,
+      reconnect, and durable replay across the merged stack.
+- [ ] **Project runtime identity from the host** — replace fixed agent-id badge
+      mappings with allowlisted family/location data, and fetch/verify the
+      signed Director policy descriptor plus reviewed overlay state rather than
+      hard-coding “Verified” on iOS.
+- [ ] **Unify Presenter cleanup semantics** — leaving or ending a room must
+      revoke/clear the active grant and stage consistently in Cline, the
+      standalone Harness, MCP, iOS projection, and replay tests.
+- [ ] **Prove fleet-scale interaction, not only filtering** — exercise 500+
+      unique skill ids through SwiftUI rendering, search, category folding,
+      Memory/Skills navigation, equip changes, VoiceOver, and latency budgets.
+- [ ] **Validate local AI on physical devices** — eligible/unavailable hardware,
+      iOS 17–25 fallback, Apple Intelligence off/model-not-ready, Files/iCloud
+      providers, revoked access, locale/refusal/context/cancellation, offline,
+      thermal, memory, and battery behavior.
+- [x] **Add a fail-closed Release boundary** — Debug keeps the labeled preview;
+      Release suppresses seeded customer/account/social data, experiments,
+      billing and fake sign-in, refuses loopback/LAN writer URLs, omits local-
+      network keys from the built plist, and uses a target-bundled privacy
+      manifest. Unit plus production-channel XCUITest/accessibility coverage
+      protects the boundary.
+- [ ] **Finish production distribution and services** — choose the production
+      bundle id/team/signing/version, connect the authenticated HTTPS reviewer
+      service and real accounts/targets, remove compiled preview-only fixtures
+      if required by the frozen scope, finalize privacy labels/public URLs,
+      qualify icons/devices, and upload the accepted candidate. Detailed gate:
+      §14 and [docs/APP-STORE-REVIEW.md](docs/APP-STORE-REVIEW.md).
 
 ## 13 · Deterministic cross-repo verification (2026-08-18)
 
@@ -420,8 +481,8 @@ source that can silently drift.
       XcodeBuildMCP workflow. Do not couple `drive-dev` to private daemon state
       or scrape MCP internals. The spike must leave one supported adapter
       contract, an honest missing-capability result, and a path that works with
-      the current `build.sh`; an Xcode project remains a useful follow-up, not a
-      prerequisite unless the spike proves XCTest is required.
+      the current Xcode project and `build.sh`; decide explicitly which checks
+      belong in XCTest/XCUITest and which stay in the external adapter.
 - [ ] **Add a deterministic iOS launch configuration** — stable accessibility
       identifiers for the session entry, lifecycle controls, invitations,
       upcoming rows, replay, and evidence-bearing states; process-only overrides
@@ -487,9 +548,9 @@ source that can silently drift.
       setup/verification time and manual intervention count; target a reduction
       from the current roughly 20–30 minute flow to 3–5 minutes without trading
       away failure diagnostics.
-- [ ] **Revisit project-native UI tests** — after the adapter spike and an
-      Xcode project exist, decide whether selected external UI steps should move
-      into XCTest/XCUITest. Keep microphone hold behavior, SwiftUI toggle
+- [ ] **Add project-native UI tests where they improve evidence** — the Xcode
+      project now exists; use the adapter spike to decide which external UI
+      steps should move into XCTest/XCUITest. Keep microphone hold behavior, SwiftUI toggle
       semantics, drag reorder, and full VoiceOver navigation as named hands-on
       gates until automation demonstrates equivalent coverage.
 
@@ -500,7 +561,7 @@ source that can silently drift.
   cleanup results; stdout stays machine-readable and human progress goes to
   stderr.
 - `DriveDevScenarioManifest` pins fixture/schema versions, required app
-  capabilities, UI steps, durable assertions, evidence requests, and supported
+  capabilities, UI steps, typed-event assertions, evidence requests, and supported
   adapter versions without containing machine-local paths or secrets.
 - `DriveAutomationLaunchConfig` is process-scoped and includes writer endpoint,
   onboarding disposition, deterministic clock seed, and animation posture. It
@@ -515,7 +576,7 @@ source that can silently drift.
   workspace; it discovers the three repositories and reuses a suitable booted
   simulator without a hardcoded UDID, user path, or port.
 - The canonical session scenario is validated at the schema boundary, rendered
-  through the app, and asserted from durable writer events with one session id
+  through the app, and asserted from typed writer events with one session id
   and the required lifecycle ordering.
 - Success and every tested failure produce a phase-specific result and a stable
   absolute evidence directory; Ctrl-C still performs owned-resource cleanup.
@@ -525,3 +586,98 @@ source that can silently drift.
 - The automated report names the remaining hands-on checks rather than implying
   coverage of microphone gestures, native control feel, reorder gestures, or a
   complete VoiceOver audit.
+
+## 14 · App Store and TestFlight readiness (2026-08-18 audit)
+
+Canonical execution plan: [docs/APP-STORE-REVIEW.md](docs/APP-STORE-REVIEW.md).
+Current verdict is **NO-GO** for both public App Store submission and external
+TestFlight. Local development evidence remains valid. The app now has a
+production-channel shell, privacy manifest, Release plist separation, and
+XCUITest/accessibility smoke, but the stack remains unmerged and the candidate
+still lacks its final identity/signing, authenticated reviewer service, real
+accounts/targets, approved policies/labels, upload, and physical-device proof.
+
+Implemented in the 2026-08-18 release-hardening slice:
+
+- [x] `AppConfiguration` defaults unknown channels to production and rejects
+      loopback, `.local`, empty, and non-HTTPS writer endpoints in Release.
+- [x] Release starts with no seeded agents, tasks, calls, inbox, memory,
+      artifacts, profile outcomes, Showcase, feedback experiments, fake billing,
+      or fake account actions; unavailable integrations say so explicitly.
+- [x] `PrivacyInfo.xcprivacy` is copied into the app and declares tracking false
+      plus the app-preference `UserDefaults` reason `CA92.1`.
+- [x] `DriveUITests` verifies production Work/Home/Profile behavior and runs
+      `performAccessibilityAudit`; the shared scheme runs unit and UI targets.
+- [x] A simulator Release build succeeds and its built plist contains
+      `DriveReleaseChannel=production` with no local-network exception.
+
+The release plan now carries the provisional v1 scope, owner decisions D01–D12,
+dependency program R0–R6, guideline coverage, and evidence-binder manifest.
+Execution order is scope/ownership → merge the 12-PR stack → parallel
+distribution/service/privacy/quality tracks → internal TestFlight → external
+TestFlight → App Review → manual/phased release.
+
+### Now · make a release candidate possible
+
+- [ ] **G0 product freeze** — name owners; decide public-v1 feature set,
+      StoreKit/free-companion/organization-only business model, hosted-agent
+      posture, Showcase/UGC exclusion or moderation scope, and Guideline 4.7
+      architecture interpretation. Resolve and record every D01–D12 entry in
+      the release evidence binder; the recommended low-risk v1 is a free
+      companion with Showcase, experiments, LAN setup, and paid chrome disabled.
+- [ ] **G1 distributable identity** — production App ID/bundle id, developer
+      team/signing, Release configuration, asset-catalog/Icon Composer icons,
+      Xcode 26+ archive, accepted App Store Connect upload, and no preview/debug
+      artifacts in the submitted binary.
+- [ ] **G2 privacy and security truth** — complete data-flow inventory,
+      final required-reason binary audit, public policy/privacy-
+      choices/support URLs, accurate privacy labels, hosted-AI consent,
+      Keychain/server authorization, threat model, and final-archive scan.
+- [ ] **G3 real account and commerce** — authentication/sign-out, in-app account
+      deletion, login-service compliance, connected account/billing/usage data,
+      and an end-to-end StoreKit lifecycle or documented valid non-IAP posture.
+- [ ] **Reviewer-accessible services** — authenticated HTTPS staging tenant,
+      synthetic non-expiring reviewer account/data, monitored availability, and
+      optional LAN pairing/purpose copy tested on physical hardware.
+
+### Next · prove safety and quality
+
+- [ ] **G4 AI/UGC safety** — provider/rights inventory, just-in-time consent,
+      adversarial agent tests, output reporting, canonical Presenter cleanup,
+      updated age rating, and either hosted Showcase moderation or a release
+      kill switch.
+- [ ] **G5 release-quality matrix** — extend the implemented production-root
+      XCUITest/accessibility smoke to physical iPhone/iPad permissions and
+      file-provider passes, Foundation Models
+      availability/thermal/battery tests, common-task VoiceOver/Voice Control/
+      AX5 coverage, network/IPv6/offline/restart, and meaningful microphone
+      behavior or removal of the claim.
+- [ ] **G6 TestFlight exit** — upload the exact release build; complete beta
+      metadata/export answers; run internal then external testing; reach zero
+      P0/P1, 100% deletion/entitlement pass, the backend SLO, and cross-functional
+      Release/Privacy/T&S/Payments/Accessibility/QA sign-off.
+
+### Later · submit and operate
+
+- [ ] **G7 submission packet** — final metadata, rights/rating/privacy/export/
+      regional declarations, truthful iPhone/iPad screenshots, review notes and
+      attachments, second-person claim audit, and a frozen review environment.
+- [ ] **G8 manual/phased release** — responsive reviewer communication,
+      rejection-to-evidence workflow, production monitoring, and rollback for
+      deletion, entitlement, undisclosed egress, consent, moderation, crash,
+      availability, secret/pixel, or title-scope failures.
+
+### App Store acceptance gates
+
+- App Store Connect accepts a production-signed archive with the final identity,
+  icons, manifest, entitlements, symbols, and no validation warnings left
+  unexplained.
+- The uploaded build, public policy, privacy labels, in-app copy, backend,
+  provider consent, retention, and deletion behavior agree exactly.
+- Reviewers can exercise every enabled feature against synthetic production-
+  equivalent services without a developer Mac, fixed port, expiring login, or
+  hidden setup.
+- Common tasks pass on supported iPhone/iPad devices and assistive technologies;
+  no P0/P1 remains and all unavailable/offline/revoked states are honest.
+- Account deletion, commerce entitlement/restore (if used), AI consent,
+  moderation (if used), Presenter scope, and rollback have auditable evidence.

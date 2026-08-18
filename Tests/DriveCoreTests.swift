@@ -71,6 +71,73 @@ final class DriveCoreTests: XCTestCase {
         XCTAssertGreaterThan(SettingsTab.allCases.count, 5)
     }
 
+    @MainActor
+    func testSettingsResetRestoresLastSavedDraft() throws {
+        let suite = "DriveCoreTests.SettingsReset.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        defaults.set("Saved name", forKey: "profile.displayName")
+
+        let drafts = SettingsDraftStore(defaults: defaults, configuration: .production)
+        drafts.displayName = "Accidental edit"
+        drafts.email = "draft@example.com"
+        XCTAssertTrue(drafts.hasUnsavedChanges)
+
+        drafts.reset()
+
+        XCTAssertEqual(drafts.displayName, "Saved name")
+        XCTAssertEqual(drafts.email, "")
+        XCTAssertFalse(drafts.hasUnsavedChanges)
+    }
+
+    func testReleaseConfigurationFailsClosed() {
+        let release = AppConfiguration.from(info: [
+            "DriveReleaseChannel": "production",
+            "DriveWriterBaseURL": "http://127.0.0.1:4600",
+        ])
+
+        XCTAssertFalse(release.previewContentEnabled)
+        XCTAssertFalse(release.feedbackExperimentsEnabled)
+        XCTAssertFalse(release.showcaseEnabled)
+        XCTAssertFalse(release.billingEnabled)
+        XCTAssertFalse(release.permitsWriterURL("http://127.0.0.1:4600"))
+        XCTAssertFalse(release.permitsWriterURL("https://writer.local"))
+        XCTAssertTrue(release.permitsWriterURL("https://writer.example.com"))
+        XCTAssertFalse(release.availableSettingsTabs.contains(.billingPayments))
+    }
+
+    func testUnknownBuildChannelDefaultsToProduction() {
+        let configuration = AppConfiguration.from(info: [
+            "DriveReleaseChannel": "typo",
+            "DriveWriterBaseURL": "http://localhost:4600",
+        ])
+
+        XCTAssertEqual(configuration.channel, .production)
+        XCTAssertEqual(configuration.initialWriterURL(defaults: UserDefaults()), "")
+    }
+
+    @MainActor
+    func testProductionStoreContainsNoPreviewSeedsOrLoopbackWire() {
+        let store = AppStore(configuration: .production)
+
+        XCTAssertTrue(store.agents.isEmpty)
+        XCTAssertTrue(store.interrupts.isEmpty)
+        XCTAssertTrue(store.tasks.isEmpty)
+        XCTAssertTrue(store.artifacts.isEmpty)
+        XCTAssertTrue(store.inbox.isEmpty)
+        XCTAssertTrue(store.memoryFiles.isEmpty)
+        XCTAssertTrue(store.upcomingSessions.isEmpty)
+        XCTAssertEqual(store.workTargets, [.unconfigured])
+        XCTAssertEqual(store.defaultCallPreset, .unavailable)
+        XCTAssertEqual(store.writerURL, "")
+        XCTAssertFalse(store.feedbackAvailable)
+
+        store.writerURL = "http://127.0.0.1:4600"
+        store.startWire()
+        XCTAssertNil(store.wireTask)
+        XCTAssertEqual(store.wireStatus, .offline)
+    }
+
     func testWorkTargetsExposeOnlySafeDisplayLocations() {
         XCTAssertGreaterThanOrEqual(WorkTargetRef.previews.count, 3)
         for target in WorkTargetRef.previews {
