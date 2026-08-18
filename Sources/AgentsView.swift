@@ -95,6 +95,12 @@ struct AgentsView: View {
             .tabSwipe()
             .background(DT.page(scheme).ignoresSafeArea())
             .navigationTitle("Agents")
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) { HomeToolbarButton() }
+                ToolbarItem(placement: .topBarTrailing) {
+                    SettingsToolbarButton(tab: .agents, source: .agents)
+                }
+            }
         }
     }
 

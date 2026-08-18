@@ -3,13 +3,14 @@ import SwiftUI
 @main
 struct DriveApp: App {
     @StateObject private var store = AppStore()
-    @AppStorage("appearance") private var appearance = "System"
+    @StateObject private var settingsDrafts = SettingsDraftStore()
 
     var body: some Scene {
         WindowGroup {
             RootView()
                 .environmentObject(store)
-                .preferredColorScheme(appearance == "Light" ? .light : appearance == "Dark" ? .dark : nil)
+                .environmentObject(settingsDrafts)
+                .preferredColorScheme(settingsDrafts.appearance == "Light" ? .light : settingsDrafts.appearance == "Dark" ? .dark : nil)
         }
     }
 }
@@ -28,6 +29,10 @@ struct RootView: View {
         }
         .fullScreenCover(isPresented: $store.inCall) {
             LiveCallView()
+        }
+        .sheet(item: $store.settingsRoute) { route in
+            SettingsModalView(route: route)
+                .environmentObject(store)
         }
         .dynamicTypeSize(.xSmall ... .accessibility3)
         .onAppear {

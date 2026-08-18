@@ -17,6 +17,7 @@ final class AppStore: ObservableObject {
     var wireBackoff: Double = 1.5
     @Published var launched = false
     @Published var selectedTab: AppTab = .home
+    @Published var settingsRoute: SettingsRoute?
     @Published var inCall = false
     @Published var showApproval = false
     @Published var editAllowed = false
@@ -24,6 +25,10 @@ final class AppStore: ObservableObject {
     @Published var handRaised = false
     @Published var agents = DemoData.agents
     @Published var interrupts = DemoData.interrupts
+
+    func openSettings(_ tab: SettingsTab, source: SettingsSource) {
+        settingsRoute = SettingsRoute(initialTab: tab, source: source)
+    }
     /// First paint carries only the curated narrative; the generated fleet
     /// (~220 projects, ~1,200 tasks) is seeded off-main right after launch.
     @Published var tasks = DemoData.curatedTasks {

@@ -41,4 +41,33 @@ final class DriveCoreTests: XCTestCase {
         XCTAssertEqual(position.index, 0)
         XCTAssertEqual(position.progress, 0)
     }
+
+    @MainActor
+    func testSettingsDraftsRemainInSharedStateUntilSaved() throws {
+        let suite = "DriveCoreTests.Settings.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+
+        let drafts = SettingsDraftStore(defaults: defaults)
+        drafts.displayName = "Draft name"
+        drafts.callLaunchBehavior = "Launch default preset"
+
+        XCTAssertTrue(drafts.hasUnsavedChanges)
+        XCTAssertEqual(drafts.displayName, "Draft name")
+        XCTAssertNil(defaults.string(forKey: "profile.displayName"))
+
+        drafts.save()
+        XCTAssertFalse(drafts.hasUnsavedChanges)
+
+        let reopened = SettingsDraftStore(defaults: defaults)
+        XCTAssertEqual(reopened.displayName, "Draft name")
+        XCTAssertEqual(reopened.callLaunchBehavior, "Launch default preset")
+    }
+
+    func testSettingsRouteKeepsRequestedEntryTab() {
+        let route = SettingsRoute(initialTab: .analytics, source: .profile)
+        XCTAssertEqual(route.initialTab, .analytics)
+        XCTAssertEqual(route.source, .profile)
+        XCTAssertGreaterThan(SettingsTab.allCases.count, 5)
+    }
 }

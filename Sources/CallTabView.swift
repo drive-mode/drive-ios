@@ -147,6 +147,12 @@ struct CallTabView: View {
             .tabSwipe()
             .background(DT.page(scheme).ignoresSafeArea())
             .navigationTitle("Work")
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) { HomeToolbarButton() }
+                ToolbarItem(placement: .topBarTrailing) {
+                    SettingsToolbarButton(tab: .calls, source: .work)
+                }
+            }
             .sheet(isPresented: $composing) {
                 SessionComposerSheet()
             }
