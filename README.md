@@ -153,8 +153,9 @@ escalation preference — persisted now, applied the moment push lands.
 
 ## Next (release-critical)
 
-- [ ] Land the open cross-repository PR stack in dependency order and restore
-      green CI on the Cline Presenter coordinator PR.
+- [x] Land the cross-repository product stack and Presenter leave/end writer
+      reconciliation; Cline #17 was repaired before merge, and Harness/MCP #4
+      merged on 2026-08-19.
 - [ ] Replace the local Work chat and preview target registry with the managed
       chat catalog/runtime plus authenticated, revocable target resolution.
 - [ ] Connect Profile account surfaces to production account, billing, usage,
@@ -170,3 +171,6 @@ escalation preference — persisted now, applied the moment push lands.
       [docs/APP-STORE-REVIEW.md](docs/APP-STORE-REVIEW.md).
 - [ ] Build the deterministic cross-repository verification workflow in TODO
       §13 so release evidence does not depend on remembered simulator steps.
+
+The cross-repository order and acceptance evidence are maintained in Cline's
+[golden-path implementation map](https://github.com/drive-mode/cline-drivecode/blob/main/docs/drivecode/plans/cline-drivemode/initiatives/portfolio-now/README.md).

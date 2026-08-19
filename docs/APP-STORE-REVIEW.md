@@ -146,7 +146,7 @@ owner, date, rationale, and affected gates in the evidence binder.
 | Wave | Work | Depends on | Exit artifact |
 |---|---|---|---|
 | R0 · Scope and ownership | Name every role; decide D01–D12; freeze included/disabled features; assign release DRI | None | Signed scope/decision record and feature-flag matrix |
-| R1 · Land the product stack | Repair Cline #17, add CI to the currently unchecked PRs, merge all 12 in dependency order, and verify cross-repository contracts from default branches | R0 scope for any release-visible behavior | Green default branches, merge manifest, cross-repo contract report |
+| R1 · Verify the product foundation | The 12-PR stack, Cline #17 repair, and Harness/MCP #4 reconciliation are merged; finish iOS cleanup projection and verify cross-repository contracts from default branches | R0 scope for any release-visible behavior | Green default branches, merge manifest, cross-repo contract report |
 | R2A · Distribution | Production App ID/project settings, signing, icons, versioning, privacy manifest, Release scan, archive/upload CI | D01, D07; can run beside R2B–R2D | Accepted App Store Connect build |
 | R2B · Service and accounts | Managed chat/targets/calls, HTTPS reviewer tenant, auth/sign-out/deletion, retention/export, account projections | D02, D03, D05, D06, D08 | End-to-end synthetic reviewer flow and deletion audit |
 | R2C · Privacy, AI, safety | Data inventory/labels/policy, hosted-AI consent, title/Director security, adversarial evaluation, UGC disabled or moderated | D03, D04, D08 | Privacy and safety sign-off |

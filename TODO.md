@@ -401,9 +401,9 @@ existing entries in §9 remain the source of detail.
 
 ### Remaining connected implementation
 
-- [ ] **Land the 12-PR stack** in dependency order and repair Cline PR #17's
-      required `presenterGrantId` propagation through Hub/CLI fixtures and the
-      stage reducer before treating Presenter coordination as delivered.
+- [x] **Land the 12-PR stack** in dependency order; Cline PR #17's required
+      `presenterGrantId` propagation was repaired before merge. Harness #4 and
+      MCP #4 subsequently reconciled leave/end cleanup and idempotent room end.
 - [ ] **Connect managed chat** — replace the one-sided in-memory Work message
       list with the managed chat catalog/runtime: stable chat ids, agent
       responses/streaming, persistence, resume, cancellation, and honest error
@@ -426,9 +426,10 @@ existing entries in §9 remain the source of detail.
       mappings with allowlisted family/location data, and fetch/verify the
       signed Director policy descriptor plus reviewed overlay state rather than
       hard-coding “Verified” on iOS.
-- [ ] **Unify Presenter cleanup semantics** — leaving or ending a room must
-      revoke/clear the active grant and stage consistently in Cline, the
-      standalone Harness, MCP, iOS projection, and replay tests.
+- [ ] **Finish Presenter cleanup projection and proof** — Cline, the standalone
+      Harness, and MCP now agree that leave/end revoke or clear the active
+      grant; mirror those fold rules in iOS and prove the behavior against the
+      actual coordinator with replay tests.
 - [ ] **Prove fleet-scale interaction, not only filtering** — exercise 500+
       unique skill ids through SwiftUI rendering, search, category folding,
       Memory/Skills navigation, equip changes, VoiceOver, and latency budgets.

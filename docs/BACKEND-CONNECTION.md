@@ -6,7 +6,19 @@ order and evidence, not product policy: every owner decision it depends on is
 one of D01–D12 in
 [APP-STORE-REVIEW.md](APP-STORE-REVIEW.md#owner-decision-register), and no
 rung may silently settle one. Transport-level payload requirements stay in
-[../DATA-NEEDS.md](../DATA-NEEDS.md); this file sequences them.
+[../DATA-NEEDS.md](../DATA-NEEDS.md); this file sequences them. Cline's
+[golden-path implementation map](https://github.com/drive-mode/cline-drivecode/blob/main/docs/drivecode/plans/cline-drivemode/initiatives/portfolio-now/README.md)
+is the cross-repository dependency and claim source; this ladder is its iOS
+connection view, not a competing backlog.
+
+| This ladder | Golden-path map |
+|---|---|
+| Rung 0 | GP0 protocol foundation |
+| Rungs 1–2 | GP1 trusted host + GP2 target registry |
+| Rung 3 | GP3 managed chat + GP4 iOS binding |
+| Rung 4 | GP6 remote call + GP7 native Presenter projection |
+| Rung 8 | GP8 cross-repository conformance |
+| Rung 9 | GP9 release services |
 
 ## The seams to replace
 
@@ -165,6 +177,12 @@ With rungs 1–8 landing, [APP-STORE-REVIEW.md](APP-STORE-REVIEW.md) takes over:
 G0 records D01–D12, then distribution identity, privacy evidence, TestFlight,
 and submission. The current verdict stands — **public App Store: NO-GO;
 external TestFlight: NO-GO** — until the gates say otherwise.
+
+Invocation-scoped sensing from Cline
+[#15](https://github.com/drive-mode/cline-drivecode/pull/15) / ADR-0037 is not
+a rung. The merged document remains Proposed and Later; no runtime sensing is
+authorized until its privacy, visible-arming, forbidden-field, retention, and
+audit prerequisites are accepted.
 
 ## Decision dependencies at a glance
 

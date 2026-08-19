@@ -41,6 +41,8 @@ device evidence, or App Store upload.
 
 The canonical remaining-work list is [TODO.md](TODO.md). The backend
 connection sequence is [docs/BACKEND-CONNECTION.md](docs/BACKEND-CONNECTION.md).
+Its cross-repository dependency and claim source is Cline's
+[golden-path implementation map](https://github.com/drive-mode/cline-drivecode/blob/main/docs/drivecode/plans/cline-drivemode/initiatives/portfolio-now/README.md).
 The public-release gate is [docs/APP-STORE-REVIEW.md](docs/APP-STORE-REVIEW.md).
 
 ## What this is
@@ -223,6 +225,11 @@ and per-rung evidence, in [docs/BACKEND-CONNECTION.md](docs/BACKEND-CONNECTION.m
 6. Work through the App Store plan from G0; the current public-release verdict
    is **NO-GO**, and external TestFlight is also blocked until distribution,
    privacy, backend/reviewer access, and account posture are real.
+
+Cline [#15](https://github.com/drive-mode/cline-drivecode/pull/15) merged only
+the Proposed invocation-scoped sensing ADR. It is not part of this connection
+sequence and does not authorize runtime sensing; keep it Later until the ADR's
+privacy and audit entry gates are accepted.
 
 ## Owner decisions still open
 
