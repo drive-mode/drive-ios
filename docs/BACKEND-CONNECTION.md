@@ -29,9 +29,10 @@ by widening a preview to look connected.
 
 Close the loop the merge opened. No owner decisions.
 
-- Land harness [#4](https://github.com/drive-mode/collaboration-harness/pull/4)
+- ~~Land harness [#4](https://github.com/drive-mode/collaboration-harness/pull/4)
   and MCP [#4](https://github.com/drive-mode/drivemode-mcp/pull/4)
-  (Presenter leave/room-end fold reconciliation, `room_end`).
+  (Presenter leave/room-end fold reconciliation, `room_end`)~~ — merged
+  2026-08-19.
 - Mirror the two fold rules in the iOS `WriterClient` title projection
   (leave revokes the leaver's grant; `control.end` clears titles) so the
   phone's view of "who may present" cannot disagree with the room fold.

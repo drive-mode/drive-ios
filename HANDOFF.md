@@ -12,9 +12,10 @@ distributable app. All 12 approved PRs merged on 2026-08-18; Cline
 coordinator [#17](https://github.com/drive-mode/cline-drivecode/pull/17)'s
 `presenterGrantId` integration-CI failure was fixed
 (`cline-drivecode@9647c40`) before merge. The Presenter leave/room-end
-reconciliation (previously follow-up #1 here) is open as harness
+reconciliation (previously follow-up #1 here) merged on 2026-08-19 as harness
 [#4](https://github.com/drive-mode/collaboration-harness/pull/4) and MCP
-[#4](https://github.com/drive-mode/drivemode-mcp/pull/4).
+[#4](https://github.com/drive-mode/drivemode-mcp/pull/4); the iOS-side title
+projection mirror is the remaining piece.
 
 The merged stack implements the intended UI and protocol seams, but several
 are still previews:
@@ -154,9 +155,9 @@ All 12 approved PRs merged on 2026-08-18, in dependency order: Harness
 [#17](https://github.com/drive-mode/cline-drivecode/pull/17) (host
 coordinator and signed Director boundary, CI fixed in `9647c40`).
 
-Open follow-up PRs — title-cleanup reconciliation: Cline revokes a leaving
-Presenter and clears titles on room end, which the standalone Harness fold
-did not. Harness [#4](https://github.com/drive-mode/collaboration-harness/pull/4)
+Follow-up reconciliation, merged 2026-08-19 — title cleanup: Cline revokes a
+leaving Presenter and clears titles on room end, which the standalone Harness
+fold did not. Harness [#4](https://github.com/drive-mode/collaboration-harness/pull/4)
 mirrors both rules into the fold (leave revokes the leaver's grant; a new
 `control.end` clears the room) and MCP
 [#4](https://github.com/drive-mode/drivemode-mcp/pull/4) exposes `room_end`
@@ -208,12 +209,10 @@ substitute for hands-on screen-reader, gesture, control, or device testing.
 The connection sequence below is expanded, with owner-decision dependencies
 and per-rung evidence, in [docs/BACKEND-CONNECTION.md](docs/BACKEND-CONNECTION.md).
 
-1. Land the Presenter leave/end reconciliation (harness
-   [#4](https://github.com/drive-mode/collaboration-harness/pull/4), MCP
-   [#4](https://github.com/drive-mode/drivemode-mcp/pull/4)), mirror the two
-   fold rules in the iOS `WriterClient` title projection, and rerun the iOS
-   Xcode suite on macOS against merged `main` — including exercising iOS
-   Presenter behavior against the actual Cline coordinator.
+1. Mirror the two merged fold rules (leave revocation, `control.end`) in the
+   iOS `WriterClient` title projection, and rerun the iOS Xcode suite on
+   macOS against merged `main` — including exercising iOS Presenter behavior
+   against the actual Cline coordinator.
 2. Connect managed chat, authenticated targets, remote call setup, runtime
    badges, the signed Director descriptor, and host-resolved call presets.
 3. Connect account/authentication, deletion, billing/StoreKit decision, usage,
