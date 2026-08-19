@@ -321,7 +321,6 @@ struct ProfileView: View {
             ZStack {
                 Circle().fill(DT.violet.opacity(0.12)).frame(width: 44, height: 44)
                 DriveMark()
-                    .foregroundStyle(DT.violetText(scheme))
                     .frame(width: 24, height: 24)
                     .markWiggle()
             }
@@ -463,7 +462,6 @@ struct ActivityRings: View {
                     .padding(inset + 8)
             }
             DriveMark()
-                .foregroundStyle(DT.ink35(scheme))
                 .frame(width: size * 0.16, height: size * 0.16)
         }
         .frame(width: size, height: size)

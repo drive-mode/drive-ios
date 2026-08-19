@@ -20,7 +20,12 @@ swiftc -O -parse-as-library \
 cp Info.Debug.plist "$APP/Info.plist"
 /usr/libexec/PlistBuddy -c "Add :UIDeviceFamily array" \
   -c "Add :UIDeviceFamily:0 integer 1" \
-  -c "Add :UIDeviceFamily:1 integer 2" "$APP/Info.plist"
+  -c "Add :UIDeviceFamily:1 integer 2" \
+  -c "Add :CFBundleIcons dict" \
+  -c "Add :CFBundleIcons:CFBundlePrimaryIcon dict" \
+  -c "Add :CFBundleIcons:CFBundlePrimaryIcon:CFBundleIconFiles array" \
+  -c "Add :CFBundleIcons:CFBundlePrimaryIcon:CFBundleIconFiles:0 string AppIcon60x60" \
+  "$APP/Info.plist"
 cp Icons/AppIcon60x60@2x.png Icons/AppIcon60x60@3x.png "$APP/" 2>/dev/null || true
 cp PrivacyInfo.xcprivacy "$APP/PrivacyInfo.xcprivacy"
 mkdir -p "$APP/Fonts" && cp Fonts/SchibstedGrotesk.ttf "$APP/Fonts/" 2>/dev/null || true

@@ -311,4 +311,37 @@ final class DriveCoreTests: XCTestCase {
         XCTAssertTrue(try! XCTUnwrap(LocalAIRunState.fileAccessRevoked.message).contains("Choose the file again"))
         XCTAssertTrue(try! XCTUnwrap(LocalAIRunState.completed.message).contains("without network access"))
     }
+
+    func testDriveBrandUsesApprovedLightAndDarkContrast() {
+        func rgba(_ color: Color) -> (CGFloat, CGFloat, CGFloat, CGFloat) {
+            var red: CGFloat = 0
+            var green: CGFloat = 0
+            var blue: CGFloat = 0
+            var alpha: CGFloat = 0
+            XCTAssertTrue(UIColor(color).getRed(&red, green: &green, blue: &blue, alpha: &alpha))
+            return (red, green, blue, alpha)
+        }
+
+        let light = rgba(DriveBrand.foreground(for: .adaptive, colorScheme: .light))
+        let dark = rgba(DriveBrand.foreground(for: .adaptive, colorScheme: .dark))
+        let onDark = rgba(DriveBrand.foreground(for: .onDark, colorScheme: .light))
+
+        XCTAssertEqual(light.0, 0, accuracy: 0.001)
+        XCTAssertEqual(light.1, 0, accuracy: 0.001)
+        XCTAssertEqual(light.2, 0, accuracy: 0.001)
+        XCTAssertEqual(light.3, 1, accuracy: 0.001)
+        for component in [dark.0, dark.1, dark.2, dark.3, onDark.0, onDark.1, onDark.2, onDark.3] {
+            XCTAssertEqual(component, 1, accuracy: 0.001)
+        }
+    }
+
+    @MainActor
+    func testWorkTabUsesRenderableTemplateDriveMark() {
+        let image = DriveBrand.tabBarImage
+
+        XCTAssertNotNil(UIImage(named: "DriveMark"))
+        XCTAssertGreaterThan(image.size.width, 0)
+        XCTAssertGreaterThan(image.size.height, 0)
+        XCTAssertEqual(image.renderingMode, .alwaysTemplate)
+    }
 }
