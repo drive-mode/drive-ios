@@ -1,20 +1,21 @@
 # Drive iOS — backlog
 
-Audited 2026-08-18 against repository state, the approved 12-PR stack, local
-verification, and current pull-request status. A checked box means the work is
-implemented and verified on the named branch; it does **not** mean the change is
-merged, distributed, or backed by a production service.
+Audited 2026-08-19 against repository state, the merged 12-PR stack, and local
+verification. A checked box means the work is implemented and verified on the
+named branch; it does **not** mean the change is distributed or backed by a
+production service.
 
 Delivery snapshot:
 
-- `drive-ios` PRs [#1](https://github.com/drive-mode/drive-ios/pull/1)–[#7](https://github.com/drive-mode/drive-ios/pull/7) are an open cleanly based stack from session registry through the bounded system-model spike. No required checks are configured on those PRs.
-- `collaboration-harness` [#2](https://github.com/drive-mode/collaboration-harness/pull/2)–[#3](https://github.com/drive-mode/collaboration-harness/pull/3) and `drivemode-mcp` [#2](https://github.com/drive-mode/drivemode-mcp/pull/2)–[#3](https://github.com/drive-mode/drivemode-mcp/pull/3) are open dependency stacks.
-- Cline coordinator [#17](https://github.com/drive-mode/cline-drivecode/pull/17) is open with failing integration CI: Hub/CLI fixtures and the stage reducer do not yet supply the required `presenterGrantId` field. The focused Presenter tests pass locally, but this PR is not merge-ready.
+- The approved 12-PR stack **merged on 2026-08-18**: `drive-ios` [#1](https://github.com/drive-mode/drive-ios/pull/1)–[#8](https://github.com/drive-mode/drive-ios/pull/8), `collaboration-harness` [#2](https://github.com/drive-mode/collaboration-harness/pull/2)–[#3](https://github.com/drive-mode/collaboration-harness/pull/3), `drivemode-mcp` [#2](https://github.com/drive-mode/drivemode-mcp/pull/2)–[#3](https://github.com/drive-mode/drivemode-mcp/pull/3), and Cline coordinator [#17](https://github.com/drive-mode/cline-drivecode/pull/17) (its `presenterGrantId` integration-CI failure was fixed in `cline-drivecode@9647c40` before merge). All four `main` branches carry the stack.
+- Post-merge verification on `main` (2026-08-19, Linux container, no Xcode): harness `bun run check` green (13 tests); MCP `bun test` 16/16 (root `bun run typecheck` needed a fresh-clone resolution fix — see the reconciliation PR); Cline `@cline/shared` 474/474, `@cline/drive` 419/419 after `bun run build:sdk`, focused hub Presenter/room suites 81/81. The iOS Xcode suite was **not** rerun (requires macOS); the standing evidence remains the pre-merge 22-unit + 3-UI-test runs.
+- Presenter leave/room-end reconciliation (HANDOFF follow-up #1) is open as harness [#4](https://github.com/drive-mode/collaboration-harness/pull/4) and MCP [#4](https://github.com/drive-mode/drivemode-mcp/pull/4): the standalone fold now revokes a leaving presenter's grant and clears titles on a new `control.end`, mirroring the Cline coordinator. iOS still projects titles from `control.title_*` events only and does not yet mirror those two fold rules (follow-up below).
 
-The app is therefore an implemented **preview on open branches**, not shipped
-product. Data requirements for the durable surfaces remain in
-[DATA-NEEDS.md](DATA-NEEDS.md); App Store readiness is planned in
-[docs/APP-STORE-REVIEW.md](docs/APP-STORE-REVIEW.md).
+The app is therefore an implemented **preview on merged `main`**, not shipped
+product. The backend connection sequence is planned in
+[docs/BACKEND-CONNECTION.md](docs/BACKEND-CONNECTION.md); data requirements
+for the durable surfaces remain in [DATA-NEEDS.md](DATA-NEEDS.md); App Store
+readiness is planned in [docs/APP-STORE-REVIEW.md](docs/APP-STORE-REVIEW.md).
 
 ## 1 · Quick wins (small, high trust)
 

@@ -4,17 +4,18 @@ SwiftUI implementation of Drive's iPhone and iPad experience: start a chat
 against an explicit repository or file target, move into a live call when the
 work benefits from it, and steer a fleet of agents from anywhere.
 
-**Maturity: implemented preview, not a released app.** The current stacked-PR
-tip contains the chat-first Work hub, unified Settings, iPhone/iPad project and
-tests, scalable skills, Presenter titles, and a bounded Apple system-model
-spike. Those changes are still on open pull requests rather than `main`. The
-Debug builds retain the clearly labeled preview world. Release builds now fail
-closed behind one configuration policy: no demo seeds, fake account/sign-in,
-Showcase, experiments, billing, or loopback writer. Managed chat, production
-targets/accounts, final distribution identity, and App Store submission remain
-release work. See [TODO.md](TODO.md) for the delivery
-snapshot and [docs/APP-STORE-REVIEW.md](docs/APP-STORE-REVIEW.md) for the release
-gate.
+**Maturity: implemented preview, not a released app.** The approved 12-PR
+stack — chat-first Work hub, unified Settings, iPhone/iPad project and tests,
+scalable skills, Presenter titles, the bounded Apple system-model spike, and
+the fail-closed release shell — merged to `main` across all four repositories
+on 2026-08-18. The Debug builds retain the clearly labeled preview world.
+Release builds fail closed behind one configuration policy: no demo seeds,
+fake account/sign-in, Showcase, experiments, billing, or loopback writer.
+Managed chat, production targets/accounts, final distribution identity, and
+App Store submission remain release work; the connection sequence is
+[docs/BACKEND-CONNECTION.md](docs/BACKEND-CONNECTION.md). See
+[TODO.md](TODO.md) for the delivery snapshot and
+[docs/APP-STORE-REVIEW.md](docs/APP-STORE-REVIEW.md) for the release gate.
 
 ## Design SoT
 

@@ -1,20 +1,23 @@
 # Handoff — Drive iOS product preview
 
-Updated 2026-08-18 from `codex/on-device-system-model` (`fa43a99`) plus the
-current pull-request and CI state. The documentation-only follow-up is on
-`codex/ios-app-store-readiness-docs`.
+Updated 2026-08-19 from merged `main` (`d3d3824`) plus the current
+pull-request state. The 12-PR stack — including the release shell and App
+Store plan from [#8](https://github.com/drive-mode/drive-ios/pull/8) — merged
+across all four repositories on 2026-08-18.
 
 ## Status first
 
-Drive iOS is a substantial native preview, not a merged or distributable app.
-All 12 approved PRs remain open. The seven iOS PRs, two Harness PRs, and two
-MCP PRs are cleanly based; Cline coordinator PR
-[#17](https://github.com/drive-mode/cline-drivecode/pull/17) is red because the
-Hub/CLI stage fixtures and reducer do not yet propagate the required
-`presenterGrantId` field.
+Drive iOS is a substantial native preview on merged `main`, not a
+distributable app. All 12 approved PRs merged on 2026-08-18; Cline
+coordinator [#17](https://github.com/drive-mode/cline-drivecode/pull/17)'s
+`presenterGrantId` integration-CI failure was fixed
+(`cline-drivecode@9647c40`) before merge. The Presenter leave/room-end
+reconciliation (previously follow-up #1 here) is open as harness
+[#4](https://github.com/drive-mode/collaboration-harness/pull/4) and MCP
+[#4](https://github.com/drive-mode/drivemode-mcp/pull/4).
 
-The open stack implements the intended UI and protocol seams, but several are
-still previews:
+The merged stack implements the intended UI and protocol seams, but several
+are still previews:
 
 - Work targets are static `WorkTargetRef.previews` records.
 - Work chat is a one-sided in-memory list plus a fire-and-forget event; there is
@@ -28,15 +31,16 @@ still previews:
   in-memory and resets on restart; cross-restart durability must come from the
   production Hub or future persistence work.
 
-The current working tree also contains a local release-hardening slice not yet
-committed or merged: `AppConfiguration` separates Debug preview from a
-fail-closed Release shell, the privacy manifest is target-bundled, Settings has
-Reset, and production-channel UI/accessibility smoke tests are in the scheme.
-This reduces misleading review behavior; it does not supply the missing host,
-account, distribution identity, signing, device evidence, or App Store upload.
+The release-hardening slice is merged (#8): `AppConfiguration` separates
+Debug preview from a fail-closed Release shell, the privacy manifest is
+target-bundled, Settings has Reset, and production-channel UI/accessibility
+smoke tests are in the scheme. This reduces misleading review behavior; it
+does not supply the missing host, account, distribution identity, signing,
+device evidence, or App Store upload.
 
-The canonical remaining-work list is [TODO.md](TODO.md). The public-release
-gate is [docs/APP-STORE-REVIEW.md](docs/APP-STORE-REVIEW.md).
+The canonical remaining-work list is [TODO.md](TODO.md). The backend
+connection sequence is [docs/BACKEND-CONNECTION.md](docs/BACKEND-CONNECTION.md).
+The public-release gate is [docs/APP-STORE-REVIEW.md](docs/APP-STORE-REVIEW.md).
 
 ## What this is
 
@@ -140,30 +144,40 @@ pixel capture and it does not expose Director implementation details.
 
 ## PR stack and merge order
 
-| Order | Repository / PR | Purpose | Current state |
-|---:|---|---|---|
-| 1 | Harness [#2](https://github.com/drive-mode/collaboration-harness/pull/2) | Session lifecycle events | Open, mergeable, no checks |
-| 2 | MCP [#2](https://github.com/drive-mode/drivemode-mcp/pull/2) | Session lifecycle tools | Open, mergeable, no checks |
-| 3–7 | iOS [#1](https://github.com/drive-mode/drive-ios/pull/1)–[#5](https://github.com/drive-mode/drive-ios/pull/5) | Registry, project/tests, Settings, Work, Agents | Open clean stack, no checks |
-| 8 | Harness [#3](https://github.com/drive-mode/collaboration-harness/pull/3) | Agent Title protocol | Open, mergeable, no checks |
-| 9 | MCP [#3](https://github.com/drive-mode/drivemode-mcp/pull/3) | Presenter writer enforcement | Open, mergeable, no checks |
-| 10–11 | iOS [#6](https://github.com/drive-mode/drive-ios/pull/6)–[#7](https://github.com/drive-mode/drive-ios/pull/7) | Presenter/Director UI and local AI | Open clean stack, no checks |
-| 12 | Cline [#17](https://github.com/drive-mode/cline-drivecode/pull/17) | Host coordinator and signed Director boundary | Open, CI failing |
+All 12 approved PRs merged on 2026-08-18, in dependency order: Harness
+[#2](https://github.com/drive-mode/collaboration-harness/pull/2)/[#3](https://github.com/drive-mode/collaboration-harness/pull/3)
+(session lifecycle events, Agent Title protocol), MCP
+[#2](https://github.com/drive-mode/drivemode-mcp/pull/2)/[#3](https://github.com/drive-mode/drivemode-mcp/pull/3)
+(lifecycle tools, Presenter writer enforcement), iOS
+[#1](https://github.com/drive-mode/drive-ios/pull/1)–[#8](https://github.com/drive-mode/drive-ios/pull/8)
+(registry through release shell), and Cline
+[#17](https://github.com/drive-mode/cline-drivecode/pull/17) (host
+coordinator and signed Director boundary, CI fixed in `9647c40`).
 
-Cline #17 can be repaired/rebased independently, but the merged-system gate is
-not complete until iOS Presenter behavior is exercised against that actual
-coordinator. Also reconcile title cleanup: Cline revokes a leaving Presenter and
-clears titles on room end, while the standalone Harness fold currently leaves a
-grant alive until expiry or explicit revoke.
+Open follow-up PRs — title-cleanup reconciliation: Cline revokes a leaving
+Presenter and clears titles on room end, which the standalone Harness fold
+did not. Harness [#4](https://github.com/drive-mode/collaboration-harness/pull/4)
+mirrors both rules into the fold (leave revokes the leaver's grant; a new
+`control.end` clears the room) and MCP
+[#4](https://github.com/drive-mode/drivemode-mcp/pull/4) exposes `room_end`
+and rides the fold. The merged-system gate still wants iOS Presenter behavior
+exercised against the actual Cline coordinator, and the iOS `WriterClient`
+projects titles from `control.title_*` events only — it does not yet mirror
+the two fold-level cleanup rules (leave revocation, `control.end`).
 
 ## Verification reality
 
-The current slice passes 22 unit and three UI tests, including production Home/
+The merged slice passes 22 unit and three UI tests, including production Home/
 Work accessibility audits, and compiles a simulator Release whose built plist
 selects production and contains no local-network exception. Prior preview work
-also built and ran on iPhone and iPad simulators. That evidence does not cover:
+also built and ran on iPhone and iPad simulators. Post-merge (2026-08-19, in a
+Linux container): harness `bun run check` green; MCP `bun test` 16/16; Cline
+`@cline/shared` 474/474, `@cline/drive` 419/419 after `bun run build:sdk`, and
+the focused hub Presenter/room suites 81/81 — all on merged `main`. That
+evidence does not cover:
 
-- current GitHub integration CI on Cline #17;
+- a post-merge run of the iOS Xcode suite (requires macOS; not rerun since
+  the merges);
 - a release-signed device archive or App Store upload validation;
 - production services, authentication, account deletion, or StoreKit;
 - physical-device local-network, microphone, file-provider, Foundation Models,
@@ -191,17 +205,23 @@ substitute for hands-on screen-reader, gesture, control, or device testing.
 
 ## Where to pick up
 
-1. Repair Cline #17 integration CI and reconcile Presenter leave/end behavior.
-2. Merge the dependency stacks, then rerun cross-repository contract and iOS
-   system checks against the merged commits.
-3. Connect managed chat, authenticated targets, remote call setup, runtime
+The connection sequence below is expanded, with owner-decision dependencies
+and per-rung evidence, in [docs/BACKEND-CONNECTION.md](docs/BACKEND-CONNECTION.md).
+
+1. Land the Presenter leave/end reconciliation (harness
+   [#4](https://github.com/drive-mode/collaboration-harness/pull/4), MCP
+   [#4](https://github.com/drive-mode/drivemode-mcp/pull/4)), mirror the two
+   fold rules in the iOS `WriterClient` title projection, and rerun the iOS
+   Xcode suite on macOS against merged `main` — including exercising iOS
+   Presenter behavior against the actual Cline coordinator.
+2. Connect managed chat, authenticated targets, remote call setup, runtime
    badges, the signed Director descriptor, and host-resolved call presets.
-4. Connect account/authentication, deletion, billing/StoreKit decision, usage,
+3. Connect account/authentication, deletion, billing/StoreKit decision, usage,
    and analytics truth.
-5. Finish approval/skill policy sync, memory sync/attribution, and real skill
+4. Finish approval/skill policy sync, memory sync/attribution, and real skill
    bodies/generation.
-6. Implement TODO §13 deterministic verification.
-7. Work through the App Store plan from G0; the current public-release verdict
+5. Implement TODO §13 deterministic verification.
+6. Work through the App Store plan from G0; the current public-release verdict
    is **NO-GO**, and external TestFlight is also blocked until distribution,
    privacy, backend/reviewer access, and account posture are real.
 

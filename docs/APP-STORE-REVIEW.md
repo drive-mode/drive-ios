@@ -41,7 +41,7 @@ builds belong in TestFlight.
 | Release quality evidence incomplete | Unit tests plus production-channel XCUITest and Home/Work accessibility audits now run in the shared scheme; release archive CI, all-root/modal coverage, and the physical-device/VoiceOver matrix remain |
 | Icon upload risk | Loose PNG icons, no asset catalog/iPad set, and all current PNGs contain alpha channels |
 | Product behavior incomplete | Release no longer exposes preview/demo account/work/social truth, but Work chat, calls, targets, accounts, and microphone steering remain disconnected or incomplete |
-| Open delivery stack | All 12 PRs are unmerged and Cline PR #17 has failing Hub/CLI integration CI |
+| Open delivery stack | Resolved 2026-08-18: all 12 PRs merged (Cline #17's Hub/CLI CI fixed in `9647c40`). Presenter leave/end reconciliation remains open as harness #4 / MCP #4, and the iOS Xcode suite has not been rerun post-merge |
 
 Official references:
 [required-reason APIs](https://developer.apple.com/documentation/bundleresources/describing-use-of-required-reason-api),
