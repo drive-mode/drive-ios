@@ -130,13 +130,14 @@ escalation preference — persisted now, applied the moment push lands.
 
 ## Brand & delight
 
-- `DriveMarkShape.swift` is the **official Drive mark converted 1:1 from
-  `cline-drivecode/assets/drive/cline-drive-mark-layers.svg`** (locked by
-  DEC-drive-mark-official) — the sporty flat-bottom D-rim steering wheel with
-  the Cline head as hub, in two layers (`DriveWheelShape` + `DriveHeadShape`).
-  Motion rule from DRIVE-MARK.md: **the wheel turns; Cline stays upright** —
-  `DriveSpinner` rotates only the wheel layer. Used in Open (idle wiggle),
-  the Home lockup, presence chips, the reconnect chip, and the app icon.
+- [`Brand/DriveMarkSource.png`](Brand/DriveMarkSource.png) is the **single
+  canonical Drive mark** imported from Cline's approved steering-wheel
+  sheet. `Brand/generate-brand-assets.py` derives the adaptive runtime image,
+  the Any/Dark/Tinted app-icon catalog, and legacy simulator icons from it;
+  `Sources/DriveBrand.swift` is the only feature-code entry point. Run the
+  generator with `--check` after any brand change. The mark is used in Open,
+  the Home lockup/control, Work tab, presence chips, reconnect/loading states,
+  Profile, and the install icon. See [`Brand/PRINCIPLES.md`](Brand/PRINCIPLES.md).
   Agent avatars wear `ClineBotShape` (from the hub's `cline-logo-filled.svg`).
 - `Pressable` spring press-feedback on every button; joining overlay on call
   entry; sweep/success haptics. All motion respects Reduce Motion.

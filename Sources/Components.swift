@@ -54,25 +54,10 @@ extension View {
     func tabSwipe() -> some View { modifier(TabSwipe()) }
 }
 
-/// The OFFICIAL Drive mark — sporty flat-bottom D-rim steering wheel with
-/// the Cline head as its hub (assets/drive/, DEC-drive-mark-official).
-/// Monochrome silhouette: black on light, white on dark, never purple fill.
-struct DriveMark: View {
-    var body: some View {
-        ZStack {
-            DriveWheelShape().fill(style: FillStyle(eoFill: true))
-            DriveHeadShape().fill(style: FillStyle(eoFill: true))
-        }
-        .aspectRatio(1, contentMode: .fit)
-        .accessibilityHidden(true)
-    }
-}
-
 /// Visible escape hatch on every non-Home root surface. Pushed screens keep
 /// native back navigation; titles never hide a second gesture.
 struct HomeToolbarButton: View {
     @EnvironmentObject private var store: AppStore
-    @Environment(\.colorScheme) private var scheme
 
     var body: some View {
         Button {
@@ -83,7 +68,6 @@ struct HomeToolbarButton: View {
         } label: {
             HStack(spacing: 6) {
                 DriveMark()
-                    .foregroundStyle(DT.ink(scheme))
                     .frame(width: 20, height: 20)
                 Text("Home")
                     .font(.system(size: 13, weight: .bold))
@@ -105,33 +89,6 @@ struct SettingsToolbarButton: View {
         }
         .accessibilityLabel("Settings")
         .accessibilityHint("Opens \(tab.rawValue) settings")
-    }
-}
-
-/// Brand loader per the motion doc: **the wheel turns; Cline stays
-/// upright** — a whole-mark spin reads as a tumbling logo, not driving.
-/// Stills under Reduce Motion.
-struct DriveSpinner: View {
-    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
-    @AppStorage("reduceMotion") private var appReduceMotion = false
-    var size: CGFloat = 28
-    @State private var spin = false
-    var body: some View {
-        ZStack {
-            DriveWheelShape()
-                .fill(style: FillStyle(eoFill: true))
-                .rotationEffect(.degrees(spin ? 360 : 0))
-            DriveHeadShape()
-                .fill(style: FillStyle(eoFill: true))
-        }
-        .aspectRatio(1, contentMode: .fit)
-        .frame(width: size, height: size)
-        .onAppear {
-            guard !(systemReduceMotion || appReduceMotion) else { return }
-            withAnimation(.linear(duration: 1.4).repeatForever(autoreverses: false)) {
-                spin = true
-            }
-        }
     }
 }
 

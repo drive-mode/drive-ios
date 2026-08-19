@@ -369,8 +369,7 @@ struct LiveCallView: View {
         HStack(spacing: 10) {
             AvatarChip(letter: "M", color: Color(hex: 0x7A3FD4), speaking: !store.editAllowed)
             AvatarChip(letter: "A", color: Color(hex: 0x5B8DEF))
-            DriveMark()
-                .foregroundStyle(.white)
+            DriveMark(contrast: .onDark)
                 .frame(width: 18, height: 18)
                 .frame(width: 34, height: 34)
                 .background(DT.surface2Dark)
