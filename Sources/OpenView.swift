@@ -21,7 +21,6 @@ struct OpenView: View {
                 .shadow(color: DT.inkLight.opacity(scheme == .dark ? 0 : 0.08), radius: 14, y: 5)
                 .overlay {
                     DriveMark()
-                        .foregroundStyle(DT.ink(scheme))
                         .frame(width: 54, height: 54)
                         .markWiggle()
                 }

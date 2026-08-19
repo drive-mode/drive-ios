@@ -33,16 +33,6 @@
 	</dict>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Connect to a Drive preview writer running on this device for local development.</string>
-	<key>CFBundleIcons</key>
-	<dict>
-		<key>CFBundlePrimaryIcon</key>
-		<dict>
-			<key>CFBundleIconFiles</key>
-			<array>
-				<string>AppIcon60x60</string>
-			</array>
-		</dict>
-	</dict>
 	<key>UIAppFonts</key>
 	<array>
 		<string>Fonts/SchibstedGrotesk.ttf</string>

@@ -11,7 +11,11 @@ struct MainTabs: View {
                     .tag(AppTab.home)
                 CallTabView()
                     .toolbar(store.tabBarVisible ? .visible : .hidden, for: .tabBar)
-                    .tabItem { Label("Work", systemImage: "waveform" ) }
+                    .tabItem {
+                        Image(uiImage: DriveBrand.tabBarImage)
+                            .renderingMode(.template)
+                        Text("Work")
+                    }
                     .tag(AppTab.work)
                 AgentsView()
                     .toolbar(store.tabBarVisible ? .visible : .hidden, for: .tabBar)
@@ -92,7 +96,6 @@ struct HomeView: View {
                     HStack(alignment: .center, spacing: 10) {
                         HStack(spacing: 9) {
                             DriveMark()
-                                .foregroundStyle(DT.ink(scheme))
                                 .frame(width: 27, height: 27)
                             Text("Drive")
                                 .kerning(-1.2)
