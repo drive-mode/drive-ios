@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
-"""Generate every Drive icon from one canonical transparent mark.
+"""Generate every Drive icon from the approved paired reference.
 
 Requires Pillow. `--import-reference` is the one-time normalization path for an
-approved single mark or a wide side-by-side light/dark reference sheet. Regular
-generation and `--check` use Brand/DriveMarkSource.png only.
+approved single mark or side-by-side light/dark reference sheet. Regular
+generation uses Brand/DriveMarkSource.png; `--check` also verifies that the
+archived reference is the exact approved file.
 """
 
 from __future__ import annotations
 
 import argparse
+import hashlib
 import io
 import sys
 from pathlib import Path
@@ -17,21 +19,46 @@ from PIL import Image, ImageFilter
 
 
 ROOT = Path(__file__).resolve().parents[1]
+REFERENCE = ROOT / "Brand" / "DriveMarkReference.png"
 SOURCE = ROOT / "Brand" / "DriveMarkSource.png"
 APP_ICON_DIR = ROOT / "Assets.xcassets" / "AppIcon.appiconset"
 RUNTIME_ICON_DIR = ROOT / "Assets.xcassets" / "DriveMark.imageset"
 ICONS_DIR = ROOT / "Icons"
 CANVAS = 1024
+APPROVED_REFERENCE_SHA256 = (
+    "d7f89cad545dfbb87cb0e119c56d5fbd3baa1bb23f5b0de2ca919f7a36f0bcb3"
+)
+
+
+def _paired_reference_half(image: Image.Image) -> Image.Image | None:
+    """Return the light-background half of an inverse reference pair, if any."""
+
+    if image.width < 2:
+        return None
+
+    midpoint = image.width // 2
+    left_background = sum(
+        image.getpixel((0, y)) for y in (0, image.height - 1)
+    ) / 2
+    right_background = sum(
+        image.getpixel((image.width - 1, y)) for y in (0, image.height - 1)
+    ) / 2
+    if abs(left_background - right_background) < 128:
+        return None
+
+    # Wide presentation sheets may have a gutter around the centre divider.
+    # Square sheets, including the approved 1254px master, split at midpoint.
+    gutter = 8 if image.width >= image.height * 1.5 else 0
+    if left_background > right_background:
+        return image.crop((0, 0, midpoint - gutter, image.height))
+    return image.crop((midpoint + gutter, 0, image.width, image.height))
 
 
 def _reference_mask(image: Image.Image) -> Image.Image:
-    """Extract foreground from a single mark or wide light/dark sheet."""
+    """Extract foreground from a single mark or inverse light/dark sheet."""
 
     image = image.convert("L")
-    if image.width >= image.height * 1.5:
-        # The approved sheet is a light/dark pair split down the middle. Leave
-        # a small gutter so the divider cannot enter the mask.
-        image = image.crop((0, 0, image.width // 2 - 8, image.height))
+    image = _paired_reference_half(image) or image
 
     corner_values = [
         image.getpixel((0, 0)),
@@ -74,6 +101,30 @@ def _import_reference(path: Path) -> None:
     SOURCE.write_bytes(_png_bytes(source))
 
 
+def _archive_approved_reference(path: Path) -> None:
+    reference = path.read_bytes()
+    digest = hashlib.sha256(reference).hexdigest()
+    if digest != APPROVED_REFERENCE_SHA256:
+        raise ValueError(
+            "reference does not match the approved Drive mark "
+            f"({digest}; expected {APPROVED_REFERENCE_SHA256})"
+        )
+    REFERENCE.parent.mkdir(parents=True, exist_ok=True)
+    REFERENCE.write_bytes(reference)
+
+
+def _verify_approved_reference() -> None:
+    if not REFERENCE.exists():
+        raise FileNotFoundError(
+            f"missing {REFERENCE.relative_to(ROOT)}; import the approved reference first"
+        )
+    digest = hashlib.sha256(REFERENCE.read_bytes()).hexdigest()
+    if digest != APPROVED_REFERENCE_SHA256:
+        raise ValueError(
+            f"{REFERENCE.relative_to(ROOT)} has unapproved content ({digest})"
+        )
+
+
 def _source_mask() -> Image.Image:
     if not SOURCE.exists():
         raise FileNotFoundError(
@@ -84,8 +135,11 @@ def _source_mask() -> Image.Image:
 
 def _transparent_mark(size: int, color: tuple[int, int, int, int]) -> Image.Image:
     mask = _source_mask().resize((size, size), Image.Resampling.LANCZOS)
-    image = Image.new("RGBA", (size, size), (0, 0, 0, 0))
-    image.paste(color, mask=mask)
+    # Keep RGB solid through anti-aliased edge pixels and carry coverage only
+    # in alpha. Blending the color with a transparent black canvas here would
+    # create a dark fringe when the white Dark/Tinted marks are composited.
+    image = Image.new("RGBA", (size, size), color)
+    image.putalpha(mask)
     return image
 
 
@@ -141,7 +195,10 @@ def main() -> int:
     if args.check and args.import_reference:
         parser.error("--check and --import-reference cannot be combined")
     if args.import_reference:
-        _import_reference(args.import_reference)
+        _archive_approved_reference(args.import_reference)
+        _import_reference(REFERENCE)
+
+    _verify_approved_reference()
 
     rendered = _rendered_images()
     mismatches: list[Path] = []

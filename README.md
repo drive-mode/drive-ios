@@ -130,14 +130,16 @@ escalation preference — persisted now, applied the moment push lands.
 
 ## Brand & delight
 
-- [`Brand/DriveMarkSource.png`](Brand/DriveMarkSource.png) is the **single
-  canonical Drive mark** imported from Cline's approved steering-wheel
-  sheet. `Brand/generate-brand-assets.py` derives the adaptive runtime image,
+- [`Brand/DriveMarkReference.png`](Brand/DriveMarkReference.png) is the exact
+  approved light/dark steering-wheel reference; its hash and locked geometry
+  are recorded in [`Brand/PRINCIPLES.md`](Brand/PRINCIPLES.md).
+  `Brand/generate-brand-assets.py` normalizes that reference into
+  `Brand/DriveMarkSource.png` and derives the adaptive runtime image,
   the Any/Dark/Tinted app-icon catalog, and legacy simulator icons from it;
   `Sources/DriveBrand.swift` is the only feature-code entry point. Run the
   generator with `--check` after any brand change. The mark is used in Open,
   the Home lockup/control, Work tab, presence chips, reconnect/loading states,
-  Profile, and the install icon. See [`Brand/PRINCIPLES.md`](Brand/PRINCIPLES.md).
+  Profile, and the install icon.
   Agent avatars wear `ClineBotShape` (from the hub's `cline-logo-filled.svg`).
 - `Pressable` spring press-feedback on every button; joining overlay on call
   entry; sweep/success haptics. All motion respects Reduce Motion.

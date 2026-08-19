@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Drive mark production verification</title>
+  <style>
+    :root { color-scheme: light dark; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #f3f3f5; color: #111; }
+    body.dark { background: #09090b; color: #f7f7f8; }
+    main { width: min(1100px, calc(100% - 32px)); margin: 32px auto 64px; }
+    header { display: flex; align-items: start; justify-content: space-between; gap: 24px; }
+    h1 { margin: 0 0 8px; font-size: clamp(28px, 5vw, 48px); letter-spacing: -.04em; }
+    p { max-width: 70ch; color: #666; line-height: 1.5; }
+    .dark p { color: #aaa; }
+    button { border: 1px solid #aaa6; border-radius: 999px; padding: 10px 16px; background: #fff8; color: inherit; }
+    .dark button { background: #222a; }
+    section { margin-top: 28px; padding: 24px; border: 1px solid #8884; border-radius: 24px; background: #fff; }
+    .dark section { background: #111; }
+    h2 { margin: 0 0 18px; font-size: 18px; }
+    .reference { width: min(100%, 560px); display: block; border-radius: 18px; }
+    .sizes { display: flex; flex-wrap: wrap; align-items: end; gap: 24px; }
+    figure { margin: 0; display: grid; justify-items: center; gap: 8px; }
+    figcaption { color: #777; font: 12px ui-monospace, SFMono-Regular, monospace; }
+    .mark { object-fit: contain; }
+    .dark .mark { filter: invert(1); }
+    .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 18px; }
+    .tile { padding: 18px; border-radius: 22%; background: #eee; }
+    .tile.dark-tile { background: #111; }
+    .tile img { width: 100%; display: block; border-radius: 22%; }
+    code { font-size: 12px; overflow-wrap: anywhere; }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1>Drive mark verification</h1>
+      <p>Production comparison for the approved angular-shoulder, notched-spoke mark. Toggle the surface and inspect the real runtime raster at its target sizes.</p>
+    </div>
+    <button type="button" onclick="document.body.classList.toggle('dark')">Toggle surface</button>
+  </header>
+
+  <section>
+    <h2>Archived approved reference</h2>
+    <img class="reference" src="DriveMarkReference.png" alt="Approved Drive mark shown black on white and white on black">
+    <p><code>SHA-256 d7f89cad545dfbb87cb0e119c56d5fbd3baa1bb23f5b0de2ca919f7a36f0bcb3</code></p>
+  </section>
+
+  <section>
+    <h2>Runtime tier</h2>
+    <div class="sizes">
+      <figure><img class="mark" src="../Assets.xcassets/DriveMark.imageset/DriveMark@3x.png" width="16" height="16" alt=""><figcaption>16 pt</figcaption></figure>
+      <figure><img class="mark" src="../Assets.xcassets/DriveMark.imageset/DriveMark@3x.png" width="20" height="20" alt=""><figcaption>20 pt</figcaption></figure>
+      <figure><img class="mark" src="../Assets.xcassets/DriveMark.imageset/DriveMark@3x.png" width="25" height="25" alt=""><figcaption>25 pt</figcaption></figure>
+      <figure><img class="mark" src="../Assets.xcassets/DriveMark.imageset/DriveMark@3x.png" width="32" height="32" alt=""><figcaption>32 pt</figcaption></figure>
+      <figure><img class="mark" src="../Assets.xcassets/DriveMark.imageset/DriveMark@3x.png" width="64" height="64" alt=""><figcaption>64 pt</figcaption></figure>
+      <figure><img class="mark" src="../Assets.xcassets/DriveMark.imageset/DriveMark@3x.png" width="192" height="192" alt=""><figcaption>192 pt</figcaption></figure>
+    </div>
+  </section>
+
+  <section>
+    <h2>Install tier</h2>
+    <div class="tiles">
+      <figure class="tile"><img src="../Assets.xcassets/AppIcon.appiconset/AppIcon-Any.png" alt="Default Drive app icon"><figcaption>Any · opaque</figcaption></figure>
+      <figure class="tile dark-tile"><img src="../Assets.xcassets/AppIcon.appiconset/AppIcon-Dark.png" alt="Dark Drive app icon"><figcaption>Dark · transparent</figcaption></figure>
+      <figure class="tile"><img src="../Assets.xcassets/AppIcon.appiconset/AppIcon-Tinted.png" alt="Tinted grayscale Drive app icon"><figcaption>Tinted · grayscale mask</figcaption></figure>
+    </div>
+  </section>
+</main>
+</body>
+</html>

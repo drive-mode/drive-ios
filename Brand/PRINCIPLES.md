@@ -3,8 +3,12 @@
 ## Locked metaphor and geometry
 
 - The Drive mark is the steering wheel with the Cline head at its hub.
-- `Brand/DriveMarkSource.png` is the canonical normalized geometry imported
-  from Cline's approved Drive mark. Feature code must use
+- `Brand/DriveMarkReference.png` is the exact approved 1254×1254 light/dark
+  reference (SHA-256 `d7f89cad545dfbb87cb0e119c56d5fbd3baa1bb23f5b0de2ca919f7a36f0bcb3`).
+  Its black-on-white left half is canonical; the inverse right half is a
+  presentation proof, not a second geometry.
+- `Brand/DriveMarkSource.png` is the generated, normalized runtime source.
+  Feature code must use
   `DriveMark` or a rendering exposed by `DriveBrand`; it must not introduce
   another logo file.
 - Runtime and install assets are generated from that source. Loading motion is
@@ -22,8 +26,8 @@
 ## Hard constraints
 
 - Monochrome only. Do not fill the Drive mark purple or use agent colors.
-- Preserve the steering-wheel silhouette, flat bottom, antenna nub, and eye
-  cutouts.
+- Preserve the steering-wheel silhouette, flat bottom, antenna nub, eye
+  cutouts, angular head shoulders, and notched horizontal spokes.
 - App-icon variants may change figure/ground treatment, never the core form.
 - Dark and tinted app-icon files retain transparency for the system-provided
   background and treatment.
@@ -34,5 +38,8 @@
 - Clear figure/ground at 1024, 180, and 120 px.
 - Black-on-light and white-on-dark variants preserve the same silhouette.
 - Tinted appearance remains a one-color grayscale mask.
-- A geometry change must pass `Brand/generate-brand-assets.py --check` after
-  regenerating the committed outputs.
+- `Brand/VERIFY.html` shows the committed assets at 16–192 pt and across both
+  surface themes for repeatable visual QA.
+- A geometry change must update the approved-reference hash deliberately and
+  pass `Brand/generate-brand-assets.py --check` after regenerating the
+  committed outputs.
