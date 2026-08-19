@@ -41,7 +41,7 @@ builds belong in TestFlight.
 | Release quality evidence incomplete | Unit tests plus production-channel XCUITest and Home/Work accessibility audits now run in the shared scheme; release archive CI, all-root/modal coverage, and the physical-device/VoiceOver matrix remain |
 | Icon upload risk | Loose PNG icons, no asset catalog/iPad set, and all current PNGs contain alpha channels |
 | Product behavior incomplete | Release no longer exposes preview/demo account/work/social truth, but Work chat, calls, targets, accounts, and microphone steering remain disconnected or incomplete |
-| Open delivery stack | All 12 PRs are unmerged and Cline PR #17 has failing Hub/CLI integration CI |
+| Open delivery stack | Resolved 2026-08-18: all 12 PRs merged (Cline #17's Hub/CLI CI fixed in `9647c40`); the Presenter leave/end reconciliation (harness #4 / MCP #4) merged 2026-08-19. The iOS Xcode suite has not been rerun post-merge |
 
 Official references:
 [required-reason APIs](https://developer.apple.com/documentation/bundleresources/describing-use-of-required-reason-api),
@@ -146,7 +146,7 @@ owner, date, rationale, and affected gates in the evidence binder.
 | Wave | Work | Depends on | Exit artifact |
 |---|---|---|---|
 | R0 · Scope and ownership | Name every role; decide D01–D12; freeze included/disabled features; assign release DRI | None | Signed scope/decision record and feature-flag matrix |
-| R1 · Land the product stack | Repair Cline #17, add CI to the currently unchecked PRs, merge all 12 in dependency order, and verify cross-repository contracts from default branches | R0 scope for any release-visible behavior | Green default branches, merge manifest, cross-repo contract report |
+| R1 · Verify the product foundation | The 12-PR stack, Cline #17 repair, and Harness/MCP #4 reconciliation are merged; finish iOS cleanup projection and verify cross-repository contracts from default branches | R0 scope for any release-visible behavior | Green default branches, merge manifest, cross-repo contract report |
 | R2A · Distribution | Production App ID/project settings, signing, icons, versioning, privacy manifest, Release scan, archive/upload CI | D01, D07; can run beside R2B–R2D | Accepted App Store Connect build |
 | R2B · Service and accounts | Managed chat/targets/calls, HTTPS reviewer tenant, auth/sign-out/deletion, retention/export, account projections | D02, D03, D05, D06, D08 | End-to-end synthetic reviewer flow and deletion audit |
 | R2C · Privacy, AI, safety | Data inventory/labels/policy, hosted-AI consent, title/Director security, adversarial evaluation, UGC disabled or moderated | D03, D04, D08 | Privacy and safety sign-off |
