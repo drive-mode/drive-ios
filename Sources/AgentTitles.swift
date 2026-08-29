@@ -144,6 +144,44 @@ extension AppStore {
         titleMutationError = nil
     }
 
+    /// Fold `control.leave`: revoke still-live grants for the leaver.
+    /// Stage cards are left in place — same as the kernel.
+    func applyControlLeave(
+        participantId: String,
+        at: Date,
+        reason: String = "left",
+        eventId: String? = nil
+    ) {
+        let liveIds = titleGrantsByID.values
+            .filter { $0.agentId == participantId && $0.isActive(at: at) }
+            .map(\.id)
+        for grantId in liveIds {
+            applyTitleRevocation(
+                grantId: grantId,
+                at: at,
+                reason: reason,
+                eventId: eventId.map { "\($0)-leave-\(grantId)" })
+        }
+    }
+
+    /// Fold `control.end`: revoke every still-live grant. Cards survive.
+    func applyControlEnd(
+        at: Date,
+        reason: String = "ended",
+        eventId: String? = nil
+    ) {
+        let liveIds = titleGrantsByID.values
+            .filter { $0.isActive(at: at) }
+            .map(\.id)
+        for grantId in liveIds {
+            applyTitleRevocation(
+                grantId: grantId,
+                at: at,
+                reason: reason,
+                eventId: eventId.map { "\($0)-end-\(grantId)" })
+        }
+    }
+
     func requestPresenter(to agentId: String, duration: TimeInterval = 15 * 60) {
         guard activeCallPresenterCandidateIDs.contains(agentId),
               agents.contains(where: { $0.id == agentId }) else {

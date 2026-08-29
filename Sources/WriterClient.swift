@@ -164,6 +164,8 @@ private struct WireEvent: Decodable {
     let fromGrantId: String?
     let toGrant: WireAgentTitleGrant?
     let transferredAt: String?
+    // control.leave / control.end
+    let participantId: String?
     // work.generic
     let kind: String?
     let payload: WirePayload?
@@ -314,6 +316,19 @@ extension AppStore {
                 at: event.revokedAt.flatMap(Self.parseIso) ?? at,
                 reason: event.reason ?? "revoked",
                 eventId: event.id)
+            return
+        case "control.leave":
+            guard let participantId = event.participantId else { return }
+            wireParticipants.removeValue(forKey: participantId)
+            applyControlLeave(
+                participantId: participantId,
+                at: at,
+                reason: event.reason ?? "left",
+                eventId: event.id)
+            return
+        case "control.end":
+            wireParticipants.removeAll()
+            applyControlEnd(at: at, reason: event.reason ?? "ended", eventId: event.id)
             return
         case "control.invite":
             // Invitations ride the control track straight into the inbox.

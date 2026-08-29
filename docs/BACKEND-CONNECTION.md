@@ -45,8 +45,8 @@ Close the loop the merge opened. No owner decisions.
   and MCP [#4](https://github.com/drive-mode/drivemode-mcp/pull/4)
   (Presenter leave/room-end fold reconciliation, `room_end`)~~ — merged
   2026-08-19.
-- Mirror the two fold rules in the iOS `WriterClient` title projection
-  (leave revokes the leaver's grant; `control.end` clears titles) so the
+- ~~Mirror the two fold rules in the iOS `WriterClient` title projection
+  (leave revokes the leaver's grant; `control.end` clears titles)~~ so the
   phone's view of "who may present" cannot disagree with the room fold.
 - Rerun the iOS Xcode suite on macOS against merged `main`, and exercise iOS
   Presenter behavior against the actual Cline coordinator rather than the
