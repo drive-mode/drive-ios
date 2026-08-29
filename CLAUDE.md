@@ -76,7 +76,7 @@ targets. Use the Xcode project for anything you intend to ship or verify.
 | | Debug (`Info.Debug.plist`) | Release (`Info.plist`) |
 |---|---|---|
 | `DriveReleaseChannel` | `preview` | `production` |
-| `DriveWriterBaseURL` | `http://127.0.0.1:4600` | empty |
+| `DriveWriterBaseURL` | empty (discover printed URL / `writer.json`) | empty |
 | Local networking keys | `NSAllowsLocalNetworking`, `NSAppTransportSecurity`, `NSLocalNetworkUsageDescription` | **absent** |
 
 Do not add local-network or loopback configuration to `Info.plist`.

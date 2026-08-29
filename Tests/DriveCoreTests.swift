@@ -116,6 +116,43 @@ final class DriveCoreTests: XCTestCase {
         XCTAssertEqual(configuration.initialWriterURL(defaults: UserDefaults()), "")
     }
 
+    func testPreviewWriterURLComesFromDiscoveryNotPort4600() throws {
+        let suite = "DriveCoreTests.WriterDiscovery.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+
+        XCTAssertEqual(AppConfiguration.preview.writerBaseURL, "")
+        XCTAssertTrue(AppConfiguration.preview.permitsWriterURL("http://127.0.0.1:51234"))
+        XCTAssertEqual(
+            AppConfiguration.preview.initialWriterURL(defaults: defaults, environment: [:]),
+            "")
+
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent(suite, isDirectory: true)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let file = dir.appendingPathComponent("writer.json")
+        try Data("{\"url\":\"http://127.0.0.1:51234\"}".utf8).write(to: file)
+
+        XCTAssertEqual(
+            AppConfiguration.preview.initialWriterURL(
+                defaults: defaults,
+                environment: ["DRIVEMODE_WRITER_DISCOVERY": file.path]),
+            "http://127.0.0.1:51234")
+        XCTAssertEqual(
+            AppConfiguration.preview.initialWriterURL(
+                defaults: defaults,
+                environment: ["DRIVEMODE_WRITER_URL": "http://127.0.0.1:49876"]),
+            "http://127.0.0.1:49876")
+        XCTAssertEqual(
+            AppConfiguration.production.initialWriterURL(
+                defaults: defaults,
+                environment: [
+                    "DRIVEMODE_WRITER_URL": "http://127.0.0.1:51234",
+                    "DRIVEMODE_WRITER_DISCOVERY": file.path,
+                ]),
+            "")
+    }
+
     @MainActor
     func testProductionStoreContainsNoPreviewSeedsOrLoopbackWire() {
         let store = AppStore(configuration: .production)

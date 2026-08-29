@@ -25,7 +25,7 @@
 	<key>DriveReleaseChannel</key>
 	<string>preview</string>
 	<key>DriveWriterBaseURL</key>
-	<string>http://127.0.0.1:4600</string>
+	<string></string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsLocalNetworking</key>
