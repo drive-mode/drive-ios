@@ -678,6 +678,8 @@ struct ConfigSettingsView: View {
     @EnvironmentObject var store: AppStore
     @EnvironmentObject private var drafts: SettingsDraftStore
     @Environment(\.colorScheme) private var scheme
+    /// Typing must not retarget an active poll; commit on Return only.
+    @State private var writerURLDraft = ""
 
     var body: some View {
         ScrollView {
@@ -820,7 +822,20 @@ struct ConfigSettingsView: View {
                         }
                         .padding(.horizontal, 14).padding(.vertical, 6).frame(minHeight: 46)
                         hairline
-                        valueRow("URL", value: store.writerURL)
+                        HStack {
+                            Text("URL").scaledFont(15)
+                            TextField("Printed writer URL", text: $writerURLDraft)
+                                .textInputAutocapitalization(.never)
+                                .keyboardType(.URL)
+                                .autocorrectionDisabled()
+                                .multilineTextAlignment(.trailing)
+                                .font(.system(size: 13, design: .monospaced))
+                                .foregroundStyle(DT.ink55(scheme))
+                                .onSubmit { commitWriterURLDraft() }
+                        }
+                        .padding(.horizontal, 14).padding(.vertical, 6).frame(minHeight: 46)
+                        .accessibilityElement(children: .combine)
+                        .accessibilityLabel("Writer URL")
                         hairline
                         HStack {
                             Text("Intent").scaledFont(15)
@@ -837,7 +852,7 @@ struct ConfigSettingsView: View {
                     .padding(.top, 7)
                     footnote(store.wireStatus.isLive
                              ? "Tasks, artifacts, and the session program are coming from the connected event stream."
-                             : "Preview writer is offline; preview data remains clearly labeled.")
+                             : "Paste the printed writer URL, or set DRIVEMODE_WRITER_URL / ~/.drivemode/writer.json. Preview allows loopback HTTP; identity is that URL, not :4600.")
                 }
 
                 Spacer(minLength: 24)
@@ -847,6 +862,15 @@ struct ConfigSettingsView: View {
         .background(DT.page(scheme).ignoresSafeArea())
         .navigationTitle("Configuration")
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear { writerURLDraft = store.writerURL }
+        .onChange(of: store.writerURL) { _, url in
+            writerURLDraft = url
+        }
+    }
+
+    private func commitWriterURLDraft() {
+        store.applyWriterURL(writerURLDraft)
+        writerURLDraft = store.writerURL
     }
 
     private var hairline: some View {

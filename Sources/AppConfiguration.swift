@@ -28,7 +28,7 @@ struct AppConfiguration: Equatable, Sendable {
 
     static let preview = AppConfiguration(
         channel: .preview,
-        writerBaseURL: "http://127.0.0.1:4600",
+        writerBaseURL: "",
         isUITesting: false)
 
     static let production = AppConfiguration(
@@ -71,10 +71,46 @@ struct AppConfiguration: Equatable, Sendable {
         return scheme == "https" && !Self.isLoopback(host) && !host.hasSuffix(".local")
     }
 
-    func initialWriterURL(defaults: UserDefaults = .standard) -> String {
+    /// Identity is stored URL, then printed/env URL, then `~/.drivemode/writer.json`.
+    /// Never a magic port. Preview still allows loopback when the URL is real.
+    func initialWriterURL(
+        defaults: UserDefaults = .standard,
+        environment: [String: String] = ProcessInfo.processInfo.environment,
+        fileManager: FileManager = .default
+    ) -> String {
         let stored = defaults.string(forKey: "writerURL") ?? ""
         if permitsWriterURL(stored) { return stored }
+
+        for key in ["DRIVEMODE_WRITER_URL", "DRIVE_WRITER_URL"] {
+            let value = (environment[key] ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+            if permitsWriterURL(value) { return value }
+        }
+
+        if let discovered = Self.readDiscoveryURL(
+            environment: environment,
+            fileManager: fileManager
+        ), permitsWriterURL(discovered) {
+            return discovered
+        }
+
         return permitsWriterURL(writerBaseURL) ? writerBaseURL : ""
+    }
+
+    static func readDiscoveryURL(
+        environment: [String: String],
+        fileManager: FileManager
+    ) -> String? {
+        let explicit = environment["DRIVEMODE_WRITER_DISCOVERY"]?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        let home = environment["HOME"]
+            ?? fileManager.homeDirectoryForCurrentUser.path
+        let defaultPath = (home as NSString).appendingPathComponent(".drivemode/writer.json")
+        let path = (explicit?.isEmpty == false ? explicit : defaultPath) ?? defaultPath
+        guard let data = fileManager.contents(atPath: path),
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let url = json["url"] as? String
+        else { return nil }
+        return url.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     private static func isLoopback(_ host: String) -> Bool {

@@ -81,10 +81,10 @@ xcrun simctl launch booted ai.drivemode.drive.preview
 ```
 
 For a live local writer, run the writer using the repository's pinned toolchain.
-Debug defaults to `http://127.0.0.1:4600`, which works only when the app and
-writer share the same network namespace (such as this simulator workflow).
-Release has no default writer, rejects loopback/LAN/non-HTTPS endpoints, and
-omits local-network keys from its built plist.
+Debug has no magic port: identity is the printed URL, `DRIVEMODE_WRITER_URL`,
+or `~/.drivemode/writer.json`. Preview still allows loopback HTTP. Release has
+no default writer, rejects loopback/LAN/non-HTTPS endpoints, and omits
+local-network keys from its built plist.
 
 Do not restore the old scratchpad `seed_full.py` workflow as a source of truth.
 TODO §13 intentionally replaces remembered seeding and simulator steps with

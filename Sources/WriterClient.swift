@@ -189,6 +189,15 @@ extension AppStore {
     private static let beatCap = 64
     private static let eventTitleCap = 4000
 
+    func applyWriterURL(_ value: String) {
+        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard trimmed.isEmpty || configuration.permitsWriterURL(trimmed) else { return }
+        writerURL = trimmed
+        UserDefaults.standard.set(trimmed, forKey: "writerURL")
+        pauseWire()
+        startWire()
+    }
+
     func startWire() {
         guard wireTask == nil, configuration.permitsWriterURL(writerURL) else {
             wireStatus = .offline
