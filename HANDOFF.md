@@ -163,10 +163,10 @@ fold did not. Harness [#4](https://github.com/drive-mode/collaboration-harness/p
 mirrors both rules into the fold (leave revokes the leaver's grant; a new
 `control.end` clears the room) and MCP
 [#4](https://github.com/drive-mode/drivemode-mcp/pull/4) exposes `room_end`
-and rides the fold. The merged-system gate still wants iOS Presenter behavior
-exercised against the actual Cline coordinator, and the iOS `WriterClient`
-projects titles from `control.title_*` events only — it does not yet mirror
-the two fold-level cleanup rules (leave revocation, `control.end`).
+and rides the fold. iOS `WriterClient` now projects those two fold-level
+cleanup rules (leave revocation, `control.end`) in addition to
+`control.title_*` events. The merged-system gate still wants iOS Presenter
+behavior exercised against the actual Cline coordinator.
 
 ## Verification reality
 
@@ -211,10 +211,9 @@ substitute for hands-on screen-reader, gesture, control, or device testing.
 The connection sequence below is expanded, with owner-decision dependencies
 and per-rung evidence, in [docs/BACKEND-CONNECTION.md](docs/BACKEND-CONNECTION.md).
 
-1. Mirror the two merged fold rules (leave revocation, `control.end`) in the
-   iOS `WriterClient` title projection, and rerun the iOS Xcode suite on
-   macOS against merged `main` — including exercising iOS Presenter behavior
-   against the actual Cline coordinator.
+1. Rerun the iOS Xcode suite on macOS against merged `main`, including
+   exercising iOS Presenter behavior against the actual Cline coordinator
+   (leave/end title fold is in `WriterClient`).
 2. Connect managed chat, authenticated targets, remote call setup, runtime
    badges, the signed Director descriptor, and host-resolved call presets.
 3. Connect account/authentication, deletion, billing/StoreKit decision, usage,

@@ -9,7 +9,7 @@ Delivery snapshot:
 
 - The approved 12-PR stack **merged on 2026-08-18**: `drive-ios` [#1](https://github.com/drive-mode/drive-ios/pull/1)–[#8](https://github.com/drive-mode/drive-ios/pull/8), `collaboration-harness` [#2](https://github.com/drive-mode/collaboration-harness/pull/2)–[#3](https://github.com/drive-mode/collaboration-harness/pull/3), `drivemode-mcp` [#2](https://github.com/drive-mode/drivemode-mcp/pull/2)–[#3](https://github.com/drive-mode/drivemode-mcp/pull/3), and Cline coordinator [#17](https://github.com/drive-mode/cline-drivecode/pull/17) (its `presenterGrantId` integration-CI failure was fixed in `cline-drivecode@9647c40` before merge). All four `main` branches carry the stack.
 - Post-merge verification on `main` (2026-08-19, Linux container, no Xcode): harness `bun run check` green (13 tests); MCP `bun test` 16/16 (root `bun run typecheck` needed a fresh-clone resolution fix — see the reconciliation PR); Cline `@cline/shared` 474/474, `@cline/drive` 419/419 after `bun run build:sdk`, focused hub Presenter/room suites 81/81. The iOS Xcode suite was **not** rerun (requires macOS); the standing evidence remains the pre-merge 22-unit + 3-UI-test runs.
-- Presenter leave/room-end reconciliation (HANDOFF follow-up #1) **merged 2026-08-19** as harness [#4](https://github.com/drive-mode/collaboration-harness/pull/4) and MCP [#4](https://github.com/drive-mode/drivemode-mcp/pull/4): the standalone fold now revokes a leaving presenter's grant and clears titles on a new `control.end`, mirroring the Cline coordinator. iOS still projects titles from `control.title_*` events only and does not yet mirror those two fold rules (follow-up below).
+- Presenter leave/room-end reconciliation (HANDOFF follow-up #1) **merged 2026-08-19** as harness [#4](https://github.com/drive-mode/collaboration-harness/pull/4) and MCP [#4](https://github.com/drive-mode/drivemode-mcp/pull/4). iOS now folds `control.leave` / `control.end` into title cleanup (live Presenter drops without a trailing `title_revoked`; stage cards survive `control.end`). Production still fail-closed. The iOS Xcode suite still needs a macOS rerun against merged `main`.
 
 The app is therefore an implemented **preview on merged `main`**, not shipped
 product. The backend connection sequence is planned in
@@ -426,10 +426,11 @@ existing entries in §9 remain the source of detail.
       mappings with allowlisted family/location data, and fetch/verify the
       signed Director policy descriptor plus reviewed overlay state rather than
       hard-coding “Verified” on iOS.
-- [ ] **Finish Presenter cleanup projection and proof** — Cline, the standalone
-      Harness, and MCP now agree that leave/end revoke or clear the active
-      grant; mirror those fold rules in iOS and prove the behavior against the
-      actual coordinator with replay tests.
+- [x] **Finish Presenter cleanup projection** — Cline, the standalone
+      Harness, and MCP agree that leave/end revoke or clear the active
+      grant; iOS now mirrors those fold rules from `control.leave` /
+      `control.end` without requiring a trailing `title_revoked`. Coordinator
+      replay against the live Cline hub is still outstanding.
 - [ ] **Prove fleet-scale interaction, not only filtering** — exercise 500+
       unique skill ids through SwiftUI rendering, search, category folding,
       Memory/Skills navigation, equip changes, VoiceOver, and latency budgets.

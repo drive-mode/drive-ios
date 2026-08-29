@@ -257,6 +257,44 @@ final class DriveCoreTests: XCTestCase {
         XCTAssertEqual(store.titleEventLog.last?.kind, .revoked)
     }
 
+    @MainActor
+    func testControlLeaveAndEndDropLivePresenterWithoutTitleRevoked() {
+        let store = AppStore()
+        let now = Date().addingTimeInterval(-5)
+        let maya = store.makePresenterGrant(agentId: "maya", at: now, duration: 600)
+        XCTAssertTrue(store.applyTitleGrant(maya, eventId: "grant-maya"))
+
+        store.applyControlLeave(participantId: "scout", at: now.addingTimeInterval(1))
+        XCTAssertEqual(store.activePresenterGrant?.agentId, "maya")
+
+        let artifactCount = store.artifacts.count
+        let beatCount = store.beats.count
+
+        store.applyControlLeave(
+            participantId: "maya",
+            at: now.addingTimeInterval(2),
+            eventId: "leave-maya")
+        XCTAssertNil(store.activePresenterGrant)
+        XCTAssertNotNil(store.titleGrantsByID[maya.id]?.revokedAt)
+        XCTAssertEqual(store.titleEventLog.last?.kind, .revoked)
+        XCTAssertEqual(store.titleEventLog.last?.reason, "left")
+
+        let scout = store.makePresenterGrant(agentId: "scout", at: now.addingTimeInterval(3), duration: 600)
+        XCTAssertTrue(store.applyTitleGrant(scout, eventId: "grant-scout"))
+        store.applyControlEnd(at: now.addingTimeInterval(4), eventId: "end-room")
+        XCTAssertNil(store.activePresenterGrant)
+        XCTAssertNotNil(store.titleGrantsByID[scout.id]?.revokedAt)
+        XCTAssertEqual(store.titleEventLog.last?.reason, "ended")
+        XCTAssertEqual(store.artifacts.count, artifactCount)
+        XCTAssertEqual(store.beats.count, beatCount)
+
+        let production = AppStore(configuration: .production)
+        XCTAssertTrue(production.agents.isEmpty)
+        XCTAssertEqual(production.writerURL, "")
+        production.applyControlEnd(at: Date())
+        XCTAssertTrue(production.titleGrantsByID.isEmpty)
+    }
+
     func testDirectorPolicyBoundaryIsNonExportable() {
         let policy = DirectorPolicyDescriptor.builtIn
         XCTAssertFalse(policy.exportable)
