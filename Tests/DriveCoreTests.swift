@@ -175,6 +175,15 @@ final class DriveCoreTests: XCTestCase {
         XCTAssertEqual(store.wireStatus, .offline)
     }
 
+    @MainActor
+    func testApplyWriterURLRejectsProductionLoopback() {
+        let store = AppStore(configuration: .production)
+        XCTAssertEqual(store.writerURL, "")
+        store.applyWriterURL("http://127.0.0.1:4600")
+        XCTAssertEqual(store.writerURL, "")
+        XCTAssertNil(store.wireTask)
+    }
+
     func testWorkTargetsExposeOnlySafeDisplayLocations() {
         XCTAssertGreaterThanOrEqual(WorkTargetRef.previews.count, 3)
         for target in WorkTargetRef.previews {

@@ -678,6 +678,8 @@ struct ConfigSettingsView: View {
     @EnvironmentObject var store: AppStore
     @EnvironmentObject private var drafts: SettingsDraftStore
     @Environment(\.colorScheme) private var scheme
+    /// Typing must not retarget an active poll; commit on Return only.
+    @State private var writerURLDraft = ""
 
     var body: some View {
         ScrollView {
@@ -822,14 +824,14 @@ struct ConfigSettingsView: View {
                         hairline
                         HStack {
                             Text("URL").scaledFont(15)
-                            TextField("Printed writer URL", text: $store.writerURL)
+                            TextField("Printed writer URL", text: $writerURLDraft)
                                 .textInputAutocapitalization(.never)
                                 .keyboardType(.URL)
                                 .autocorrectionDisabled()
                                 .multilineTextAlignment(.trailing)
                                 .font(.system(size: 13, design: .monospaced))
                                 .foregroundStyle(DT.ink55(scheme))
-                                .onSubmit { store.applyWriterURL(store.writerURL) }
+                                .onSubmit { commitWriterURLDraft() }
                         }
                         .padding(.horizontal, 14).padding(.vertical, 6).frame(minHeight: 46)
                         .accessibilityElement(children: .combine)
@@ -860,6 +862,15 @@ struct ConfigSettingsView: View {
         .background(DT.page(scheme).ignoresSafeArea())
         .navigationTitle("Configuration")
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear { writerURLDraft = store.writerURL }
+        .onChange(of: store.writerURL) { _, url in
+            writerURLDraft = url
+        }
+    }
+
+    private func commitWriterURLDraft() {
+        store.applyWriterURL(writerURLDraft)
+        writerURLDraft = store.writerURL
     }
 
     private var hairline: some View {
