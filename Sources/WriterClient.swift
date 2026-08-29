@@ -195,7 +195,55 @@ extension AppStore {
         writerURL = trimmed
         UserDefaults.standard.set(trimmed, forKey: "writerURL")
         pauseWire()
+        resetWireProjection()
         startWire()
+    }
+
+    /// A printed URL is a writer identity. Retargeting must drop the old
+    /// cursor and working set so the next poll cannot skip a fresh log or
+    /// keep another writer's tasks and artifacts on a live connection.
+    private func resetWireProjection() {
+        for sessionId in wireReminderScheduled {
+            NotificationManager.shared.cancelSessionReminder(sessionId)
+        }
+        wireSeq = -1
+        wireDropped = false
+        wireBackoff = 1.5
+        wireStatus = .offline
+        wireTasks.removeAll()
+        wireTaskAt.removeAll()
+        wireTaskOrder.removeAll()
+        wireArtifacts.removeAll()
+        wireArtifactOrder.removeAll()
+        wireBeats.removeAll()
+        wireBeatRelated.removeAll()
+        wireBeatPrograms.removeAll()
+        wireSessions.removeAll()
+        wireUpcomingSessions = []
+        wireActiveSession = nil
+        wireActiveProgramId = nil
+        wireReminderScheduled.removeAll()
+        wireParticipants.removeAll()
+        wireActorStatus.removeAll()
+        wireEventTitles.removeAll()
+        wireEventOrder.removeAll()
+        wireSkillUse.removeAll()
+        titleGrantsByID.removeAll()
+        titleEventLog.removeAll()
+
+        if configuration.previewContentEnabled {
+            agents = DemoData.agents
+            interrupts = DemoData.interrupts
+            tasks = DemoData.curatedTasks
+            beats = DemoData.beats
+            artifacts = DemoData.artifacts
+        } else {
+            agents = []
+            interrupts = []
+            tasks = []
+            beats = []
+            artifacts = []
+        }
     }
 
     func startWire() {

@@ -824,6 +824,7 @@ struct ConfigSettingsView: View {
                         hairline
                         HStack {
                             Text("URL").scaledFont(15)
+                                .accessibilityHidden(true)
                             TextField("Printed writer URL", text: $writerURLDraft)
                                 .textInputAutocapitalization(.never)
                                 .keyboardType(.URL)
@@ -832,10 +833,9 @@ struct ConfigSettingsView: View {
                                 .font(.system(size: 13, design: .monospaced))
                                 .foregroundStyle(DT.ink55(scheme))
                                 .onSubmit { commitWriterURLDraft() }
+                                .accessibilityLabel("Writer URL")
                         }
                         .padding(.horizontal, 14).padding(.vertical, 6).frame(minHeight: 46)
-                        .accessibilityElement(children: .combine)
-                        .accessibilityLabel("Writer URL")
                         hairline
                         HStack {
                             Text("Intent").scaledFont(15)

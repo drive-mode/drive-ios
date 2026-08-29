@@ -184,6 +184,47 @@ final class DriveCoreTests: XCTestCase {
         XCTAssertNil(store.wireTask)
     }
 
+    @MainActor
+    func testApplyWriterURLResetsWireCursorAndCollections() {
+        let previous = UserDefaults.standard.string(forKey: "writerURL")
+        defer {
+            if let previous {
+                UserDefaults.standard.set(previous, forKey: "writerURL")
+            } else {
+                UserDefaults.standard.removeObject(forKey: "writerURL")
+            }
+        }
+
+        let store = AppStore(configuration: .production)
+        store.wireSeq = 80
+        store.wireStatus = .live(latestSeq: 80, events: 12)
+        store.wireDropped = true
+        store.wireTasks["old-task"] = TaskItem(
+            id: "old-task", title: "Stale task", room: "room",
+            agentName: "Maya", agentColor: .purple, state: .running)
+        store.wireTaskOrder = ["old-task"]
+        store.tasks = Array(store.wireTasks.values)
+        store.wireArtifacts["old-art"] = Artifact(
+            id: "old-art", title: "Stale artifact", kind: .diff,
+            room: "room", repo: "repo", agentName: "Maya", agentColor: .purple,
+            age: "now", day: "Today", meta: "", sizeKB: 1, life: .permanent)
+        store.wireArtifactOrder = ["old-art"]
+        store.artifacts = Array(store.wireArtifacts.values)
+
+        store.applyWriterURL("https://writer.example.com")
+        defer { store.pauseWire() }
+
+        XCTAssertEqual(store.writerURL, "https://writer.example.com")
+        XCTAssertEqual(store.wireSeq, -1)
+        XCTAssertFalse(store.wireDropped)
+        XCTAssertTrue(store.wireTasks.isEmpty)
+        XCTAssertTrue(store.wireTaskOrder.isEmpty)
+        XCTAssertTrue(store.wireArtifacts.isEmpty)
+        XCTAssertTrue(store.tasks.isEmpty)
+        XCTAssertTrue(store.artifacts.isEmpty)
+        XCTAssertEqual(store.wireStatus, .offline)
+    }
+
     func testWorkTargetsExposeOnlySafeDisplayLocations() {
         XCTAssertGreaterThanOrEqual(WorkTargetRef.previews.count, 3)
         for target in WorkTargetRef.previews {
