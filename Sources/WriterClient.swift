@@ -292,13 +292,31 @@ extension AppStore {
         }
     }
 
-    /// Drop every wire-derived projection and rewind the cursor: the log this
-    /// client was following is gone, so the next poll rebuilds from the top.
+    /// Drop every wire-derived projection input and rewind the cursor: the
+    /// log this client was following is gone, so the next poll rebuilds from
+    /// the top. Anything left behind here gets folded together with the new
+    /// incarnation's events by `rebuildFromWire()` — the exact history splice
+    /// a resync exists to prevent — so this must clear the full set that
+    /// `apply(wireEvent:)` writes, matching the demo recreation's
+    /// `emptyState()`. Published arrays the rebuild guards behind non-empty
+    /// wire data (`tasks`, `artifacts`, `agents`) keep their last coherent
+    /// view until the new log carries replacements, like a dropped wire does;
+    /// `beats` reset immediately because a stale program would keep replaying.
     private func resyncWire() {
         wireSeq = -1
         for sessionId in wireReminderScheduled {
             NotificationManager.shared.cancelSessionReminder(sessionId)
         }
+        wireTasks.removeAll()
+        wireTaskAt.removeAll()
+        wireTaskOrder.removeAll()
+        wireArtifacts.removeAll()
+        wireArtifactOrder.removeAll()
+        wireParticipants.removeAll()
+        wireActorStatus.removeAll()
+        wireEventTitles.removeAll()
+        wireEventOrder.removeAll()
+        wireSkillUse.removeAll()
         wireSessions.removeAll()
         wireBeats.removeAll()
         wireBeatRelated.removeAll()

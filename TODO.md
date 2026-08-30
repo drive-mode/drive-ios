@@ -698,7 +698,12 @@ foreign history onto old state. Contract details in `DATA-NEEDS.md`
       resync path is the extracted `resyncWire()`; the `latestSeq`
       heuristic stays as a fallback for writers that predate the field.
       Landed with the writer change; mirrored in the drivemode-mcp demo
-      phone recreation so the two poll loops stay 1:1.
+      phone recreation so the two poll loops stay 1:1. Review caught that
+      the inherited resync body only cleared sessions/beats/titles —
+      tasks, artifacts, roster, actor status, event titles, and skill use
+      survived and would still have been folded together with the new
+      log. `resyncWire()` now drops the full set `apply(wireEvent:)`
+      writes, matching the recreation's `emptyState()`.
 - [ ] **Simulator pass over the resync path** — kill/restart the writer
       mid-session with the new field flowing and verify the reconnect chip,
       projection reset, and rebuild-from-top behavior on device. (This
