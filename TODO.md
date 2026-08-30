@@ -684,3 +684,26 @@ TestFlight → App Review → manual/phased release.
   no P0/P1 remains and all unavailable/offline/revoked states are honest.
 - Account deletion, commerce entitlement/restore (if used), AI consent,
   moderation (if used), Presenter scope, and rollback have auditable evidence.
+
+## 15 · Wire cursor fencing (2026-08-30)
+
+The writer now names its log incarnation (`logId` on `events_since`,
+`/health`, `/snapshot`, and `~/.drivemode/writer.json`), because the old
+restart heuristic (`latestSeq < cursor`) went blind once a restarted
+writer's fresh log grew past the stale cursor — the client would fold a
+foreign history onto old state. Contract details in `DATA-NEEDS.md`
+(“Cursor + log identity”); rationale in `drivemode-mcp/docs/DDIA-LESSONS.md`.
+
+- [x] **`WriterClient` compares `logId` and resyncs on change** — the
+      resync path is the extracted `resyncWire()`; the `latestSeq`
+      heuristic stays as a fallback for writers that predate the field.
+      Landed with the writer change; mirrored in the drivemode-mcp demo
+      phone recreation so the two poll loops stay 1:1.
+- [ ] **Simulator pass over the resync path** — kill/restart the writer
+      mid-session with the new field flowing and verify the reconnect chip,
+      projection reset, and rebuild-from-top behavior on device. (This
+      branch was authored off-simulator; the Swift compiles against the
+      documented shapes but the hands-on check is owed.)
+- [ ] **Adopt `opId` retry keys when the app grows write paths that
+      retry** — composer sends (`conversation_publish`) should attach one
+      once send-retry UX exists, so a retried send cannot double-post.
