@@ -19,6 +19,12 @@ const isoString = (ms) => new Date(ms).toISOString();
 const isLocalUser = (id) => id === LOCAL_USER || id === "drive:human";
 
 const wire = {
+  /** The roster's display name when the actor joined, else a readable id. */
+  nameFor(actorId) {
+    if (actorId === "coder") return "Cline";
+    return this.wireParticipants[actorId]?.displayName ?? displayName(actorId);
+  },
+
   /** Identity: stored URL → ?writer= → /discovery proxy → nothing. Never a magic port. */
   async resolveInitialWriterURL() {
     const stored = prefs.get("writerURL", "");
@@ -224,7 +230,7 @@ const wire = {
         const { taskId: id, title, project } = payload;
         if (!id || !title || !project) return;
         if (!this.wireTasks[id]) this.wireTaskOrder.push(id);
-        this.wireTasks[id] = { id, title, room: project, agentName: displayName(actorId), agentColor: colorForActor(actorId), state: cap(payload.state ?? "queued"), progress: null, detail: null, deps: payload.deps ?? [] };
+        this.wireTasks[id] = { id, title, room: project, agentName: this.nameFor(actorId), agentColor: colorForActor(actorId), state: cap(payload.state ?? "queued"), progress: null, detail: null, deps: payload.deps ?? [] };
         if (!["Running", "Review", "Blocked", "Queued", "Done"].includes(this.wireTasks[id].state)) this.wireTasks[id].state = "Queued";
         this.wireTaskAt[id] = at;
         this.evictTasksIfNeeded();
@@ -247,7 +253,7 @@ const wire = {
         if (payload.life?.ttlDays != null) life = ephemeral(Math.max(0, payload.life.ttlDays - Math.floor((Date.now() - at) / 86_400_000)));
         else life = permanent();
         if (!this.wireArtifacts[id]) this.wireArtifactOrder.push(id);
-        this.wireArtifacts[id] = { id, title, kind: kindLabel, room: payload.project ?? "Auth middleware", repo: payload.repo ?? "drive-mode", agentName: displayName(actorId), agentColor: colorForActor(actorId), age: relative(at), day: "Today", meta: payload.summary ?? kindLabel.toLowerCase(), sizeKB: payload.sizeKb ?? 0, life, at };
+        this.wireArtifacts[id] = { id, title, kind: kindLabel, room: payload.project ?? "Auth middleware", repo: payload.repo ?? "drive-mode", agentName: this.nameFor(actorId), agentColor: colorForActor(actorId), age: relative(at), day: "Today", meta: payload.summary ?? kindLabel.toLowerCase(), sizeKB: payload.sizeKb ?? 0, life, at };
         if (this.wireArtifactOrder.length > ARTIFACT_CAP) delete this.wireArtifacts[this.wireArtifactOrder.shift()];
         return;
       }
@@ -257,7 +263,7 @@ const wire = {
         const directorId = payload.directorId ?? actorId;
         const programId = payload.programId ?? "legacy";
         const key = `${programId}#${index}`;
-        this.wireBeats[key] = { id: index, kind: BEAT_KINDS[payload.kind] ?? "PLAN", title, director: displayName(directorId), directorColor: colorForActor(directorId), caption: payload.caption ?? title, duration: payload.durationSec ?? 7, steps: payload.steps ?? [], accent: payload.accent ?? [] };
+        this.wireBeats[key] = { id: index, kind: BEAT_KINDS[payload.kind] ?? "PLAN", title, director: this.nameFor(directorId), directorColor: colorForActor(directorId), caption: payload.caption ?? title, duration: payload.durationSec ?? 7, steps: payload.steps ?? [], accent: payload.accent ?? [] };
         this.wireBeatRelated[key] = payload.relatedEventIds ?? [];
         this.wireBeatPrograms[key] = programId;
         const keys = Object.keys(this.wireBeats);
@@ -333,6 +339,9 @@ const wire = {
     if (tasks.length) {
       const pulsing = new Set(tasks.filter((t) => t.state === "Running" || t.state === "Review" || t.state === "Blocked").map((t) => t.room));
       for (const p of pulsing) this.archivedProjects.delete(p);
+      // The wire owns the world: the demo registry leaves with the demo tasks.
+      const rooms = new Set(tasks.map((t) => t.room));
+      this.projects = this.projects.filter((p) => rooms.has(p.id));
       this.tasks = tasks.sort((a, b) => a.id.localeCompare(b.id));
       this.interrupts = tasks.filter((t) => t.state === "Blocked").sort((a, b) => a.id.localeCompare(b.id)).map((t) => ({
         id: `wire-${t.id}`, agentName: t.agentName, agentColor: t.agentColor, title: `${t.agentName} is blocked — ${t.title}`, kind: "blocked",

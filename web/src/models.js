@@ -476,7 +476,8 @@ export function relative(ms, now = Date.now()) {
 
 export function displayName(actorId) {
   if (actorId === "coder") return "Cline";
-  const s = String(actorId ?? "");
+  // Namespaced ids ("agent:atlas", "drive:harrison") read as their local part.
+  const s = String(actorId ?? "").replace(/^(agent|drive|human|user):/, "");
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
