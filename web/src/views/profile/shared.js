@@ -1,7 +1,7 @@
 // Shared plumbing for the Profile / Settings cluster: the bound store + nav
 // (received from registerProfile), the module-scoped stylesheet (token-only,
 // injected once), and a few tiny helpers every module in this folder uses.
-import { html, cx, useState, useEffect, useRef, Observable } from "../../ui.js";
+import { html, cx, useState, useEffect, Observable } from "../../ui.js";
 import { CountUp, Icon } from "../../components.js";
 
 /** Bound at registration; views read `ctx.store` / `ctx.nav` (never import the store). */
@@ -313,4 +313,3 @@ export function timeToMinutes(v) { const [h, m] = String(v ?? "").split(":").map
 const clockFmt = new Intl.DateTimeFormat([], { hour: "numeric", minute: "2-digit" });
 export function minutesLabel(m) { const d = new Date(); d.setHours(Math.floor(m / 60), m % 60, 0, 0); return clockFmt.format(d); }
 
-export function useMounted() { const r = useRef(true); useEffect(() => () => { r.current = false; }, []); return r; }

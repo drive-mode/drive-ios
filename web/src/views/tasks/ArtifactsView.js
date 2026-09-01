@@ -126,9 +126,9 @@ export function ArtifactCard({ artifact: a }) {
     aria-label=${`${a.kind}: ${a.title}, ${a.room}, ${sizeLabel(a.sizeKB)}, ${a.life.permanent ? "permanent" : `ephemeral, ${lifeBadge(a.life)}`}`} title="Opens the artifact. Long press for lifecycle options.">
     <div class="tk-top"><span class="tk-kind"><${Icon} name=${meta.symbol} size=${15} weight=${2.3} /></span><span class="tk-age">${a.age}</span></div>
     <div class="tk-title">${a.title}</div>
-    <div class="tk-meta">${a.meta}</div>
+    <div class="tk-art-meta">${a.meta}</div>
     <div class="tk-who"><${AvatarChip} letter=${a.agentName.charAt(0)} color=${a.agentColor} size=${16} /><span>${a.room}</span></div>
-    <div class="tk-foot">
+    <div class="tk-art-foot">
       <span class="tk-size">${sizeLabel(a.sizeKB)}</span>
       <span class=${cx("tk-life", eph && "tk-eph")}><${Icon} name=${lifeSymbol(a.life)} size=${9} weight=${2.8} />${lifeBadge(a.life)}</span>
     </div>

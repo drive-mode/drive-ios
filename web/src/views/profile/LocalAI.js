@@ -6,7 +6,7 @@
 // content never leaves this page and is marked untrusted in the prompt.
 import { html, cx, useState, useRef, useObservable, Observable, haptic } from "../../ui.js";
 import { Screen, Icon, Button, Card, Eyebrow } from "../../components.js";
-import { ctx, Footnote } from "./shared.js";
+import { ctx } from "./shared.js";
 
 // ------------------------------------------------------------- model
 

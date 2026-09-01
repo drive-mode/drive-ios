@@ -12,7 +12,7 @@ import { Icon, NavBar, HomeToolbarButton, IconButton, Empty, Eyebrow, ToggleRow,
 import { nav } from "../../nav.js";
 import { prefs } from "../../prefs.js";
 import { WORK_TARGET_KIND, ACCESS_POSTURE, CONNECTION_STATE, targetCanUse, presetCanLaunch, resolveCallLaunch } from "../../models.js";
-import { injectStyle, CheckCircle } from "./shared.js";
+import { injectStyle, CheckCircle, BackButton } from "./shared.js";
 import { SessionRecordCard } from "./CallTabView.js";
 
 let store = null;
@@ -264,7 +264,7 @@ export function WorkHistoryView() {
   const replays = s.artifacts.filter((a) => a.kind === "Replay");
   const empty = !wire.length && !replays.length;
   return html`<div class="screen">
-    <${NavBar} title="History" back=${() => nav.pop()} />
+    <${NavBar} title="History" leading=${html`<${BackButton} />`} />
     <div class="scroll"><div class="content no-tabbar list" style=${{ paddingTop: 8 }}>
       ${empty ? html`<div style=${{ paddingTop: 60 }}><${Empty} icon="clock.arrow.circlepath" title="No call history" body=${s.configuration.previewContentEnabled ? "Sessions you join replay here as their directed program." : "History appears after an approved host supplies authenticated session records."} /></div>` : null}
       ${wire.map((rec) => html`<${SessionRecordCard} key=${rec.id} session=${rec} />`)}

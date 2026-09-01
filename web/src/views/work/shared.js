@@ -10,6 +10,7 @@
 
 import { html, cx } from "../../ui.js";
 import { Icon } from "../../components.js";
+import { nav } from "../../nav.js";
 
 export function injectStyle(id, css) {
   if (document.getElementById(id)) return;
@@ -60,6 +61,18 @@ injectStyle("work-css", `
 .wk-check { border-radius: 50%; display: inline-grid; place-items: center; flex: none; box-shadow: inset 0 0 0 1.5px var(--ink-35); color: #fff; transition: background .15s, box-shadow .15s; }
 .wk-check.on { background: var(--tint, var(--violet)); box-shadow: none; }
 `);
+
+/**
+ * Navigation-bar back chevron for pushed pages. The foundation's `Page` starts
+ * an edge-swipe (with pointer capture) for any pointerdown within 28px of the
+ * left edge, which swallows the NavBar's own chevron; stopping pointerdown here
+ * keeps the tap a tap. Pass it as `leading` instead of `back`.
+ */
+export function BackButton({ onClick, label = "Back" }) {
+  return html`<button type="button" class="back-btn pressable" aria-label=${label} onPointerDown=${(e) => e.stopPropagation()} onClick=${() => (onClick ?? (() => nav.pop()))()}>
+    <${Icon} name="chevron.left" size=${22} weight=${2.6} />
+  </button>`;
+}
 
 /** `checkmark.circle.fill` / `circle` as SwiftUI draws them: a tinted disc with a white check, or a ring. */
 export function CheckCircle({ on = false, size = 20, tint = "var(--violet)", className, style }) {

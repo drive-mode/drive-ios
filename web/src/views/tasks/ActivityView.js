@@ -79,7 +79,7 @@ function WeekBars({ days, selectedDayId, onToggle }) {
     <div class="tk-week" role="group" aria-label="Shipped per day, last 7 days">
       ${week.map((day) => { const on = selectedDayId === day.id; return html`<button key=${day.id} type="button" class=${cx("pressable", on && "tk-on")} aria-pressed=${on} aria-label=${shipsLabel(day)} onClick=${() => { haptic("light"); onToggle(day.id); }}>
         <span class="tk-cnt">${day.ships}</span>
-        <span class="tk-bar"><i style=${{ height: `${Math.max(5, (day.ships / maxShips) * 100)}%`, minHeight: 5 }} /></span>
+        <span class="tk-week-bar"><i style=${{ height: `${Math.max(5, (day.ships / maxShips) * 100)}%`, minHeight: 5 }} /></span>
         <span class="tk-wd">${fmtNarrow.format(day.date)}</span>
       </button>`; })}
     </div>
@@ -163,7 +163,7 @@ export function BreakdownCard({ title, records }) {
     <div class="tk-rows" role="list">
       ${merged.slice(0, 8).map((slice) => html`<button key=${slice.name} type="button" role="listitem" class="tk-brow pressable" aria-label=${`${slice.name}, ${slice.count} shipped. Opens the project map.`} onClick=${() => { haptic("light"); nav.push("projectMap", { projectId: slice.name }); }}>
         <span class="tk-nm">${slice.name}</span>
-        <span class="tk-bar"><i style=${{ width: `${Math.max(3, (slice.count / maxCount) * 100)}%` }} /></span>
+        <span class="tk-brow-bar"><i style=${{ width: `${Math.max(3, (slice.count / maxCount) * 100)}%` }} /></span>
         <span class="tk-n">${slice.count}</span>
         <${Icon} name="chevron.right" size=${10} weight=${2.6} color="var(--ink-35)" />
       </button>`)}

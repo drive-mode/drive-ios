@@ -35,12 +35,13 @@ injectStyle("work-css-spotlight", `
 .sp-director { display: flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: var(--ink-55); flex: none; }
 .sp-director i { width: 6px; height: 6px; border-radius: 50%; flex: none; }
 .sp-stage { flex: 1; min-height: 0; padding: 10px 16px 64px; overflow: hidden; position: relative; }
-.spotlight.theater .sp-stage { padding-bottom: 70px; }
+.spotlight.theater .sp-stage { padding-bottom: 130px; }
 .sp-stage-inner { max-width: 560px; height: 100%; }
 .sp-zones { position: absolute; left: 0; right: 0; top: 56px; bottom: 0; display: flex; }
 .sp-zones > div { flex: 1; }
 .sp-caption-wrap { position: absolute; left: 0; right: 0; bottom: 0; padding: 0 12px 12px; pointer-events: none; display: flex; justify-content: center; }
-.spotlight.theater .sp-caption-wrap { padding: 0 16px 14px; justify-content: flex-start; }
+.spotlight.theater .sp-caption-wrap { padding: 0 16px 78px; justify-content: flex-start; }
+.spotlight.theater .sp-rail-row { margin-top: 56px; }
 .sp-caption { display: flex; align-items: center; gap: 11px; padding: 10px 13px; border-radius: var(--r-card); max-width: 100%;
   background: color-mix(in srgb, var(--surface) 92%, transparent); box-shadow: inset 0 0 0 0.8px var(--hairline); font-size: 12.5px; color: var(--ink-78); line-height: 1.3; }
 .spotlight.theater .sp-caption { max-width: 420px; }

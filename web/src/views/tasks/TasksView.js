@@ -13,8 +13,6 @@ let store = null;
 /** Called once by registerTasks — the store is received, never imported. */
 export function bindTasksStore(s) { store = s; }
 
-const STATE_DOT = { Running: "var(--live)", Review: "var(--violet)", Blocked: "var(--danger)", Queued: "var(--ink-35)", Done: "var(--ink-35)" };
-
 // ------------------------------------------------------------ rows
 
 export function TaskStateChip({ state }) {
@@ -206,7 +204,7 @@ export function ProjectCard({ project }) {
   if (agg.blocked) parts.push(`${agg.blocked} blocked`);
   if (agg.review) parts.push(`${agg.review} in review`);
   return html`<button type="button" role="listitem" class=${cx("tk-proj pressable", agg.blocked > 0 ? "tk-blocked" : attention > 0 && "tk-attn")} aria-label=${parts.join(", ")} title="Opens the project map. Long press to pin or archive." ...${lp}>
-    <div class="tk-head">
+    <div class="tk-proj-head">
       ${pinned ? html`<span class="tk-pin"><${Icon} name="pin.fill" size=${10} weight=${2.6} fill /></span>` : null}
       <span class="tk-name">${project.name}</span>
       ${attention > 0 ? html`<span class=${cx("tk-count", agg.blocked > 0 && "tk-danger")}>${attention}</span>` : null}

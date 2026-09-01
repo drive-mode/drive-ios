@@ -32,7 +32,7 @@ export function ArtifactDetailView({ params }) {
   return html`<${Screen} title=${artifact.kind} back contentClass="tk-pushed">
     <div class="tk-head" style=${{ "--tint": meta.tint }}>
       <span class="tk-kind tk-lg"><${Icon} name=${meta.symbol} size=${20} weight=${2.3} /></span>
-      <div class="grow" style=${{ minWidth: 0 }}><div class="tk-ttl">${artifact.title}</div><div class="tk-meta">${artifact.meta}</div></div>
+      <div class="grow" style=${{ minWidth: 0 }}><div class="tk-ttl">${artifact.title}</div><div class="tk-head-meta">${artifact.meta}</div></div>
     </div>
 
     ${artifact.kind === "Replay" ? html`
@@ -269,11 +269,11 @@ function TestBeat({ beat, t }) {
   const done = Math.floor(t * beat.steps.length * 1.15);
   return html`<div class="tk-tests">
     ${beat.steps.map((s, i) => html`<div key=${i} class=${cx("tk-tr", i <= done && "tk-on")}>
-      ${i < done ? html`<${Icon} name="checkmark.circle.fill" size=${15} fill color="var(--live)" />` : i === done ? html`<span class="tk-pulse"><i style=${{ opacity: 0.35 + 0.65 * pulse(t, 14) }} /></span>` : html`<span class="tk-ring" />`}
+      ${i < done ? html`<span class="tk-mark" style=${{ "--tint": "var(--live)", width: 15, height: 15 }}><${Icon} name="checkmark" size=${9} weight=${3.4} /></span>` : i === done ? html`<span class="tk-pulse"><i style=${{ opacity: 0.35 + 0.65 * pulse(t, 14) }} /></span>` : html`<span class="tk-ring" />`}
       <span>${s}</span>
       ${i < done ? html`<span class="tk-pass">PASS</span>` : null}
     </div>`)}
-    <div class="tk-sum">${Math.min(done, beat.steps.length)}/${beat.steps.length} passing</div>
+    <div class="tk-tests-sum">${Math.min(done, beat.steps.length)}/${beat.steps.length} passing</div>
   </div>`;
 }
 
@@ -282,11 +282,11 @@ function DecisionBeat({ beat, t }) {
     ${beat.steps.map((s, i) => {
       const chosen = beat.accent.includes(i) && t > 0.5, dimmed = !beat.accent.includes(i) && t > 0.5;
       return html`<div key=${i} class=${cx("tk-op", chosen && "tk-on", dimmed && "tk-dim")}>
-        <${Icon} name=${chosen ? "checkmark.circle.fill" : "circle"} size=${17} fill=${chosen} color=${chosen ? "var(--violet-text)" : "var(--ink-35)"} />
+        <span class=${cx("tk-mark", !chosen && "tk-ring")} style=${{ "--tint": "var(--violet-text)" }}><${Icon} name="checkmark" size=${10} weight=${3.2} /></span>
         <span>${s}</span>
       </div>`;
     })}
-    <div class="tk-note">Decisions are narrated, logged, and reversible from history.</div>
+    <div class="tk-decide-note">Decisions are narrated, logged, and reversible from history.</div>
   </div>`;
 }
 
@@ -303,7 +303,7 @@ function MetricBeat({ beat, t }) {
           <div class="tk-mbar"><i class=${cx(after && "tk-after")} style=${{ width: `${Math.max(2, (value / 41) * grow * 100)}%` }} /></div>
         </div>`;
       }
-      return html`<div key=${i} class="tk-seal" style=${{ opacity: t > 0.5 ? 1 : 0 }}><${Icon} name="checkmark.seal.fill" size=${14} fill color="var(--live)" />${s}</div>`;
+      return html`<div key=${i} class="tk-seal" style=${{ opacity: t > 0.5 ? 1 : 0 }}><${Icon} name="checkmark.seal" size=${15} weight=${2.4} color="var(--live)" />${s}</div>`;
     })}
   </div>`;
 }

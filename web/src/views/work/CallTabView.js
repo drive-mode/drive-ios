@@ -9,7 +9,7 @@ import { nav, hasRoute } from "../../nav.js";
 import { prefs } from "../../prefs.js";
 import { LOCAL_USER_ID } from "../../store.js";
 import { BEAT_TINT, TASK_STATE_TINT, scheduledDateFor, displayName as displayNameFor } from "../../models.js";
-import { injectStyle, CheckCircle } from "./shared.js";
+import { injectStyle, CheckCircle, BackButton } from "./shared.js";
 import { ProgressRail, ReplaySpotlight } from "./SpotlightDirector.js";
 
 let store = null;
@@ -163,7 +163,7 @@ export function SessionRecordView({ params }) {
     ? [wire.project, wire.when, plural(wire.agendaCount ?? 0, "agenda item"), ...(wire.people ?? []).map((p) => p)]
     : replay ? [replay.room, replay.meta, `${replay.agentName} directed`, `${replay.age} ago`] : [];
   return html`<div class="screen">
-    <${NavBar} title=${title} back=${() => nav.pop()} />
+    <${NavBar} title=${title} leading=${html`<${BackButton} />`} />
     <div class="scroll"><div class="content no-tabbar vstack" style=${{ "--gap": "14px", paddingTop: 8 }}>
       ${!wire && !replay ? html`<${Empty} icon="clock.arrow.circlepath" title="Record not found" body="This session record is no longer in the working set." />` : null}
       ${chips.length ? html`<div class="sr-meta">${chips.map((c) => html`<${Chip} key=${c}>${c}</${Chip}>`)}</div>` : null}
@@ -190,7 +190,7 @@ export function WorkCallsView() {
   const upcomingMenu = (e, session) => showMenu(e, [{ label: "Remove", icon: "trash", danger: true, onSelect: () => s.removeUpcoming(session.id) }], { title: session.title });
 
   return html`<div class="screen">
-    <${NavBar} title="Calls" back=${() => nav.pop()} />
+    <${NavBar} title="Calls" leading=${html`<${BackButton} />`} />
     <div class="scroll"><div class="content no-tabbar" style=${{ paddingTop: 8 }}>
       <${Eyebrow}>NOW</${Eyebrow}>
       <div style=${{ marginTop: 10 }}>

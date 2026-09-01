@@ -2,7 +2,7 @@
 // Apple's rings and trends, wearing Drive's verbs: Steer, Answer, Ship.
 // Personable, honest, never stale. Production shows observed counts only.
 import { html, cx, useState, useEffect, useObservable, reducedMotion } from "../../ui.js";
-import { Screen, Icon, AvatarChip, DriveMark, Row, RowGroup, Eyebrow, Card, Pressable } from "../../components.js";
+import { Screen, Icon, AvatarChip, DriveMark, Row, RowGroup, Eyebrow, Card } from "../../components.js";
 import { prefs } from "../../prefs.js";
 import { DemoData } from "../../models.js";
 import { ctx, profileLayout, CountUpText } from "./shared.js";
