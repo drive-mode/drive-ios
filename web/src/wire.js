@@ -5,7 +5,7 @@
 // Installed as methods on AppStore (the Swift file is an `extension AppStore`).
 import { AppStore } from "./store.js";
 import { prefs } from "./prefs.js";
-import { relative, displayName, colorForActor, ArtifactKind, permanent, ephemeral, displayWhen, scheduledDateFor } from "./models.js";
+import { relative, displayName, localActorId, colorForActor, ArtifactKind, permanent, ephemeral, displayWhen, scheduledDateFor } from "./models.js";
 
 const TASK_CAP = 3000;
 const ARTIFACT_CAP = 800;
@@ -21,7 +21,7 @@ const isLocalUser = (id) => id === LOCAL_USER || id === "drive:human";
 const wire = {
   /** The roster's display name when the actor joined, else a readable id. */
   nameFor(actorId) {
-    if (actorId === "coder") return "Cline";
+    if (localActorId(actorId) === "coder") return "Cline";
     return this.wireParticipants[actorId]?.displayName ?? displayName(actorId);
   },
 

@@ -296,6 +296,17 @@ test("interrupt replies resolve the interrupt and resume the blocked task", asyn
   assert.equal(s.agents.find((a) => a.id === "coder").state, "Working");
 });
 
+test("display names strip namespaces before the Cline alias", () => {
+  assert.equal(models.displayName("coder"), "Cline");
+  assert.equal(models.displayName("agent:coder"), "Cline");
+  assert.equal(models.displayName("agent:atlas"), "Atlas");
+  assert.equal(models.displayName("drive:harrison"), "Harrison");
+  const s = preview();
+  assert.equal(s.nameFor("agent:coder"), "Cline");
+  s.applyWireEvent({ type: "control.join", at: new Date().toISOString(), participant: { id: "agent:beacon", kind: "agent", displayName: "Beacon", role: "partner" } });
+  assert.equal(s.nameFor("agent:beacon"), "Beacon");
+});
+
 test("intent recorder predicts the most frequent next surface", () => {
   const r = new IntentRecorder();
   r.reset();

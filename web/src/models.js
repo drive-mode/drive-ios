@@ -474,10 +474,14 @@ export function relative(ms, now = Date.now()) {
   return `${Math.floor(s / 86_400)}d`;
 }
 
+/** Namespaced ids ("agent:atlas", "drive:harrison") read as their local part. */
+export function localActorId(actorId) {
+  return String(actorId ?? "").replace(/^(agent|drive|human|user):/, "");
+}
+
 export function displayName(actorId) {
-  if (actorId === "coder") return "Cline";
-  // Namespaced ids ("agent:atlas", "drive:harrison") read as their local part.
-  const s = String(actorId ?? "").replace(/^(agent|drive|human|user):/, "");
+  const s = localActorId(actorId);
+  if (s === "coder") return "Cline"; // the main agent is Cline
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
