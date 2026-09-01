@@ -16,7 +16,7 @@ export function OpenView() {
     else { s.launch(); nav.selectTab("home"); }
   };
 
-  return html`<div class="op" data-surface="open">
+  return html`<div class="hm-open" data-surface="open">
     ${preview ? html`<${PreviewChip} />` : html`<div style=${{ height: 30 }} />`}
     <div style=${{ flex: 1, minHeight: 24 }} />
 

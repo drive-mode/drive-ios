@@ -140,6 +140,8 @@ a { color: var(--violet-text); text-decoration: none; }
 img { max-width: 100%; display: block; }
 :focus-visible { outline: 2px solid var(--violet); outline-offset: 2px; border-radius: 4px; }
 input, textarea { outline: none; }
+.field input:focus-visible, .field textarea:focus-visible { outline: none; }
+.field input::-webkit-search-cancel-button, .field input::-webkit-search-decoration { -webkit-appearance: none; appearance: none; }
 
 /* ------------------------------------------------------------ device frame */
 #app { position: fixed; inset: 0; display: grid; place-items: center; }

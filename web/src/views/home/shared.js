@@ -29,21 +29,21 @@ export function stripAgentPrefix(title, agentName) {
 
 injectStyle("home-css", `
 /* ---------------------------------------------------------- Open */
-.op { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; text-align: center;
+.hm-open { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; text-align: center;
   padding: calc(var(--safe-top) + 24px) 36px calc(var(--safe-bottom) + 10px);
   background: linear-gradient(180deg, color-mix(in srgb, var(--violet) 3%, var(--page)), var(--page) 60%); overflow-y: auto; }
-.op .mark-tile { width: 96px; height: 96px; border-radius: 22px; background: var(--surface); display: grid; place-items: center;
+.hm-open .mark-tile { width: 96px; height: 96px; border-radius: 22px; background: var(--surface); display: grid; place-items: center;
   box-shadow: inset 0 0 0 .8px var(--hairline), 0 5px 14px rgba(0,0,0,.08); }
-.op .wordmark { margin-top: 20px; font-size: 12px; font-weight: 700; letter-spacing: 4.5px; color: var(--ink-55); }
-.op h1 { margin-top: 10px; font-size: 34px; font-weight: 900; letter-spacing: -1.2px; line-height: 1.08; }
-.op h1 .verb { color: var(--violet-text); }
-.op .lede { margin-top: 14px; font-size: 15px; line-height: 1.45; color: var(--ink-55); white-space: pre-line; }
-.op .cta { margin-top: 34px; width: 100%; height: 52px; border-radius: var(--r-hero); font-size: 16px; font-weight: 700; color: #fff;
+.hm-open .wordmark { margin-top: 20px; font-size: 12px; font-weight: 700; letter-spacing: 4.5px; color: var(--ink-55); }
+.hm-open h1 { margin-top: 10px; font-size: 34px; font-weight: 900; letter-spacing: -1.2px; line-height: 1.08; }
+.hm-open h1 .verb { color: var(--violet-text); }
+.hm-open .lede { margin-top: 14px; font-size: 15px; line-height: 1.45; color: var(--ink-55); white-space: pre-line; }
+.hm-open .cta { margin-top: 34px; width: 100%; height: 52px; border-radius: var(--r-hero); font-size: 16px; font-weight: 700; color: #fff;
   background: var(--hero-gradient); box-shadow: 0 8px 14px color-mix(in srgb, var(--violet) 35%, transparent); }
-.op .alt { margin-top: 12px; width: 100%; height: 52px; border-radius: var(--r-hero); font-size: 15px; font-weight: 600; color: var(--ink);
+.hm-open .alt { margin-top: 12px; width: 100%; height: 52px; border-radius: var(--r-hero); font-size: 15px; font-weight: 600; color: var(--ink);
   background: var(--surface); box-shadow: inset 0 0 0 .8px var(--hairline); }
-.op .invite { margin-top: 18px; min-height: 44px; padding: 0 12px; font-size: 13px; font-weight: 600; color: var(--violet-text); }
-.op .foot { margin-top: auto; padding: 24px 0 0; font-size: 12px; font-weight: 600; color: var(--ink-55); }
+.hm-open .invite { margin-top: 18px; min-height: 44px; padding: 0 12px; font-size: 13px; font-weight: 600; color: var(--violet-text); }
+.hm-open .foot { margin-top: auto; padding: 24px 0 0; font-size: 12px; font-weight: 600; color: var(--ink-55); }
 
 /* ---------------------------------------------------------- Home */
 .hm-content { padding-left: 20px; padding-right: 20px; }
