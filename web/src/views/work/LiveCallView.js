@@ -22,8 +22,8 @@ let store = null;
 export function bindLiveCall(ctx) { store = ctx.store; }
 
 injectStyle("work-css-live", `
-.live-call { position: absolute; inset: 0; background: var(--page); overflow: hidden; }
-.live-frame { position: absolute; inset: 0; display: flex; flex-direction: column; background: var(--page); }
+.live-call { position: absolute; inset: 0; background: var(--page); overflow: clip; }
+.live-frame { position: absolute; inset: 0; display: flex; flex-direction: column; background: var(--page); overflow: clip; }
 .live-frame.rotated { inset: auto; left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(90deg); transform-origin: center; }
 .live-frame.animate { transition: transform .45s var(--ease), width .45s var(--ease), height .45s var(--ease); }
 

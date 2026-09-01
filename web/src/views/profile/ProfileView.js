@@ -8,7 +8,6 @@ import { DemoData } from "../../models.js";
 import { ctx, profileLayout, CountUpText } from "./shared.js";
 import { readProfileLayout } from "./ProfileCustomize.js";
 import { ShowcaseDemo } from "./ShowcaseView.js";
-import { FeedbackBubble } from "./FeedbackMode.js";
 
 export function ProfileView() {
   const store = useObservable(ctx.store);
@@ -23,7 +22,8 @@ export function ProfileView() {
   const displayEmail = emailRaw || (preview ? "harrison@quant-h2.com" : "Account service not connected");
   const initial = displayName.charAt(0).toUpperCase();
 
-  return html`<${Screen} title="Profile" back footer=${store.feedbackAvailable ? html`<${FeedbackBubble} />` : null}>
+  // The feedback bubble rides Home (HomeView.swift) — the Home cluster mounts its own; Profile stays quiet.
+  return html`<${Screen} title="Profile" back>
     <div class="pf-head">
       <${AvatarChip} letter=${initial} name=${displayName} color="var(--violet)" size=${46} human />
       <div class="grow">

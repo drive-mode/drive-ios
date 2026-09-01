@@ -18,20 +18,20 @@ const STATE_DOT = { Running: "var(--live)", Review: "var(--violet)", Blocked: "v
 // ------------------------------------------------------------ rows
 
 export function TaskStateChip({ state }) {
-  if (state === "Done") return html`<span class="tk-state done" aria-label="Done"><${Icon} name="checkmark" size=${13} weight=${3} /></span>`;
-  return html`<span class=${cx("tk-state", state.toLowerCase())}>${state === "Running" ? html`<i class="dot" />` : null}${state}</span>`;
+  if (state === "Done") return html`<span class="tk-state tk-done" aria-label="Done"><${Icon} name="checkmark" size=${13} weight=${3} /></span>`;
+  return html`<span class=${cx("tk-state", `tk-${state.toLowerCase()}`)}>${state === "Running" ? html`<i class="dot" />` : null}${state}</span>`;
 }
 
 export function TaskRow({ task, showProject = false, archived = false, className }) {
-  return html`<div class=${cx("tk-taskrow", task.state === "Done" && "done", archived && "archived", className)}>
+  return html`<div class=${cx("tk-taskrow", task.state === "Done" && "tk-done", archived && "tk-archived", className)}>
     <${AvatarChip} letter=${task.agentName.charAt(0)} name=${task.agentName} color=${task.agentColor} size=${28} />
-    <div class="body">
-      <div class="t">${task.title}</div>
-      ${showProject ? html`<div class="r">${task.room}</div>` : null}
+    <div class="tk-body">
+      <div class="tk-t">${task.title}</div>
+      ${showProject ? html`<div class="tk-r">${task.room}</div>` : null}
     </div>
-    ${task.progress != null && task.state === "Running" ? html`<span class="pct">${Math.round(task.progress * 100)}%</span>` : null}
+    ${task.progress != null && task.state === "Running" ? html`<span class="tk-pct">${Math.round(task.progress * 100)}%</span>` : null}
     <${TaskStateChip} state=${task.state} />
-    ${archived ? html`<span class="tag" aria-hidden="true">ARCHIVED</span>` : null}
+    ${archived ? html`<span class="tk-tag" aria-hidden="true">ARCHIVED</span>` : null}
   </div>`;
 }
 
@@ -94,7 +94,7 @@ export function TasksView() {
       <${TidyCard} />
       <div class="tk-modebar">
         <${ModeToggle} options=${["Projects", "All tasks"]} value=${mode} onChange=${setMode} label="Tasks view" />
-        ${mode === "All tasks" ? html`<button type="button" class=${cx("tk-select pressable", selecting && "on")} aria-pressed=${selecting} onClick=${() => { haptic("light"); toggleSelecting(); }}>${selecting ? "Done" : "Select"}</button>` : null}
+        ${mode === "All tasks" ? html`<button type="button" class=${cx("tk-select pressable", selecting && "tk-on")} aria-pressed=${selecting} onClick=${() => { haptic("light"); toggleSelecting(); }}>${selecting ? "Done" : "Select"}</button>` : null}
       </div>
       ${mode === "Projects"
         ? html`<${ProjectGrid} scrollRef=${scrollRef} projects=${s.orderedProjects} seeded=${s.fleetSeeded} preview=${preview} />`
@@ -105,8 +105,8 @@ export function TasksView() {
 }
 
 function StatusStrip({ needsYou, running, blocked }) {
-  const tile = (n, label, { accent, live, danger, onClick, hint } = {}) => html`<${onClick ? "button" : "div"} type=${onClick ? "button" : undefined} class=${cx("tk-tile", accent && "accent", danger && "danger", onClick && "pressable")} onClick=${onClick} aria-label=${`${n} ${label}${hint ? `. ${hint}` : ""}`}>
-    <span class="n">${n}</span><span class="l">${live ? html`<i class="dot" />` : null}${label}</span>
+  const tile = (n, label, { accent, live, danger, onClick, hint } = {}) => html`<${onClick ? "button" : "div"} type=${onClick ? "button" : undefined} class=${cx("tk-tile", accent && "tk-accent", danger && "tk-danger", onClick && "pressable")} onClick=${onClick} aria-label=${`${n} ${label}${hint ? `. ${hint}` : ""}`}>
+    <span class="tk-n">${n}</span><span class="tk-l">${live ? html`<i class="dot" />` : null}${label}</span>
   </${onClick ? "button" : "div"}>`;
   return html`<div class="tk-strip">
     ${tile(needsYou, "Need you", { accent: true, onClick: () => { haptic("light"); needsYouRouter(); }, hint: "Opens what needs a human" })}
@@ -122,12 +122,12 @@ function AttentionRail({ items }) {
   return html`
     <${EyebrowRow} label="NEEDS A HUMAN" trailing=${items.length} />
     <div class="tk-hscroll tk-rail" role="list" aria-label="Needs a human">
-      ${shown.map((task) => html`<button key=${task.id} type="button" role="listitem" class=${cx("tk-att pressable", task.state === "Blocked" && "blocked")}
+      ${shown.map((task) => html`<button key=${task.id} type="button" role="listitem" class=${cx("tk-att pressable", task.state === "Blocked" && "tk-blocked")}
         aria-label=${`${task.title}, ${task.state}, ${task.room}`} title="Opens the project map focused on this task"
         onClick=${() => { haptic("light"); openTask(task); }}>
         <div class="hstack" style=${{ gap: 6 }}><${AvatarChip} letter=${task.agentName.charAt(0)} color=${task.agentColor} size=${20} /><${TaskStateChip} state=${task.state} /></div>
-        <div class="t">${task.title}</div>
-        <div class="r">${task.room}</div>
+        <div class="tk-t">${task.title}</div>
+        <div class="tk-r">${task.room}</div>
       </button>`)}
       ${items.length > 14 ? html`<span class="tk-more">+${items.length - 14} more</span>` : null}
     </div>`;
@@ -143,7 +143,7 @@ function TidyCard() {
   const candidates = s.sweepCandidateCount;
   if (candidates <= 0 && !s.sweeping) return null;
   return html`<div class="tk-tidy" role="status">
-    <span class="ic">${s.sweeping ? html`<${DriveSpinner} size=${26} />` : html`<${Icon} name="sparkles" size=${18} weight=${2.4} />`}</span>
+    <span class="tk-ic">${s.sweeping ? html`<${DriveSpinner} size=${26} />` : html`<${Icon} name="sparkles" size=${18} weight=${2.4} />`}</span>
     <div class="grow">
       <div class="t-sm w7" style=${{ fontSize: 13.5 }}>${s.sweeping ? "Filing…" : `${candidates} shipped tasks ready to file`}</div>
       <div class="t-xs muted" style=${{ marginTop: 2 }}>Out of sight, still searchable — never deleted</div>
@@ -156,7 +156,7 @@ function ArchiveFooter({ count }) {
   return html`<button type="button" class="tk-foot pressable" onClick=${() => { haptic("light"); nav.push("archive"); }} aria-label=${`Archive, ${count} items. Filed, searchable, restorable.`}>
     <${Icon} name="archivebox" size=${14} weight=${2.2} />
     <span>Archive · ${count} items</span>
-    <span class="sub grow">filed, searchable, restorable</span>
+    <span class="tk-sub grow">filed, searchable, restorable</span>
     <${Icon} name="chevron.right" size=${12} weight=${2.6} color="var(--ink-35)" />
   </button>`;
 }
@@ -179,7 +179,7 @@ function ProjectGrid({ scrollRef, projects, seeded, preview }) {
   for (let r = start; r < end; r++) {
     const a = r * 2, b = a + 1;
     rows.push(html`<div key=${r} class="tk-gridrow" style=${{ top: offsets[r] }}>
-      ${[a, b].map((i) => i < projects.length ? html`<${ProjectCard} key=${projects[i].id} project=${projects[i]} />` : i < cells ? html`<div key=${`sk${i}`} class="tk-proj skel skeleton" aria-busy="true" />` : null)}
+      ${[a, b].map((i) => i < projects.length ? html`<${ProjectCard} key=${projects[i].id} project=${projects[i]} />` : i < cells ? html`<div key=${`sk${i}`} class="tk-proj tk-skel skeleton" aria-busy="true" />` : null)}
     </div>`);
   }
   return html`<div ref=${hostRef} class="tk-grid" style=${{ height: total }} role="list" aria-label="Projects" aria-busy=${skeletons > 0}>${rows}</div>`;
@@ -205,13 +205,13 @@ export function ProjectCard({ project }) {
   if (agg.running) parts.push(`${agg.running} running`);
   if (agg.blocked) parts.push(`${agg.blocked} blocked`);
   if (agg.review) parts.push(`${agg.review} in review`);
-  return html`<button type="button" role="listitem" class=${cx("tk-proj pressable", agg.blocked > 0 ? "blocked" : attention > 0 && "attn")} aria-label=${parts.join(", ")} title="Opens the project map. Long press to pin or archive." ...${lp}>
-    <div class="head">
-      ${pinned ? html`<span class="pin"><${Icon} name="pin.fill" size=${10} weight=${2.6} fill /></span>` : null}
-      <span class="name">${project.name}</span>
-      ${attention > 0 ? html`<span class=${cx("tk-count", agg.blocked > 0 && "danger")}>${attention}</span>` : null}
+  return html`<button type="button" role="listitem" class=${cx("tk-proj pressable", agg.blocked > 0 ? "tk-blocked" : attention > 0 && "tk-attn")} aria-label=${parts.join(", ")} title="Opens the project map. Long press to pin or archive." ...${lp}>
+    <div class="tk-head">
+      ${pinned ? html`<span class="tk-pin"><${Icon} name="pin.fill" size=${10} weight=${2.6} fill /></span>` : null}
+      <span class="tk-name">${project.name}</span>
+      ${attention > 0 ? html`<span class=${cx("tk-count", agg.blocked > 0 && "tk-danger")}>${attention}</span>` : null}
     </div>
-    <div class="area">${project.area} · ${agg.total} task${agg.total === 1 ? "" : "s"}</div>
+    <div class="tk-area">${project.area} · ${agg.total} task${agg.total === 1 ? "" : "s"}</div>
     <${StateBar} agg=${agg} />
     <div class="tk-legend">${agg.running > 0 ? html`<i style=${{ background: "var(--live)" }} />${agg.running} running` : agg.total === agg.done ? html`<i style=${{ background: "var(--ink-35)" }} />shipped` : html`<i style=${{ background: "var(--ink-35)" }} />quiet`}</div>
   </button>`;
@@ -236,7 +236,7 @@ function ProjectPeek({ project }) {
   const count = (v, l, c) => html`<span><b style=${{ color: c }}>${v}</b>${l}</span>`;
   return html`<div class="tk-peek">
     <div class="hstack" style=${{ justifyContent: "space-between", gap: 8 }}><span class="w8" style=${{ fontSize: 16 }}>${project.name}</span><span class="eyebrow" style=${{ fontSize: 9, letterSpacing: .7 }}>${project.area} · ${agg.total} tasks</span></div>
-    <div class="counts">
+    <div class="tk-counts">
       ${count(agg.running, "running", "var(--live)")}
       ${agg.blocked > 0 ? count(agg.blocked, "blocked", "var(--danger)") : null}
       ${agg.review > 0 ? count(agg.review, "review", "var(--violet-text)") : null}
@@ -305,17 +305,17 @@ export function AllTasksList({ scrollRef, selecting = false, selectedIds, onTogg
   const out = [];
   for (let i = start; i < end; i++) {
     const row = model.rows[i];
-    if (row.kind === "head") out.push(html`<div key=${row.id} class="tk-abs tk-sec" style=${{ top: model.offsets[i] }} role="presentation"><span>${row.project.name}</span><span class="n">${row.count}</span></div>`);
+    if (row.kind === "head") out.push(html`<div key=${row.id} class="tk-abs tk-sec" style=${{ top: model.offsets[i] }} role="presentation"><span>${row.project.name}</span><span class="tk-n">${row.count}</span></div>`);
     else if (selecting) {
       const on = selectedIds.has(row.id);
       out.push(html`<button key=${row.id} type="button" class="tk-abs tk-selrow pressable" style=${{ top: model.offsets[i], height: ROW_H }} role="checkbox" aria-checked=${on} aria-label=${`${on ? "Selected" : "Not selected"}: ${row.task.title}`} onClick=${() => { haptic("light"); onToggle(row.id); }}>
-        <span class=${cx("tk-check", on && "on")}><${Icon} name="checkmark" size=${13} weight=${3.2} /></span>
+        <span class=${cx("tk-check", on && "tk-on")}><${Icon} name="checkmark" size=${13} weight=${3.2} /></span>
         <${TaskRow} task=${row.task} />
       </button>`);
     } else out.push(html`<div key=${row.id} class="tk-abs" style=${{ top: model.offsets[i] }}><${TaskButton} task=${row.task} /></div>`);
   }
   return html`<div ref=${hostRef} class="tk-list" style=${{ height: model.total }} role="list" aria-label="All tasks">
-    ${stickyHead?.kind === "head" ? html`<div class="tk-sticky" aria-hidden="true"><div class="tk-sec"><span>${stickyHead.project.name}</span><span class="n">${stickyHead.count}</span></div></div>` : null}
+    ${stickyHead?.kind === "head" ? html`<div class="tk-sticky" aria-hidden="true"><div class="tk-sec"><span>${stickyHead.project.name}</span><span class="tk-n">${stickyHead.count}</span></div></div>` : null}
     ${out}
   </div>`;
 }
@@ -333,9 +333,9 @@ export function AllTasksView() {
     haptic("success");
     nav.toast(`Filed ${pluralize(n, "task")} to the archive`, { icon: "archivebox" });
   };
-  const footer = selecting && selectedIds.size > 0 ? html`<div class="tk-filebar pushed"><button type="button" class="pressable" onClick=${fileSelected}><${Icon} name="archivebox" size=${15} weight=${2.4} />File ${selectedIds.size} to archive</button></div>` : null;
+  const footer = selecting && selectedIds.size > 0 ? html`<div class="tk-filebar tk-pushed"><button type="button" class="pressable" onClick=${fileSelected}><${Icon} name="archivebox" size=${15} weight=${2.4} />File ${selectedIds.size} to archive</button></div>` : null;
   return html`<${Screen} title="All tasks" back contentClass="tk-pushed" scrollRef=${scrollRef} footer=${footer}
-    trailing=${html`<button type="button" class=${cx("tk-select pressable", selecting && "on")} style=${{ height: 34 }} aria-pressed=${selecting} onClick=${() => { haptic("light"); setSelecting((v) => { if (v) setSelectedIds(new Set()); return !v; }); }}>${selecting ? "Done" : "Select"}</button>`}>
+    trailing=${html`<button type="button" class=${cx("tk-select pressable", selecting && "tk-on")} style=${{ height: 34 }} aria-pressed=${selecting} onClick=${() => { haptic("light"); setSelecting((v) => { if (v) setSelectedIds(new Set()); return !v; }); }}>${selecting ? "Done" : "Select"}</button>`}>
     <${AllTasksList} scrollRef=${scrollRef} selecting=${selecting} selectedIds=${selectedIds} onToggle=${toggleId} pushed />
   </${Screen}>`;
 }
@@ -368,8 +368,8 @@ export function ArchiveView() {
       <${EyebrowRow} label=${`ARCHIVED PROJECTS · ${projects.length}`} />
       <div class="vstack" style=${{ gap: 9, marginTop: 10 }} role="list">
         ${projects.map((p) => html`<div key=${p.id} class="tk-archrow" role="listitem">
-          <span class="ic"><${Icon} name="archivebox" size=${14} /></span>
-          <div class="grow" style=${{ minWidth: 0 }}><div class="nm">${p.name}</div><div class="ar">${p.area}${s.neverFileProjects.has(p.id) ? " · never auto-files" : ""}</div></div>
+          <span class="tk-ic"><${Icon} name="archivebox" size=${14} /></span>
+          <div class="grow" style=${{ minWidth: 0 }}><div class="tk-nm">${p.name}</div><div class="tk-ar">${p.area}${s.neverFileProjects.has(p.id) ? " · never auto-files" : ""}</div></div>
           <button type="button" class="tk-restore pressable" onClick=${() => restoreProject(p)} aria-label=${`Restore ${p.name}`}>Restore</button>
         </div>`)}
       </div>` : null}

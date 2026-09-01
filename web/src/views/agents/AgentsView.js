@@ -37,7 +37,7 @@ export function ensureAgentsCSS() {
 .ag-tile .l { display: inline-flex; align-items: center; gap: 5px; font-size: 10.5px; font-weight: 600; color: var(--ink-55); }
 .ag-tile.needs .n, .ag-tile.needs .l { color: var(--violet-text); }
 .ag-tile.stuck .n { color: var(--danger); }
-.ag-pill { display: inline-flex; align-items: center; gap: 5px; height: 30px; padding: 0 9px; border-radius: var(--r-pill); background: color-mix(in srgb, var(--violet) 8%, transparent); color: var(--violet-text); font-size: 12px; font-weight: 700; }
+.ag-pill { display: inline-flex; align-items: center; gap: 5px; min-height: 36px; margin: -3px 0; padding: 0 9px; border-radius: var(--r-pill); background: color-mix(in srgb, var(--violet) 8%, transparent); color: var(--violet-text); font-size: 12px; font-weight: 700; }
 .ag-row { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; padding: 13px 14px; margin-top: 10px; background: var(--surface); border-radius: var(--r-card); box-shadow: inset 0 0 0 .8px var(--hairline), var(--card-shadow); color: inherit; }
 .ag-row.needs { box-shadow: inset 0 0 0 .8px color-mix(in srgb, var(--violet) 28%, transparent), var(--card-shadow); }
 .ag-row .name { font-size: 15px; font-weight: 600; }
@@ -59,9 +59,9 @@ export function ensureAgentsCSS() {
 .ag-cap-body { padding: 0 14px 14px; }
 .ag-disclose { transition: transform .2s var(--ease); }
 :root[data-reduce-motion="1"] .ag-disclose { transition: none; }
-.ag-linkbtn { display: inline-flex; align-items: center; gap: 4px; min-height: 30px; padding: 4px 6px; border-radius: 8px; color: var(--violet-text); font-size: 12.5px; font-weight: 700; }
+.ag-linkbtn { display: inline-flex; align-items: center; gap: 4px; min-height: 44px; margin: -7px 0; padding: 4px 6px; border-radius: 8px; color: var(--violet-text); font-size: 12.5px; font-weight: 700; }
 .ag-linkbtn:disabled { cursor: default; }
-.ag-chipbtn { display: inline-flex; align-items: center; justify-content: center; min-height: 30px; padding: 5px 12px; border-radius: var(--r-pill); background: color-mix(in srgb, var(--violet) 10%, transparent); color: var(--violet-text); font-size: 11.5px; font-weight: 700; }
+.ag-chipbtn { display: inline-flex; align-items: center; justify-content: center; min-height: 36px; margin: -3px 0; padding: 5px 12px; border-radius: var(--r-pill); background: color-mix(in srgb, var(--violet) 10%, transparent); color: var(--violet-text); font-size: 11.5px; font-weight: 700; }
 .ag-wide-violet { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; min-height: 46px; border-radius: var(--r-control); background: color-mix(in srgb, var(--violet) 10%, transparent); color: var(--violet-text); font-size: 14px; font-weight: 700; }
 .ag-microtag { font-size: 8px; font-weight: 900; letter-spacing: .8px; color: var(--ink-35); white-space: nowrap; }
 .ag-kv { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; min-height: 46px; padding: 6px 14px; color: inherit; }
@@ -71,12 +71,12 @@ export function ensureAgentsCSS() {
 .ag-swatch { width: 20px; height: 20px; border-radius: 50%; box-shadow: inset 0 0 0 .8px var(--hairline); flex: none; }
 .ag-line-head { display: flex; align-items: center; gap: 9px; width: 100%; text-align: left; min-height: 42px; padding: 0 14px; color: inherit; }
 .ag-line-task { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; min-height: 44px; padding: 4px 14px 4px 33px; color: inherit; }
-.ag-legend { display: flex; align-items: center; gap: 7px; width: 100%; text-align: left; min-height: 30px; padding: 2px 0; color: inherit; }
+.ag-legend { display: flex; align-items: center; gap: 7px; width: 100%; text-align: left; min-height: 34px; padding: 2px 0; color: inherit; }
 .ag-dot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
 .ag-art { display: inline-flex; align-items: center; gap: 7px; padding: 8px 11px; min-height: 36px; border-radius: var(--r-pill); background: var(--surface); box-shadow: inset 0 0 0 .8px color-mix(in srgb, var(--tint) 25%, transparent); color: var(--ink-78); font-size: 11.5px; font-weight: 600; max-width: 220px; }
 .ag-task-chip { display: inline-flex; align-items: center; gap: 4.5px; padding: 4.5px 9px; border-radius: var(--r-control); font-size: 11px; font-weight: 700; white-space: nowrap; flex: none; }
 .ag-search .field, .ag-search { padding: 8px 11px; }
-.ag-kitchip { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 7px 10px; border-radius: var(--r-pill); background: color-mix(in srgb, var(--violet) 10%, transparent); color: var(--violet-text); font-size: 11.5px; font-weight: 700; white-space: nowrap; }
+.ag-kitchip { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 7px 10px; border-radius: var(--r-pill); background: color-mix(in srgb, var(--violet) 10%, transparent); color: var(--violet-text); font-size: 11.5px; font-weight: 700; white-space: nowrap; }
 .ag-kitchip.done { background: color-mix(in srgb, var(--violet) 5%, transparent); color: var(--ink-35); cursor: default; }
 .ag-cat-head { display: flex; align-items: center; gap: 9px; width: 100%; text-align: left; padding: 0 12px; color: inherit; }
 .ag-cat-head:disabled { cursor: default; }
@@ -89,7 +89,7 @@ export function ensureAgentsCSS() {
 .ag-events { display: inline-block; font-size: 10.5px; padding: 5px 9px; border-radius: 6px; background: color-mix(in srgb, var(--well) 100%, transparent); box-shadow: inset 0 0 0 .8px var(--hairline); max-width: 100%; word-break: break-word; }
 .ag-review { display: inline-flex; align-items: center; padding: 4px 9px; border-radius: var(--r-pill); font-size: 11px; font-weight: 900; color: var(--tint); background: color-mix(in srgb, var(--tint) 12%, transparent); }
 .ag-improve { display: flex; align-items: center; gap: 8px; width: 100%; margin-top: 10px; min-height: 36px; color: inherit; }
-.ag-carrier { display: inline-flex; align-items: center; gap: 5px; padding: 5px 8px; min-height: 30px; border-radius: var(--r-pill); background: var(--surface2); color: inherit; }
+.ag-carrier { display: inline-flex; align-items: center; gap: 5px; padding: 5px 8px; min-height: 36px; border-radius: var(--r-pill); background: var(--surface2); color: inherit; }
 .ag-observed { display: flex; align-items: center; gap: 6px; width: 100%; padding: 8px 10px; border-radius: 9px; background: color-mix(in srgb, var(--tint) 7%, transparent); color: inherit; }
 .ag-carriers { display: inline-flex; flex: none; }
 .ag-carriers .avatar { box-shadow: 0 0 0 1.5px var(--surface); }
@@ -103,10 +103,15 @@ export function ensureAgentsCSS() {
 .ag-sheet { display: flex; flex-direction: column; flex: 1; min-height: 0; }
 .ag-sheet .scroll { flex: 1; min-height: 0; }
 .ag-sheet-foot { flex: none; padding: 10px 16px calc(var(--safe-bottom) + 12px); box-shadow: 0 -.5px 0 var(--hairline); background: var(--page); }
-.ag-scope { display: inline-flex; align-items: center; gap: 5px; min-height: 32px; padding: 7px 11px; border-radius: var(--r-pill); background: var(--surface); box-shadow: inset 0 0 0 .8px var(--hairline); color: var(--ink-78); font-size: 12px; font-weight: 700; white-space: nowrap; }
+.ag-scope { display: inline-flex; align-items: center; gap: 5px; min-height: 36px; padding: 7px 11px; border-radius: var(--r-pill); background: var(--surface); box-shadow: inset 0 0 0 .8px var(--hairline); color: var(--ink-78); font-size: 12px; font-weight: 700; white-space: nowrap; }
 .ag-scope.on { background: var(--tint); color: #fff; box-shadow: none; }
 .ag-mem-row { display: flex; align-items: center; gap: 11px; width: 100%; text-align: left; padding: 9px 12px; min-height: 52px; color: inherit; }
 .ag-pie { display: block; flex: none; }
+.ag-row .row-body, .ag-mem-row .row-body, .ag-lib-row .row-body, .ag-pkg-row .row-body, .ag-skill-main .row-body, .ag-file-row .row-body { flex: 1; min-width: 0; }
+.ag-row .row-body > .hstack, .ag-lib-row .row-body > .hstack, .ag-skill-main .row-body > .hstack, .ag-mem-row .row-body > .hstack { min-width: 0; }
+.ag-row .name, .ag-lib-row .w6.truncate { min-width: 0; flex: 0 1 auto; }
+.ag-checkdot { width: 20px; height: 20px; border-radius: 50%; display: inline-grid; place-items: center; box-shadow: inset 0 0 0 1.6px var(--ink-35); flex: none; }
+.ag-checkdot.on { background: var(--violet); box-shadow: none; color: #fff; }
 `;
   const el = document.createElement("style");
   el.id = "agents-css";

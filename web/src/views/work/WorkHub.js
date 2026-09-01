@@ -264,7 +264,7 @@ export function WorkHistoryView() {
   const replays = s.artifacts.filter((a) => a.kind === "Replay");
   const empty = !wire.length && !replays.length;
   return html`<div class="screen">
-    <${NavBar} title="History" back />
+    <${NavBar} title="History" back=${() => nav.pop()} />
     <div class="scroll"><div class="content no-tabbar list" style=${{ paddingTop: 8 }}>
       ${empty ? html`<div style=${{ paddingTop: 60 }}><${Empty} icon="clock.arrow.circlepath" title="No call history" body=${s.configuration.previewContentEnabled ? "Sessions you join replay here as their directed program." : "History appears after an approved host supplies authenticated session records."} /></div>` : null}
       ${wire.map((rec) => html`<${SessionRecordCard} key=${rec.id} session=${rec} />`)}

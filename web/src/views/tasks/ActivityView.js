@@ -77,10 +77,10 @@ function WeekBars({ days, selectedDayId, onToggle }) {
   return html`<${Card} className="tk-card" hero>
     <div class="eyebrow">SHIPPED · LAST 7 DAYS</div>
     <div class="tk-week" role="group" aria-label="Shipped per day, last 7 days">
-      ${week.map((day) => { const on = selectedDayId === day.id; return html`<button key=${day.id} type="button" class=${cx("pressable", on && "on")} aria-pressed=${on} aria-label=${shipsLabel(day)} onClick=${() => { haptic("light"); onToggle(day.id); }}>
-        <span class="cnt">${day.ships}</span>
-        <span class="bar"><i style=${{ height: `${Math.max(5, (day.ships / maxShips) * 100)}%`, minHeight: 5 }} /></span>
-        <span class="wd">${fmtNarrow.format(day.date)}</span>
+      ${week.map((day) => { const on = selectedDayId === day.id; return html`<button key=${day.id} type="button" class=${cx("pressable", on && "tk-on")} aria-pressed=${on} aria-label=${shipsLabel(day)} onClick=${() => { haptic("light"); onToggle(day.id); }}>
+        <span class="tk-cnt">${day.ships}</span>
+        <span class="tk-bar"><i style=${{ height: `${Math.max(5, (day.ships / maxShips) * 100)}%`, minHeight: 5 }} /></span>
+        <span class="tk-wd">${fmtNarrow.format(day.date)}</span>
       </button>`; })}
     </div>
   </${Card}>`;
@@ -95,9 +95,9 @@ function MonthCalendar({ records, selectedDayId, onToggle }) {
   return html`<${Card} className="tk-card" hero>
     <div class="eyebrow">${fmtMonthYear.format(new Date()).toUpperCase()}</div>
     <div class="tk-month" role="grid" aria-label="This month">
-      ${["S", "M", "T", "W", "T", "F", "S"].map((h, i) => html`<div key=${`h${i}`} class="h" role="columnheader">${h}</div>`)}
+      ${["S", "M", "T", "W", "T", "F", "S"].map((h, i) => html`<div key=${`h${i}`} class="tk-h" role="columnheader">${h}</div>`)}
       ${Array.from({ length: firstWeekday }, (_, i) => html`<div key=${`b${i}`} style=${{ height: 34 }} />`)}
-      ${monthDays.map((day) => { const on = selectedDayId === day.id; return html`<button key=${day.id} type="button" role="gridcell" class=${cx("tk-day pressable", on && "on")} aria-pressed=${on} aria-label=${shipsLabel(day)} onClick=${() => { haptic("light"); onToggle(day.id); }}>
+      ${monthDays.map((day) => { const on = selectedDayId === day.id; return html`<button key=${day.id} type="button" role="gridcell" class=${cx("tk-day pressable", on && "tk-on")} aria-pressed=${on} aria-label=${shipsLabel(day)} onClick=${() => { haptic("light"); onToggle(day.id); }}>
         <span>${new Date(day.date).getDate()}</span><i class=${`tk-heat-${heatLevel(day.ships, maxShips)}`} />
       </button>`; })}
     </div>
@@ -121,12 +121,12 @@ export function ContributionGrid({ demo, selectedDayId, onSelect }) {
   const { yearColumns: cols, yearMonthLabels: labels, maxDailyShips } = demo;
   useEffect(() => { const el = ref.current; if (el) el.scrollLeft = el.scrollWidth; }, [cols]);
   return html`<div ref=${ref} class="tk-wall" role="grid" aria-label="Contribution wall, last 12 months">
-    <div class="cols">
-      ${cols.map((col, c) => html`<div key=${c} class="col" role="row">
-        <span class="ml" aria-hidden="true">${labels[c] ?? " "}</span>
+    <div class="tk-cols">
+      ${cols.map((col, c) => html`<div key=${c} class="tk-col" role="row">
+        <span class="tk-ml" aria-hidden="true">${labels[c] ?? " "}</span>
         ${col.map((day, r) => day
-          ? html`<button key=${day.id} type="button" role="gridcell" class=${cx("sq", `tk-heat-${heatLevel(day.ships, maxDailyShips)}`, selectedDayId === day.id && "on")} aria-pressed=${selectedDayId === day.id} aria-label=${shipsLabel(day)} onClick=${() => { haptic("light"); onSelect(day.id); }} />`
-          : html`<span key=${`e${r}`} class="sq blank" />`)}
+          ? html`<button key=${day.id} type="button" role="gridcell" class=${cx("tk-sq", `tk-heat-${heatLevel(day.ships, maxDailyShips)}`, selectedDayId === day.id && "tk-on")} aria-pressed=${selectedDayId === day.id} aria-label=${shipsLabel(day)} onClick=${() => { haptic("light"); onSelect(day.id); }} />`
+          : html`<span key=${`e${r}`} class="tk-sq tk-blank" />`)}
       </div>`)}
     </div>
   </div>`;
@@ -159,12 +159,12 @@ export function BreakdownCard({ title, records }) {
   const total = records.reduce((n, r) => n + r.ships, 0);
   const maxCount = Math.max(1, merged[0]?.count ?? 1);
   return html`<${Card} className="tk-card tk-bd fade-in" hero key=${title}>
-    <div class="bdhead"><span class="ttl">${title}</span><span class="tot">${total} shipped</span></div>
-    <div class="rows" role="list">
+    <div class="tk-bdhead"><span class="tk-ttl">${title}</span><span class="tk-tot">${total} shipped</span></div>
+    <div class="tk-rows" role="list">
       ${merged.slice(0, 8).map((slice) => html`<button key=${slice.name} type="button" role="listitem" class="tk-brow pressable" aria-label=${`${slice.name}, ${slice.count} shipped. Opens the project map.`} onClick=${() => { haptic("light"); nav.push("projectMap", { projectId: slice.name }); }}>
-        <span class="nm">${slice.name}</span>
-        <span class="bar"><i style=${{ width: `${Math.max(3, (slice.count / maxCount) * 100)}%` }} /></span>
-        <span class="n">${slice.count}</span>
+        <span class="tk-nm">${slice.name}</span>
+        <span class="tk-bar"><i style=${{ width: `${Math.max(3, (slice.count / maxCount) * 100)}%` }} /></span>
+        <span class="tk-n">${slice.count}</span>
         <${Icon} name="chevron.right" size=${10} weight=${2.6} color="var(--ink-35)" />
       </button>`)}
       ${!merged.length ? html`<div class="t-sm muted">Nothing shipped in this range.</div>` : null}

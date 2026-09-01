@@ -32,7 +32,8 @@ export function createConfiguration({ search = window.location.search } = {}) {
     permitsWriterURL(value) {
       const v = String(value ?? "").trim();
       if (!v) return false;
-      if (v.startsWith("/")) return channel === "preview" || window.location.protocol === "https:";
+      // Same-origin proxy paths are a preview-only transport (serve.py).
+      if (v.startsWith("/")) return channel === "preview";
       let url;
       try { url = new URL(v); } catch { return false; }
       const scheme = url.protocol.replace(":", "");

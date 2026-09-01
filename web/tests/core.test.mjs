@@ -49,6 +49,57 @@ test("release configuration fails closed and unknown channels default to product
   assert.equal(v.permitsWriterURL("http://127.0.0.1:4600"), true);
   assert.equal(v.permitsWriterURL("http://10.0.0.5:4600"), false);
   assert.equal(v.permitsWriterURL("/writer"), true);
+  assert.equal(p.permitsWriterURL("/writer"), false, "the serve.py proxy is preview-only");
+});
+
+test("discovery only uses the proxy when the discovered writer itself passes the channel policy", async () => {
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = async () => ({ ok: true, json: async () => ({ url: "http://127.0.0.1:43483", proxy: "/writer" }) });
+  try {
+    assert.equal(await preview().resolveInitialWriterURL(), "/writer");
+    assert.equal(await production().resolveInitialWriterURL(), "");
+    globalThis.fetch = async () => ({ ok: true, json: async () => ({ url: "https://hub.example.com", proxy: "/writer" }) });
+    assert.equal(await production().resolveInitialWriterURL(), "", "production never rides the proxy");
+  } finally { globalThis.fetch = realFetch; }
+});
+
+test("pause during an in-flight poll cancels that loop; resume runs exactly one chain", async () => {
+  const realFetch = globalThis.fetch;
+  let calls = 0;
+  globalThis.fetch = async () => { calls++; await new Promise((r) => setTimeout(r, 40)); return { ok: true, json: async () => ({ result: { latestSeq: -1, events: [] } }) }; };
+  try {
+    const s = preview();
+    s.writerURL = "http://127.0.0.1:4600";
+    s.startWire();
+    await new Promise((r) => setTimeout(r, 10)); // first poll is in flight
+    s.pauseWire();
+    s.startWire();
+    s.startWire();
+    await new Promise((r) => setTimeout(r, 120));
+    s.pauseWire();
+    const settled = calls;
+    await new Promise((r) => setTimeout(r, 200));
+    assert.equal(calls, settled, "no polls after pause");
+    assert.ok(calls <= 3, `only one chain polled (${calls} calls)`);
+    assert.equal(s.wireStatus.live, true);
+  } finally { globalThis.fetch = realFetch; }
+});
+
+test("a dropped wire keeps its cursor and event count for diagnostics", async () => {
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = async () => ({ ok: true, json: async () => ({ result: { latestSeq: 7, events: [] } }) });
+  try {
+    const s = preview();
+    s.writerURL = "http://127.0.0.1:4600";
+    await s.pollWire();
+    assert.deepEqual(s.wireStatus, { live: true, latestSeq: 7, events: 0 });
+    globalThis.fetch = async () => { throw new Error("ECONNREFUSED"); };
+    await s.pollWire();
+    await s.pollWire();
+    assert.deepEqual(s.wireStatus, { live: false, latestSeq: 7, events: 0 });
+    assert.equal(s.wireDropped, true);
+    assert.equal(s.wireSeq, 7);
+  } finally { globalThis.fetch = realFetch; }
 });
 
 test("production store contains no preview seeds or loopback wire", () => {

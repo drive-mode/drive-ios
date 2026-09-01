@@ -103,7 +103,7 @@ export function ProjectMapView({ params }) {
       ${mapItems.length ? html`<${DependencyMap} projectId=${projectId} items=${mapItems} placements=${layout.placements} height=${mapHeight} selectedId=${selectedId} onSelect=${setSelectedId} />` : null}
       ${layout?.clusters.length ? html`<div class="tk-hscroll tk-clusters" role="group" aria-label="Tasks past the map cap">
         <span>Mapping ${mapItems.length} most active</span>
-        ${layout.clusters.map((c) => html`<button key=${c.state} type="button" class=${cx("tk-cluster pressable", stateFilter === c.state && "on")} style=${{ "--tint": CLUSTER_TINT[c.state] }} aria-pressed=${stateFilter === c.state}
+        ${layout.clusters.map((c) => html`<button key=${c.state} type="button" class=${cx("tk-cluster pressable", stateFilter === c.state && "tk-on")} style=${{ "--tint": CLUSTER_TINT[c.state] }} aria-pressed=${stateFilter === c.state}
           aria-label=${`${c.count} more ${c.state} tasks`} title="Filters the task list below" onClick=${() => { haptic("light"); setStateFilter(stateFilter === c.state ? null : c.state); }}><i />+${c.count} ${c.state.toLowerCase()}</button>`)}
       </div>` : null}
       ${selected ? html`<${TaskDetailCard} task=${selected} />` : null}
@@ -230,7 +230,7 @@ function DependencyMap({ projectId, items, placements, height, selectedId, onSel
       stroke=${blockedEdge ? "var(--danger)" : "var(--ink-35)"} stroke-opacity=".45" stroke-width="1.2" stroke-dasharray=${blockedEdge ? "4 4" : undefined} />`);
   }
 
-  return html`<div ref=${hostRef} class=${cx("tk-map", zoomed && "zoomed")} style=${{ height }}
+  return html`<div ref=${hostRef} class=${cx("tk-map", zoomed && "tk-zoomed")} style=${{ height }}
     onPointerDown=${onPointerDown} onPointerMove=${onPointerMove} onPointerUp=${onPointerUp} onPointerCancel=${onPointerUp} onWheel=${onWheel}
     onDblClick=${reset} title="Pinch or ⌘-scroll to zoom the map; double-tap to reset">
     <svg viewBox=${`0 0 ${width} ${height}`} width=${width} height=${height} role="group" aria-label=${`Dependency map, ${items.length} tasks. Pinch to zoom; double-tap to reset.`}
@@ -253,9 +253,9 @@ function MapNode({ task, x, y, selected, onSelect }) {
   if (running) label += `, ${Math.round(task.progress * 100)} percent`;
   label += `, ${task.agentName}`;
   const botScale = 13 / 487.04;
-  return html`<g class="node" transform=${`translate(${x} ${y})`} role="button" tabindex="0" aria-label=${label} aria-pressed=${selected} title="Selects this task on the map"
+  return html`<g class="tk-node" transform=${`translate(${x} ${y})`} role="button" tabindex="0" aria-label=${label} aria-pressed=${selected} title="Selects this task on the map"
     onClick=${(e) => { e.stopPropagation(); onSelect(); }} onKeyDown=${(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onSelect(); } }}>
-    <circle class="hit" r=${r + 6} fill="transparent" />
+    <circle class="tk-hit" r=${r + 6} fill="transparent" />
     <circle r=${r} fill="var(--surface)" style=${{ filter: "drop-shadow(0 2px 3px var(--node-shadow))" }} />
     <circle r=${rr} fill="none" stroke=${ring} stroke-opacity=".25" stroke-width="3" />
     ${running
@@ -265,7 +265,7 @@ function MapNode({ task, x, y, selected, onSelect }) {
       ? html`<path d="M-4.5 0.5 L-1.5 3.5 L4.5 -3" fill="none" stroke="var(--ink-35)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />`
       : html`<circle r="11" fill=${task.agentColor} /><path d=${CLINE_BOT_PATH} fill="#fff" fill-rule="evenodd" transform=${`translate(${-466.73 * botScale / 2} ${-487.04 * botScale / 2}) scale(${botScale})`} />`}
     ${selected ? html`<circle r=${r + 4} fill="none" stroke="var(--violet)" stroke-width="2" />` : null}
-    <text class=${cx("lbl", done && "done", selected && "sel")} y=${r + 11} text-anchor="middle">
+    <text class=${cx("tk-lbl", done && "tk-done", selected && "tk-sel")} y=${r + 11} text-anchor="middle">
       ${lines.map((ln, i) => html`<tspan key=${i} x="0" dy=${i === 0 ? 0 : 11}>${ln}</tspan>`)}
     </text>
   </g>`;
@@ -291,8 +291,8 @@ function TaskDetailCard({ task }) {
       <${Icon} name="brain" size=${11} weight=${2.4} color="var(--tint-blue)" /><span class="grow truncate">${f.hook}</span><${Icon} name="chevron.right" size=${10} weight=${2.6} color="var(--ink-35)" />
     </button>`)}
     <div class="tk-actions">
-      ${interrupt ? html`<button type="button" class="tk-action solid pressable" onClick=${() => { haptic("light"); nav.push("conversation", { interruptId: interrupt.id }); }}>Answer ${task.agentName}</button>`
-        : task.room === "Auth middleware" ? html`<button type="button" class="tk-action solid pressable" onClick=${() => { haptic("light"); s.joinCall(); }}>Join session</button>` : null}
+      ${interrupt ? html`<button type="button" class="tk-action tk-solid pressable" onClick=${() => { haptic("light"); nav.push("conversation", { interruptId: interrupt.id }); }}>Answer ${task.agentName}</button>`
+        : task.room === "Auth middleware" ? html`<button type="button" class="tk-action tk-solid pressable" onClick=${() => { haptic("light"); s.joinCall(); }}>Join session</button>` : null}
       <button type="button" class="tk-action pressable" onClick=${() => { haptic("light"); nav.selectTab("agents"); }}>View agent</button>
     </div>
   </${Card}>`;

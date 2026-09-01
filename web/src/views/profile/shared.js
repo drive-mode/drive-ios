@@ -216,7 +216,7 @@ export const PROFILE_CSS = `
 .pf-replay .pf-director { display: flex; align-items: center; gap: 6px; font-size: 10.5px; color: rgba(255,255,255,.6); margin-top: 8px; }
 
 /* ---- feedback ---- */
-.pf-bubble { position: absolute; right: 16px; bottom: calc(var(--safe-bottom) + 18px); width: 46px; height: 46px; border-radius: 50%; background: var(--hero-gradient); display: grid; place-items: center; box-shadow: 0 4px 10px rgba(159,88,250,.4); z-index: 6; }
+.pf-bubble { position: absolute; right: 16px; bottom: calc(var(--tabbar-h) + var(--safe-bottom) + 14px); width: 46px; height: 46px; border-radius: 50%; background: var(--hero-gradient); display: grid; place-items: center; box-shadow: 0 4px 10px rgba(159,88,250,.4); z-index: 6; }
 .pf-chat { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 .pf-honesty { display: inline-flex; align-items: center; gap: 7px; padding: 7px 12px; border-radius: var(--r-pill); background: var(--surface2); font-size: 8.5px; font-weight: 700; letter-spacing: .8px; color: var(--ink-55); margin: 10px auto 0; }
 .pf-msgs { flex: 1; min-height: 0; overflow-y: auto; padding: 14px 18px; display: flex; flex-direction: column; gap: 10px; scrollbar-width: none; }

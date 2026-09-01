@@ -116,6 +116,11 @@ export function SkillIconBox({ pkg, on = true, size = 30 }) {
   return html`<span class=${cx("ag-icobox", on && "on")} style=${{ "--tint": skillTint(pkg), width: size, height: size }}><${Icon} name=${pkg.symbol} size=${Math.round(size * 0.45)} weight=${2.4} /></span>`;
 }
 
+/** The equip / pick indicator: an outlined circle, or a violet disc with a white check. */
+export function CheckDot({ on }) {
+  return html`<span class=${cx("ag-checkdot", on && "on")} aria-hidden="true">${on ? html`<${Icon} name="checkmark" size=${12} weight=${3.2} />` : null}</span>`;
+}
+
 function SearchEmpty({ query }) {
   return html`<${Empty} icon="magnifyingglass" title=${`No Results for “${query}”`} body="Check the spelling or try a new search." />`;
 }
@@ -193,7 +198,7 @@ function SkillRows({ agent, skills, equipped }) {
             </span>
           </button>
           <button type="button" class="ag-check pressable" role="switch" aria-checked=${on} aria-label=${`${on ? "Unequip" : "Equip"} ${skill.name}`} onClick=${() => { haptic("light"); s.toggleSkill(skill.id, agent.id); }}>
-            <${Icon} name=${on ? "checkmark.circle.fill" : "circle"} size=${20} weight=${2.2} fill=${on} color=${on ? "var(--violet)" : "var(--ink-35)"} />
+            <${CheckDot} on=${on} />
           </button>
         </div>
       </div>`;
@@ -273,7 +278,7 @@ export function SkillDetailView({ params }) {
       ${skill.files.map((file, i) => html`<div key=${file.name}>
         ${i > 0 ? html`<${Sep} inset=${40} />` : null}
         <div class="ag-file-row" aria-label=${`${file.name}, ${file.note}, ${isManifest(file) ? "always loaded" : "loads on demand"}, ${file.lines} lines`}>
-          <${Icon} name=${isManifest(file) ? "doc.text.fill" : "doc.text"} size=${13} weight=${2} fill=${isManifest(file)} color=${isManifest(file) ? tint : "var(--ink-35)"} style=${{ width: 22 }} />
+          <${Icon} name="doc.text" size=${14} weight=${isManifest(file) ? 2.6 : 1.8} color=${isManifest(file) ? tint : "var(--ink-35)"} style=${{ width: 22 }} />
           <span class="row-body">
             <span class="mono w7" style=${{ fontSize: 12.5, display: "block" }}>${file.name}</span>
             <span class="t-xs muted truncate" style=${{ display: "block", fontSize: 10.5 }}>${file.note}</span>
@@ -342,8 +347,8 @@ export function ImproveSkillSheet({ params }) {
   ensureAgentsCSS();
   const s = useObservable(store);
   const original = s.package(params.skillId);
+  const improved = useMemo(() => (original ? SkillCatalog.improved(original) : null), [original]);
   if (!original) return html`<${SheetFrame} title="Improve" onCancel=${() => nav.dismiss()}><${Empty} title="Skill not found" /></${SheetFrame}>`;
-  const improved = useMemo(() => SkillCatalog.improved(original), [original]);
   const added = improved.files.length > original.files.length ? improved.files[improved.files.length - 1] : null;
   return html`<${SheetFrame} title=${`Improve ${original.name}`} onCancel=${() => nav.dismiss()}>
     <div class="hstack" style=${{ gap: 9, marginTop: 8, alignItems: "flex-start" }}>
@@ -411,7 +416,7 @@ export function NewBundleSheet() {
       ${visible.map((skill, i) => { const on = picked.has(skill.id); return html`<div key=${skill.id}>
         ${i > 0 ? html`<${Sep} inset=${44} />` : null}
         <button type="button" class="ag-pick-row pressable" role="checkbox" aria-checked=${on} aria-label=${`${skill.name}`} onClick=${() => toggle(skill.id)}>
-          <${Icon} name=${on ? "checkmark.circle.fill" : "circle"} size=${19} weight=${2} fill=${on} color=${on ? "var(--violet)" : "var(--ink-35)"} />
+          <${CheckDot} on=${on} />
           <${Icon} name=${skill.symbol} size=${13} weight=${2.4} color=${skillTint(skill)} />
           <span class="w6 grow truncate" style=${{ fontSize: 13.5, textAlign: "left" }}>${skill.name}</span>
         </button>

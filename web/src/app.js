@@ -25,7 +25,9 @@ export function applyAppearance() {
   const a = prefs.get("appearance", "System");
   const root = document.documentElement;
   if (a === "Light" || a === "Dark") root.dataset.theme = a.toLowerCase(); else delete root.dataset.theme;
-  root.dataset.reduceMotion = prefs.get("reduceMotion", false) ? "1" : "0";
+  // The in-app toggle forces Reduce Motion on; otherwise the OS preference
+  // (prefers-reduced-motion) decides, so the attribute is absent, not "0".
+  if (prefs.get("reduceMotion", false)) root.dataset.reduceMotion = "1"; else delete root.dataset.reduceMotion;
 }
 window.addEventListener("drive:prefs-changed", applyAppearance);
 

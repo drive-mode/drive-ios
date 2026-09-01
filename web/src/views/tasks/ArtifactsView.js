@@ -91,7 +91,7 @@ export function ArtifactsView() {
       <${MenuPill} icon="arrow.up.arrow.down" value=${sort} options=${SORTS} onChange=${setSort} title="Sort" />
     </div>
     ${model.sections.map((sec) => html`<div key=${sec.header || "all"}>
-      ${sec.header ? html`<div class="tk-sechead"><span>${sec.header}</span><span class="n">${sec.items.length}</span></div>` : null}
+      ${sec.header ? html`<div class="tk-sechead"><span>${sec.header}</span><span class="tk-n">${sec.items.length}</span></div>` : null}
       <div class="tk-agrid" role="list">${sec.items.map((a) => html`<${ArtifactCard} key=${a.id} artifact=${a} />`)}</div>
     </div>`)}
     ${model.visible === 0 ? html`<div class="tk-nomatch"><${Icon} name="tray" size=${26} weight=${1.4} color="var(--ink-35)" />Nothing matches those filters</div>` : null}
@@ -101,7 +101,7 @@ export function ArtifactsView() {
 
 function KindChip({ kind, label, selected, onSelect }) {
   const tint = kind ? ARTIFACT_META[kind].tint : "var(--violet)";
-  return html`<button type="button" role="tab" aria-selected=${selected} class=${cx("tk-chip pressable", selected && "on")} style=${{ "--tint": tint }} onClick=${() => { if (!selected) { haptic("light"); onSelect(); } }}>
+  return html`<button type="button" role="tab" aria-selected=${selected} class=${cx("tk-chip pressable", selected && "tk-on")} style=${{ "--tint": tint }} onClick=${() => { if (!selected) { haptic("light"); onSelect(); } }}>
     ${kind ? html`<${Icon} name=${ARTIFACT_META[kind].symbol} size=${12} weight=${2.4} />` : null}${label}
   </button>`;
 }
@@ -113,7 +113,7 @@ function MenuPill({ icon, value, options, prefix, onChange, title }) {
     const r = e.currentTarget.getBoundingClientRect();
     nav.openMenu({ x: r.left, y: r.bottom, title, items: options.map((o) => ({ label: o, checked: o === value, onSelect: () => onChange(o) })) });
   };
-  return html`<button type="button" class=${cx("tk-mpill pressable", !neutral && "set")} aria-haspopup="menu" aria-label=${`${title}: ${value}`} onClick=${(e) => { haptic("light"); open(e); }}>
+  return html`<button type="button" class=${cx("tk-mpill pressable", !neutral && "tk-set")} aria-haspopup="menu" aria-label=${`${title}: ${value}`} onClick=${(e) => { haptic("light"); open(e); }}>
     <${Icon} name=${icon} size=${11} weight=${2.4} />${prefix ? `${prefix} ${value.toLowerCase()}` : value}<${Icon} name="chevron.down" size=${9} weight=${3} />
   </button>`;
 }
@@ -124,13 +124,13 @@ export function ArtifactCard({ artifact: a }) {
   const lp = useLongPress((e, pt) => nav.openMenu({ x: pt.x, y: pt.y, title: a.title, items: artifactMenuItems(a) }), { onClick: () => { haptic("light"); nav.push("artifact", { id: a.id }); } });
   return html`<button type="button" role="listitem" class="tk-art pressable" style=${{ "--tint": meta.tint }} ...${lp}
     aria-label=${`${a.kind}: ${a.title}, ${a.room}, ${sizeLabel(a.sizeKB)}, ${a.life.permanent ? "permanent" : `ephemeral, ${lifeBadge(a.life)}`}`} title="Opens the artifact. Long press for lifecycle options.">
-    <div class="top"><span class="tk-kind"><${Icon} name=${meta.symbol} size=${15} weight=${2.3} /></span><span class="age">${a.age}</span></div>
-    <div class="title">${a.title}</div>
-    <div class="meta">${a.meta}</div>
-    <div class="who"><${AvatarChip} letter=${a.agentName.charAt(0)} color=${a.agentColor} size=${16} /><span>${a.room}</span></div>
-    <div class="foot">
-      <span class="size">${sizeLabel(a.sizeKB)}</span>
-      <span class=${cx("tk-life", eph && "eph")}><${Icon} name=${lifeSymbol(a.life)} size=${9} weight=${2.8} />${lifeBadge(a.life)}</span>
+    <div class="tk-top"><span class="tk-kind"><${Icon} name=${meta.symbol} size=${15} weight=${2.3} /></span><span class="tk-age">${a.age}</span></div>
+    <div class="tk-title">${a.title}</div>
+    <div class="tk-meta">${a.meta}</div>
+    <div class="tk-who"><${AvatarChip} letter=${a.agentName.charAt(0)} color=${a.agentColor} size=${16} /><span>${a.room}</span></div>
+    <div class="tk-foot">
+      <span class="tk-size">${sizeLabel(a.sizeKB)}</span>
+      <span class=${cx("tk-life", eph && "tk-eph")}><${Icon} name=${lifeSymbol(a.life)} size=${9} weight=${2.8} />${lifeBadge(a.life)}</span>
     </div>
   </button>`;
 }

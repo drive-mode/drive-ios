@@ -31,8 +31,8 @@ export function ArtifactDetailView({ params }) {
 
   return html`<${Screen} title=${artifact.kind} back contentClass="tk-pushed">
     <div class="tk-head" style=${{ "--tint": meta.tint }}>
-      <span class="tk-kind lg"><${Icon} name=${meta.symbol} size=${20} weight=${2.3} /></span>
-      <div class="grow" style=${{ minWidth: 0 }}><div class="ttl">${artifact.title}</div><div class="meta">${artifact.meta}</div></div>
+      <span class="tk-kind tk-lg"><${Icon} name=${meta.symbol} size=${20} weight=${2.3} /></span>
+      <div class="grow" style=${{ minWidth: 0 }}><div class="tk-ttl">${artifact.title}</div><div class="tk-meta">${artifact.meta}</div></div>
     </div>
 
     ${artifact.kind === "Replay" ? html`
@@ -65,18 +65,18 @@ export function ArtifactDetailView({ params }) {
     <p class="tk-caption">${artifact.life.permanent ? "Keeps until superseded." : `Files to the archive in ${lifeBadge(artifact.life).replace(" left", "")} — searchable, never deleted.`}</p>
 
     <div class="tk-detail-actions">
-      <button type="button" class="solid pressable" onClick=${() => { haptic("light"); s.joinCall(); }}><${Icon} name="waveform" size=${13} weight=${2.4} />Open in session</button>
+      <button type="button" class="tk-solid pressable" onClick=${() => { haptic("light"); s.joinCall(); }}><${Icon} name="waveform" size=${13} weight=${2.4} />Open in session</button>
       <button type="button" class="pressable" onClick=${() => { haptic("light"); shareText(shareLine(artifact)); }}><${Icon} name="square.and.arrow.up" size=${13} weight=${2.4} />Share</button>
     </div>
   </${Screen}>`;
 }
 
 function MetaRow({ label, value }) {
-  return html`<div class="tk-metarow"><span>${label}</span><span class="v">${value}</span></div>`;
+  return html`<div class="tk-metarow"><span>${label}</span><span class="tk-v">${value}</span></div>`;
 }
 
 function LifeChip({ label, symbol, active, onClick }) {
-  return html`<button type="button" role="radio" aria-checked=${active} class=${cx("tk-lifechip pressable", active && "on")} onClick=${() => { if (!active) { haptic("light"); onClick(); } }}>
+  return html`<button type="button" role="radio" aria-checked=${active} class=${cx("tk-lifechip pressable", active && "tk-on")} onClick=${() => { if (!active) { haptic("light"); onClick(); } }}>
     <${Icon} name=${symbol} size=${11} weight=${2.4} />${label}
   </button>`;
 }
@@ -152,7 +152,7 @@ export function ReplayPlayer({ beats }) {
       <span class="tk-ptag">REPLAY</span>
     </div>
     ${beat ? html`<${BeatHeader} beat=${beat} />` : null}
-    ${beats.length ? html`<${StageClock} beats=${beats} position=${position} paused=${paused} />` : html`<div class="tk-stage"><div class="empty-beat">
+    ${beats.length ? html`<${StageClock} beats=${beats} position=${position} paused=${paused} />` : html`<div class="tk-stage"><div class="tk-empty-beat">
       <${Icon} name="play.rectangle" size=${34} weight=${1.3} color="var(--tint-replay)" />
       <div class="w8" style=${{ fontSize: 17 }}>Empty program</div>
       <div class="t-xs muted">No beats have been directed for this room yet.</div>
@@ -163,9 +163,9 @@ export function ReplayPlayer({ beats }) {
     </div>` : null}
     ${beats.length ? html`<div class="tk-pctl">
       <button type="button" aria-label="Previous beat" onClick=${skipBack}><${Icon} name="backward.fill" size=${14} fill /></button>
-      <button type="button" class="main" aria-label=${paused ? "Play" : "Pause"} aria-pressed=${paused} onClick=${togglePlay}><${Icon} name=${paused ? "play.fill" : "pause.fill"} size=${18} fill /></button>
+      <button type="button" class="tk-main" aria-label=${paused ? "Play" : "Pause"} aria-pressed=${paused} onClick=${togglePlay}><${Icon} name=${paused ? "play.fill" : "pause.fill"} size=${18} fill /></button>
       <button type="button" aria-label="Next beat" onClick=${skipForward}><${Icon} name="forward.fill" size=${14} fill /></button>
-      <span class="st">${paused ? "PAUSED" : `${pos.index + 1}/${beats.length}`}</span>
+      <span class="tk-st">${paused ? "PAUSED" : `${pos.index + 1}/${beats.length}`}</span>
     </div>` : null}
   </div>`;
 }
@@ -190,7 +190,7 @@ function StageClock({ beats, position, paused }) {
 /** Kind-colored rail: watched beats at full tint, the current one fills live, upcoming dimmed. */
 export function ProgressRail({ beats, index, progress }) {
   return html`<div class="tk-prail" aria-hidden="true">
-    ${beats.map((b, i) => html`<i key=${b.id ?? i} class=${cx(i < index && "done", i === index && "now")} style=${{ "--tint": BEAT_TINT[b.kind] ?? "var(--violet)" }}>${i === index ? html`<b style=${{ width: `${Math.max(2, progress * 100)}%` }} />` : null}</i>`)}
+    ${beats.map((b, i) => html`<i key=${b.id ?? i} class=${cx(i < index && "tk-done", i === index && "tk-now")} style=${{ "--tint": BEAT_TINT[b.kind] ?? "var(--violet)" }}>${i === index ? html`<b style=${{ width: `${Math.max(2, progress * 100)}%` }} />` : null}</i>`)}
   </div>`;
 }
 
@@ -199,8 +199,8 @@ export function BeatHeader({ beat }) {
   const dirColor = beat.directorColor === "var(--coder)" ? "#fff" : beat.directorColor;
   return html`<div class="tk-bhead" style=${{ "--tint": tint }}>
     <span class="tk-bkind">${beat.kind}</span>
-    <span class="bt">${beat.title}</span>
-    <span class="dir"><i style=${{ background: dirColor }} />${beat.director}</span>
+    <span class="tk-bt">${beat.title}</span>
+    <span class="tk-dir"><i style=${{ background: dirColor }} />${beat.director}</span>
   </div>`;
 }
 
@@ -209,7 +209,7 @@ const WIRE_SYMBOL = { PLAN: "list.bullet.rectangle", DIAGRAM: "point.3.connected
 export function BeatStage({ beat, t }) {
   if (!beat) return null;
   if (!beat.steps?.length) {
-    return html`<div class="empty-beat">
+    return html`<div class="tk-empty-beat">
       <${Icon} name=${WIRE_SYMBOL[beat.kind] ?? "circle.circle"} size=${34} weight=${1.3} color=${BEAT_TINT[beat.kind]} style=${{ opacity: 0.5 + 0.5 * Math.min(1, t * 3) }} />
       <div class="w8" style=${{ fontSize: 17 }}>${beat.title}</div>
       <div class="t-xs w6" style=${{ color: "var(--ink-35)" }}>Directed live · ${beat.director}</div>
@@ -235,10 +235,10 @@ function PlanBeat({ beat, t }) {
     ${beat.steps.map((step, i) => {
       const isDone = i < doneCount || (i === doneCount && t > 0.72);
       const isActive = i === doneCount && !isDone;
-      return html`<div key=${i} class=${cx("st", isDone && "done", isActive && "on")} style=${{ opacity: t > i * 0.08 ? 1 : 0 }}>
-        <span class="ck">${isDone ? html`<${Icon} name="checkmark" size=${10} weight=${3} />` : isActive ? html`<i class="dot" style=${{ opacity: 0.4 + 0.6 * pulse(t, 12) }} />` : null}</span>
+      return html`<div key=${i} class=${cx("tk-st", isDone && "tk-done", isActive && "tk-on")} style=${{ opacity: t > i * 0.08 ? 1 : 0 }}>
+        <span class="tk-ck">${isDone ? html`<${Icon} name="checkmark" size=${10} weight=${3} />` : isActive ? html`<i class="dot" style=${{ opacity: 0.4 + 0.6 * pulse(t, 12) }} />` : null}</span>
         <span>${step}</span>
-        ${isActive ? html`<span class="now">NOW</span>` : null}
+        ${isActive ? html`<span class="tk-now">NOW</span>` : null}
       </div>`;
     })}
   </div>`;
@@ -251,29 +251,29 @@ function DiagramBeat({ beat, t }) {
   const parts = [];
   beat.steps.forEach((label, i) => {
     const isNew = beat.accent.includes(i), lit = pulseIndex >= i - 0.5;
-    parts.push(html`<span key=${`n${i}`} class=${cx("nd", isNew && "new", lit && "lit")}>${label}</span>`);
-    if (i < n - 1) parts.push(html`<i key=${`c${i}`} class=${cx("cn", pulseIndex > i && "on")} />`);
+    parts.push(html`<span key=${`n${i}`} class=${cx("tk-nd", isNew && "tk-new", lit && "tk-lit")}>${label}</span>`);
+    if (i < n - 1) parts.push(html`<i key=${`c${i}`} class=${cx("tk-cn", pulseIndex > i && "tk-on")} />`);
   });
-  return html`<div class=${cx("tk-diag", horizontal && "h")}>${parts}</div>`;
+  return html`<div class=${cx("tk-diag", horizontal && "tk-h")}>${parts}</div>`;
 }
 
 function CodeBeat({ beat, t, edit = false }) {
   const visible = Math.floor(t * 1.35 * beat.steps.length) + 1;
   return html`<div class="tk-code">
-    ${beat.steps.slice(0, visible).map((ln, i) => html`<div key=${i} class=${cx("ln", edit ? ln.startsWith("+") && "add" : i === 0 && "first")}>${ln}</div>`)}
-    ${edit && visible <= beat.steps.length ? html`<i class="cur" style=${{ opacity: pulse(t, 14) }} />` : null}
+    ${beat.steps.slice(0, visible).map((ln, i) => html`<div key=${i} class=${cx("tk-ln", edit ? ln.startsWith("+") && "tk-add" : i === 0 && "tk-first")}>${ln}</div>`)}
+    ${edit && visible <= beat.steps.length ? html`<i class="tk-cur" style=${{ opacity: pulse(t, 14) }} />` : null}
   </div>`;
 }
 
 function TestBeat({ beat, t }) {
   const done = Math.floor(t * beat.steps.length * 1.15);
   return html`<div class="tk-tests">
-    ${beat.steps.map((s, i) => html`<div key=${i} class=${cx("tr", i <= done && "on")}>
-      ${i < done ? html`<${Icon} name="checkmark.circle.fill" size=${15} fill color="var(--live)" />` : i === done ? html`<span class="pulse"><i style=${{ opacity: 0.35 + 0.65 * pulse(t, 14) }} /></span>` : html`<span class="ring" />`}
+    ${beat.steps.map((s, i) => html`<div key=${i} class=${cx("tk-tr", i <= done && "tk-on")}>
+      ${i < done ? html`<${Icon} name="checkmark.circle.fill" size=${15} fill color="var(--live)" />` : i === done ? html`<span class="tk-pulse"><i style=${{ opacity: 0.35 + 0.65 * pulse(t, 14) }} /></span>` : html`<span class="tk-ring" />`}
       <span>${s}</span>
-      ${i < done ? html`<span class="pass">PASS</span>` : null}
+      ${i < done ? html`<span class="tk-pass">PASS</span>` : null}
     </div>`)}
-    <div class="sum">${Math.min(done, beat.steps.length)}/${beat.steps.length} passing</div>
+    <div class="tk-sum">${Math.min(done, beat.steps.length)}/${beat.steps.length} passing</div>
   </div>`;
 }
 
@@ -281,12 +281,12 @@ function DecisionBeat({ beat, t }) {
   return html`<div class="tk-decide">
     ${beat.steps.map((s, i) => {
       const chosen = beat.accent.includes(i) && t > 0.5, dimmed = !beat.accent.includes(i) && t > 0.5;
-      return html`<div key=${i} class=${cx("op", chosen && "on", dimmed && "dim")}>
+      return html`<div key=${i} class=${cx("tk-op", chosen && "tk-on", dimmed && "tk-dim")}>
         <${Icon} name=${chosen ? "checkmark.circle.fill" : "circle"} size=${17} fill=${chosen} color=${chosen ? "var(--violet-text)" : "var(--ink-35)"} />
         <span>${s}</span>
       </div>`;
     })}
-    <div class="note">Decisions are narrated, logged, and reversible from history.</div>
+    <div class="tk-note">Decisions are narrated, logged, and reversible from history.</div>
   </div>`;
 }
 
@@ -299,11 +299,11 @@ function MetricBeat({ beat, t }) {
       if (parts.length === 2 && Number.isFinite(value)) {
         const after = beat.accent.includes(i);
         return html`<div key=${i}>
-          <div class="mrow"><span>${parts[0]}</span><b class=${cx(after && "after")}>${Math.round(value)}ms</b></div>
-          <div class="mbar"><i class=${cx(after && "after")} style=${{ width: `${Math.max(2, (value / 41) * grow * 100)}%` }} /></div>
+          <div class="tk-mrow"><span>${parts[0]}</span><b class=${cx(after && "tk-after")}>${Math.round(value)}ms</b></div>
+          <div class="tk-mbar"><i class=${cx(after && "tk-after")} style=${{ width: `${Math.max(2, (value / 41) * grow * 100)}%` }} /></div>
         </div>`;
       }
-      return html`<div key=${i} class="seal" style=${{ opacity: t > 0.5 ? 1 : 0 }}><${Icon} name="checkmark.seal.fill" size=${14} fill color="var(--live)" />${s}</div>`;
+      return html`<div key=${i} class="tk-seal" style=${{ opacity: t > 0.5 ? 1 : 0 }}><${Icon} name="checkmark.seal.fill" size=${14} fill color="var(--live)" />${s}</div>`;
     })}
   </div>`;
 }

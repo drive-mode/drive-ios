@@ -28,7 +28,12 @@ const wire = {
       const res = await fetch("./discovery", { cache: "no-store" });
       if (res.ok) {
         const info = await res.json();
-        if (info?.url && this.configuration.permitsWriterURL(info.proxy ?? "")) { this.discoveredWriter = info.url; return info.proxy; }
+        // The proxy is only a transport: the discovered writer itself must
+        // pass the channel's URL policy (production never reaches loopback).
+        if (info?.url && info?.proxy && this.configuration.permitsWriterURL(info.url) && this.configuration.permitsWriterURL(info.proxy)) {
+          this.discoveredWriter = info.url;
+          return info.proxy;
+        }
       }
     } catch { /* not served by serve.py — fine */ }
     return "";
@@ -47,16 +52,20 @@ const wire = {
   startWire() {
     if (this.wireTimer != null) return;
     if (!this.configuration.permitsWriterURL(this.writerURL)) { this.wireStatus = { live: false, latestSeq: -1, events: 0 }; this.commit(); return; }
+    // A generation token cancels a loop whose poll is in flight when the wire
+    // pauses, so a pause/resume never leaves two chains polling the writer.
+    const gen = (this.wireGeneration = (this.wireGeneration ?? 0) + 1);
     const loop = async () => {
-      if (this.wireTimer == null) return;
+      if (this.wireGeneration !== gen) return;
       await this.pollWire();
-      if (this.wireTimer == null) return;
+      if (this.wireGeneration !== gen) return;
       this.wireTimer = setTimeout(loop, this.wirePollInterval() * 1000);
     };
     this.wireTimer = setTimeout(loop, 0);
   },
 
   pauseWire() {
+    this.wireGeneration = (this.wireGeneration ?? 0) + 1;
     if (this.wireTimer != null) clearTimeout(this.wireTimer);
     this.wireTimer = null;
     this.intent.persistNow();
@@ -116,8 +125,9 @@ const wire = {
       this.commit();
     } catch (err) {
       this.wireLastError = String(err?.message ?? err);
+      // Guarded: an offline writer must not re-publish the app every poll, and
+      // a drop keeps the cursor/event count so WIRE diagnostics stay truthful.
       if (this.wireStatus.live) { this.wireStatus = { live: false, latestSeq: this.wireSeq, events: this.wireStatus.events }; this.wireDropped = true; this.commit(); }
-      else if (this.wireStatus.latestSeq !== -1 || this.wireStatus.events !== 0) { this.wireStatus = { live: false, latestSeq: -1, events: 0 }; this.commit(); }
     } finally { this.wirePolling = false; }
   },
 
