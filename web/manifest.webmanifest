@@ -1,0 +1,15 @@
+{
+  "name": "Drive",
+  "short_name": "Drive",
+  "description": "Steer a fleet of agents from your phone. Local web build of the Drive iOS app.",
+  "id": "ai.drivemode.drive.preview.web",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0A0A0A",
+  "theme_color": "#0A0A0A",
+  "icons": [
+    { "src": "assets/icons/app-icon-1024.png", "sizes": "1024x1024", "type": "image/png", "purpose": "any" }
+  ]
+}

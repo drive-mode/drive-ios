@@ -71,6 +71,16 @@ xcrun simctl launch booted ai.drivemode.drive.preview
 it does **not** build `Assets.xcassets`, and it does not build or run the test
 targets. Use the Xcode project for anything you intend to ship or verify.
 
+**Local web build (any OS, no Xcode):** `web/` is a one-module-per-Swift-file
+port of the whole app onto vendored Preact — same store, wire fold, tokens,
+copy and gates. `cd web && python3 serve.py` serves it and proxies the
+discovered writer; `node --test web/tests/` runs the core parity tests;
+`web/tools/smoke.mjs` walks every surface in headless Chromium. Read
+`web/ARCHITECTURE.md` before touching it. When you change a Swift surface,
+port the change to its `web/src/views/<tab>/<File>.js` twin (and the reverse):
+the two builds are meant to document the same contract, and the web fold
+(`web/src/wire.js`) must not drift from `WriterClient.swift`.
+
 ### The two configurations differ on purpose
 
 | | Debug (`Info.Debug.plist`) | Release (`Info.plist`) |
@@ -96,6 +106,7 @@ Theme.swift             DT design tokens + CardStyle
 Components.swift        shared controls (Pressable, scaledFont, …)
 DriveBrand.swift        the only feature-code entry point for the Drive mark
 ClineBotShape.swift     agent avatar mark, converted 1:1 from the hub icon
+web/                    the local web build — same app, no Xcode (see web/ARCHITECTURE.md)
 ```
 
 Surfaces: `OpenView`, `HomeView`, `WorkHub`, `CallTabView`, `LiveCallView`,

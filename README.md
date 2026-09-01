@@ -42,6 +42,22 @@ xcrun simctl install booted build/Drive.app
 xcrun simctl launch booted ai.drivemode.drive.preview
 ```
 
+### Local web build (no Xcode)
+
+[`web/`](web/README.md) is a fully working local version of the app for any
+machine — the same surfaces, copy, store, wire fold, brand and tokens as
+`Sources/`, ported one module per Swift file onto vendored Preact with no
+build step. It runs in a phone frame on a desktop and installs to an iPhone
+home screen as a standalone app.
+
+```bash
+cd web && python3 serve.py        # http://127.0.0.1:8787/ — discovers ~/.drivemode/writer.json
+node --test web/tests/            # core parity tests (director, fail-closed, titles, presets, fold)
+```
+
+`?channel=production` exercises the fail-closed channel in the browser. The
+contract is [`web/ARCHITECTURE.md`](web/ARCHITECTURE.md).
+
 ## Surfaces
 
 Tabs: **Home · Work · Agents · Tasks**, profile off Home's avatar.

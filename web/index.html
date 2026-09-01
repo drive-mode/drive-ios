@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>Drive</title>
+<meta name="description" content="Drive — steer a fleet of agents from your phone. Local web build of the iOS app.">
+<meta name="theme-color" content="#0A0A0A" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#F8FAFB" media="(prefers-color-scheme: light)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Drive">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="assets/icons/app-icon-1024.png">
+<link rel="icon" type="image/png" href="assets/icons/app-icon-1024.png">
+<link rel="preload" href="assets/fonts/SchibstedGrotesk.ttf" as="font" type="font/ttf" crossorigin>
+<link rel="stylesheet" href="src/theme.css">
+<script>
+  // Appearance and motion are applied before first paint so the Open screen
+  // never flashes the wrong scheme. Same keys as Settings → General.
+  (function () {
+    try {
+      var a = JSON.parse(localStorage.getItem("drive.appearance") || '"System"');
+      if (a === "Light" || a === "Dark") document.documentElement.dataset.theme = a.toLowerCase();
+      var m = JSON.parse(localStorage.getItem("drive.reduceMotion") || "false");
+      if (m) document.documentElement.dataset.reduceMotion = "1";
+    } catch (e) {}
+  })();
+</script>
+</head>
+<body>
+<div id="app" aria-live="polite"></div>
+<noscript>Drive needs JavaScript. Open this page in Safari or Chrome.</noscript>
+<script type="module" src="src/app.js"></script>
+</body>
+</html>
