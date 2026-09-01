@@ -68,8 +68,8 @@ injectStyle("work-css-live", `
 
 .lc-theater { position: absolute; inset: 0; display: flex; flex-direction: column; }
 .lc-theater > .spotlight { position: absolute; inset: 0; }
-.lc-theater .top { position: relative; display: flex; align-items: center; gap: 8px; padding: 8px 14px 0; padding-left: calc(14px + var(--theater-inset, 0px)); flex: none; }
-.lc-theater .bottom { position: relative; margin-top: auto; display: flex; align-items: flex-end; gap: 8px; padding: 0 14px 10px; padding-left: calc(14px + var(--theater-inset, 0px)); flex: none; }
+.lc-theater .top { position: relative; display: flex; align-items: center; gap: 8px; padding: 8px 14px 0; padding-left: calc(14px + max(var(--theater-inset, 0px), env(safe-area-inset-left, 0px))); padding-right: calc(14px + env(safe-area-inset-right, 0px)); flex: none; }
+.lc-theater .bottom { position: relative; margin-top: auto; display: flex; align-items: flex-end; gap: 8px; padding: 0 14px 10px; padding-left: calc(14px + max(var(--theater-inset, 0px), env(safe-area-inset-left, 0px))); padding-right: calc(14px + env(safe-area-inset-right, 0px)); flex: none; }
 .lc-glass { background: color-mix(in srgb, var(--surface) 94%, transparent); box-shadow: inset 0 0 0 0.8px rgba(var(--ink-rgb), .12); }
 .lc-tround { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; flex: none; color: rgba(var(--ink-rgb), .85); font-size: 15px; transition: background .15s, box-shadow .15s; }
 .lc-tround.sm { width: 32px; height: 32px; }
@@ -90,19 +90,6 @@ injectStyle("work-css-live", `
 `);
 
 // --------------------------------------------------------------- hooks
-
-function useMediaQuery(query) {
-  const [matches, setMatches] = useState(() => window.matchMedia?.(query).matches ?? false);
-  useEffect(() => {
-    const mq = window.matchMedia?.(query);
-    if (!mq) return undefined;
-    const on = () => setMatches(mq.matches);
-    on();
-    mq.addEventListener?.("change", on);
-    return () => mq.removeEventListener?.("change", on);
-  }, [query]);
-  return matches;
-}
 
 function useSize(ref) {
   const [size, setSize] = useState({ w: 0, h: 0 });
@@ -271,7 +258,7 @@ function TheaterControls({ s, onType, onExit }) {
 
 function TheaterLayout({ s, typing, setTyping, onExit, rotated }) {
   return html`<div class="lc-theater" style=${{ "--theater-inset": rotated ? "var(--safe-top)" : "0px" }}>
-    <${Spotlight} theater rotated=${rotated} />
+    <${Spotlight} theater rotated=${rotated} style=${{ "--sp-inset": rotated ? "var(--safe-top)" : "env(safe-area-inset-left, 0px)" }} />
     <div class="top">
       <button type="button" class="lc-tround sm lc-glass lc-hit pressable" onClick=${() => s.leaveCall()} aria-label="Leave session"><${Icon} name="chevron.left" size=${14} weight=${2.4} /></button>
       <div class="grow" />
@@ -294,11 +281,14 @@ export function LiveCallView() {
   const [joining, setJoining] = useState(true);
   const [typing, setTyping] = useState(false);
   const [theaterWanted, setTheaterWanted] = useState(false);
-  const landscape = useMediaQuery("(orientation: landscape)");
-  const theater = theaterWanted || landscape;
-  const rotated = theaterWanted && !landscape;
   const rootRef = useRef();
   const { w, h } = useSize(rootRef);
+  // Orientation is the device frame's, not the window's: in the desktop
+  // frame the window is landscape while the phone is portrait. A physically
+  // rotated phone (frameless / PWA) makes the frame itself wider than tall.
+  const landscape = w > 0 && w > h;
+  const theater = theaterWanted || landscape;
+  const rotated = theaterWanted && !landscape;
 
   useEffect(() => { const id = setTimeout(() => setJoining(false), 900); return () => clearTimeout(id); }, []);
   // Leaving from theater hands back a portrait app: the cover unmounts, and

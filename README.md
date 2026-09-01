@@ -52,7 +52,7 @@ home screen as a standalone app.
 
 ```bash
 cd web && python3 serve.py        # http://127.0.0.1:8787/ — discovers ~/.drivemode/writer.json
-node --test web/tests/            # core parity tests (director, fail-closed, titles, presets, fold)
+node --test 'web/tests/**/*.test.mjs'            # core parity tests (director, fail-closed, titles, presets, fold)
 ```
 
 `?channel=production` exercises the fail-closed channel in the browser. The

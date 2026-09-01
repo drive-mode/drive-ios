@@ -175,7 +175,7 @@ export function NavBar({ title, back = false, onBack, leading, trailing, large =
   const showBack = back === true || typeof back === "function" || typeof back === "string";
   return html`<header class=${cx("navbar", hairline && "hairline")}>
     <div class="nav-side">
-      ${showBack ? html`<button class="back-btn pressable" onClick=${() => { haptic("light"); (typeof back === "function" ? back : onBack ?? nav.back)(); }} aria-label="Back"><${Icon} name="chevron.left" size=${22} weight=${2.6} />${typeof back === "string" ? html`<span>${back}</span>` : null}</button>` : null}
+      ${showBack ? html`<button class="back-btn pressable" onClick=${() => { haptic("light"); (typeof back === "function" ? back : onBack ?? (() => nav.back()))(); }} aria-label="Back"><${Icon} name="chevron.left" size=${22} weight=${2.6} />${typeof back === "string" ? html`<span>${back}</span>` : null}</button>` : null}
       ${leading}
     </div>
     ${!large ? html`<div class=${cx("nav-title truncate", !center && "leading")}>${title}${subtitle ? html`<div class="t-xs muted" style=${{ fontWeight: 500 }}>${subtitle}</div>` : null}</div>` : html`<div class="grow" />`}

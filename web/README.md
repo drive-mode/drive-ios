@@ -68,7 +68,7 @@ data** clears it.
 ## Verify
 
 ```bash
-node --test tests/            # core parity tests (director, fail-closed, titles, presets, fold)
+node --test 'tests/**/*.test.mjs'   # core parity tests (director, fail-closed, titles, presets, fold)
 ```
 
 Headless UI walk (needs `playwright-core` and a Chromium; see `tools/smoke.mjs`):

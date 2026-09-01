@@ -3,8 +3,8 @@
 // runtime-badge allowlist, Presenter exclusivity/transfer/revocation,
 // Director policy non-exportability, the wire fold, and the archive rules.
 //
-//   node --test web/tests/
-import "./dom-shim.mjs";
+//   node --test 'web/tests/**/*.test.mjs'
+import "./helpers/dom-shim.mjs";
 import { test, beforeEach } from "node:test";
 import assert from "node:assert/strict";
 

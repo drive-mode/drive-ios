@@ -76,7 +76,7 @@ function Page({ page, index, depth }) {
   const [dx, setDx] = useState(0);
   const isTop = index === depth - 1;
   // Edge-swipe back: begin within 28px of the left edge, follow the finger, pop past 35%.
-  const onDown = (e) => { if (!isTop || e.clientX - (ref.current?.getBoundingClientRect().left ?? 0) > 28) return; drag.current = { x: e.clientX, w: ref.current.offsetWidth }; try { ref.current.setPointerCapture?.(e.pointerId); } catch { /* stale pointer id */ } };
+  const onDown = (e) => { if (!isTop || e.clientX - (ref.current?.getBoundingClientRect().left ?? 0) > 28 || e.target.closest?.("button,[role=button],a,input,textarea")) return; drag.current = { x: e.clientX, w: ref.current.offsetWidth }; try { ref.current.setPointerCapture?.(e.pointerId); } catch { /* stale pointer id */ } };
   const onMove = (e) => { if (!drag.current) return; setDx(Math.max(0, e.clientX - drag.current.x)); };
   const onUp = () => { if (!drag.current) return; const w = drag.current.w; const pop = dx > w * 0.35; drag.current = null; setDx(0); if (pop) nav.pop(); };
   return html`<div ref=${ref} class=${cx("page", index > 0 || true ? "pushed" : "", page.popping && "popping", !isTop && "under", dx > 0 && "dragging")} style=${dx > 0 ? { transform: `translateX(${dx}px)` } : undefined}

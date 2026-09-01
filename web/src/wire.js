@@ -309,7 +309,8 @@ const wire = {
 
   async performWireMutation(tool, args) {
     const response = await this.rpc(tool, args, 3500);
-    if (!response?.ok) throw new Error(response?.error ?? "writer rejected mutation");
+    if (!response?.ok) { this.wireLastMutationError = `${tool}: ${response?.error ?? "writer rejected mutation"}`; throw new Error(response?.error ?? "writer rejected mutation"); }
+    this.wireLastMutationError = null;
     if (!response.result?.event) throw new Error("missing event");
     return response.result.event;
   },
@@ -391,7 +392,7 @@ const wire = {
   wireSnapshot() {
     return {
       url: this.writerURL, discovered: this.discoveredWriter ?? null, status: this.wireStatus, dropped: this.wireDropped, seq: this.wireSeq,
-      lastPollAt: this.wireLastPollAt, lastError: this.wireLastError, backoff: this.wireBackoff, interval: this.wireTimer != null ? this.wirePollIntervalPreview() : null,
+      lastPollAt: this.wireLastPollAt, lastError: this.wireLastError, lastMutationError: this.wireLastMutationError ?? null, backoff: this.wireBackoff, interval: this.wireTimer != null ? this.wirePollIntervalPreview() : null,
       tasks: Object.keys(this.wireTasks).length, artifacts: Object.keys(this.wireArtifacts).length, beats: Object.keys(this.wireBeats).length,
       participants: Object.keys(this.wireParticipants).length, sessions: Object.keys(this.wireSessions).length, grants: Object.keys(this.titleGrantsByID).length,
     };

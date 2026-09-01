@@ -20,7 +20,8 @@ const getStore = () => boundStore ?? window.drive?.store;
 injectStyle("work-css-spotlight", `
 .spotlight { position: relative; display: flex; flex-direction: column; min-height: 0; overflow: hidden; background: var(--well);
   border-radius: var(--r-hero); box-shadow: inset 0 0 0 0.8px var(--hairline); outline: none; user-select: none; -webkit-user-select: none; touch-action: pan-y; }
-.spotlight.theater { border-radius: 0; box-shadow: none; }
+.spotlight.theater { border-radius: 0; box-shadow: none; padding-left: var(--sp-inset, 0px); }
+.spotlight.theater .sp-caption-wrap { left: var(--sp-inset, 0px); }
 .spotlight:focus-visible { box-shadow: inset 0 0 0 2px var(--violet); }
 .sp-rail-row { display: flex; align-items: center; gap: 8px; margin: 12px 14px 0; flex: none; }
 .sp-rail { display: flex; align-items: center; gap: 4px; height: 5px; flex: 1; min-width: 0; }

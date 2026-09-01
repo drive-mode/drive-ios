@@ -1,5 +1,5 @@
 [
-  ["click", "text=Open"], ["shot", "10-home"],
+  ["eval", "window.drive.store.launch()"], ["wait", 500], ["shot", "10-home"],
   ["eval", "window.drive.nav.push('needsYou')"], ["shot", "11-needs-you"], ["key", "Escape"],
   ["eval", "window.drive.nav.push('conversation',{interruptId:'blocked-scout'})"], ["shot", "12-conversation"], ["key", "Escape"],
   ["eval", "window.drive.nav.push('inbox')"], ["shot", "13-inbox"], ["key", "Escape"],
