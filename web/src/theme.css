@@ -179,8 +179,6 @@ input, textarea { outline: none; }
 .scroll::-webkit-scrollbar { display: none; }
 .content { padding: 0 16px calc(var(--tabbar-h) + var(--safe-bottom) + 28px); }
 .content.no-tabbar { padding-bottom: calc(var(--safe-bottom) + 28px); }
-.stack { display: flex; flex-direction: column; }
-.stack > * + * { margin-top: var(--gap, 12px); }
 .hstack { display: flex; align-items: center; gap: var(--gap, 8px); }
 .vstack { display: flex; flex-direction: column; gap: var(--gap, 8px); }
 .grow { flex: 1; min-width: 0; }
@@ -381,9 +379,9 @@ select.native { background: var(--surface2); border: 0; border-radius: 8px; padd
 .sheet .sheet-grab { width: 36px; height: 5px; border-radius: 3px; background: var(--ink-18); margin: 2px auto; flex: none; }
 .sheet .navbar { padding-top: 6px; min-height: 48px; }
 .sheet .content { padding-bottom: calc(var(--safe-bottom) + 24px); }
-.sheet.light { background: #F8FAFB; color: #151516; color-scheme: light; --page: #F8FAFB; --surface: #fff; --surface2: #F4F5F7; --ink: #151516; --ink-78: rgba(21,21,22,.78); --ink-55: rgba(21,21,22,.55); --ink-35: rgba(21,21,22,.35); --ink-18: rgba(21,21,22,.18); --ink-08: rgba(21,21,22,.08); --hairline: rgba(21,21,22,.08); --violet-text: #7A3FD4; --live: #2BCC28; --coder: #151516; --mark-ink: #000; }
-.cover { position: absolute; inset: 0; z-index: 45; background: var(--page); animation: coverUp .4s var(--ease); display: flex; flex-direction: column; }
-.cover.closing { animation: coverDown .3s var(--ease) forwards; }
+.sheet.light { background: #F8FAFB; color: #151516; color-scheme: light; --page: #F8FAFB; --surface: #fff; --surface2: #F4F5F7; --ink: #151516; --ink-78: rgba(21,21,22,.78); --ink-55: rgba(21,21,22,.55); --ink-35: rgba(21,21,22,.35); --ink-18: rgba(21,21,22,.18); --ink-08: rgba(21,21,22,.08); --hairline: rgba(21,21,22,.08); --violet-text: #7A3FD4; --live: #2BCC28; --diff-green: #178C15; --coder: #151516; --mark-ink: #000; }
+.nav-cover { position: absolute; inset: 0; z-index: 45; background: var(--page); animation: coverUp .4s var(--ease); display: flex; flex-direction: column; }
+.nav-cover.closing { animation: coverDown .3s var(--ease) forwards; }
 @keyframes sheetUp { from { transform: translateY(calc(100% * var(--motion))); } to { transform: none; } }
 @keyframes sheetDown { to { transform: translateY(100%); } }
 @keyframes coverUp { from { transform: translateY(calc(100% * var(--motion))); } to { transform: none; } }

@@ -6,14 +6,14 @@ import { html, render, cx, useEffect, useRef, useState, useObservable, useSwipe,
 import { prefs } from "./prefs.js";
 import { createConfiguration, AppStore } from "./store.js";
 import "./wire.js";
-import { nav, routeFor } from "./nav.js";
+import { nav, routeFor, hasRoute } from "./nav.js";
 import { Icon, DriveMark, MenuLayer, Badge, Button } from "./components.js";
 import { notifications } from "./notifications.js";
 import { registerAllViews } from "./views/index.js";
 
 const configuration = createConfiguration();
 export const store = new AppStore(configuration);
-window.drive = { store, nav, configuration, prefs }; // console + test hooks
+window.drive = { store, nav, configuration, prefs, hasRoute, __hasRoute: hasRoute }; // console + test hooks
 
 registerAllViews({ store, nav });
 notifications.configure(store);
@@ -43,14 +43,14 @@ function TabBar() {
   const n = useObservable(nav);
   const badges = { home: s.unreadInboxCount, agents: s.needsYouCount, tasks: s.attentionTasks.filter((t) => t.state === "Blocked").length };
   return html`<${Fragment}>
-    <nav class=${cx("tabbar", !s.tabBarVisible && "hidden-bar")} aria-label="Guide bar" onPointerDown=${() => s.touchTabBar()}>
+    <nav class=${cx("tabbar", (!s.tabBarVisible || n.stack.length > 0) && "hidden-bar")} aria-label="Guide bar" onPointerDown=${() => s.touchTabBar()}>
       ${TABS.map((t) => html`<button key=${t.id} class=${cx("tab", n.tab === t.id && "on")} role="tab" aria-selected=${n.tab === t.id} aria-label=${t.label} onClick=${() => { haptic("light"); nav.selectTab(t.id); }}>
         ${t.icon ? html`<${Icon} name=${t.icon} size=${22} weight=${n.tab === t.id ? 2.4 : 1.9} />` : html`<${DriveMark} size=${22} style=${{ background: n.tab === t.id ? "var(--violet-text)" : "var(--ink-35)" }} />`}
         <span>${t.label}</span>
         ${badges[t.id] ? html`<span class="tab-badge"><${Badge} count=${badges[t.id]} violet=${t.id !== "agents"} /></span>` : null}
       </button>`)}
     </nav>
-    <button class=${cx("grabber", !s.tabBarVisible && "visible")} aria-label="Show guide bar" onClick=${() => s.summonTabBar()} onPointerDown=${(e) => { const y = e.clientY; const up = (ev) => { if (y - ev.clientY > 10) s.summonTabBar(); window.removeEventListener("pointerup", up); }; window.addEventListener("pointerup", up); }}><i /></button>
+    <button class=${cx("grabber", !s.tabBarVisible && n.stack.length === 0 && "visible")} aria-label="Show guide bar" onClick=${() => s.summonTabBar()} onPointerDown=${(e) => { const y = e.clientY; const up = (ev) => { if (y - ev.clientY > 10) s.summonTabBar(); window.removeEventListener("pointerup", up); }; window.addEventListener("pointerup", up); }}><i /></button>
   </${Fragment}>`;
 }
 
@@ -74,7 +74,7 @@ function Page({ page, index, depth }) {
   const [dx, setDx] = useState(0);
   const isTop = index === depth - 1;
   // Edge-swipe back: begin within 28px of the left edge, follow the finger, pop past 35%.
-  const onDown = (e) => { if (!isTop || e.clientX - (ref.current?.getBoundingClientRect().left ?? 0) > 28) return; drag.current = { x: e.clientX, w: ref.current.offsetWidth }; ref.current.setPointerCapture?.(e.pointerId); };
+  const onDown = (e) => { if (!isTop || e.clientX - (ref.current?.getBoundingClientRect().left ?? 0) > 28) return; drag.current = { x: e.clientX, w: ref.current.offsetWidth }; try { ref.current.setPointerCapture?.(e.pointerId); } catch { /* stale pointer id */ } };
   const onMove = (e) => { if (!drag.current) return; setDx(Math.max(0, e.clientX - drag.current.x)); };
   const onUp = () => { if (!drag.current) return; const w = drag.current.w; const pop = dx > w * 0.35; drag.current = null; setDx(0); if (pop) nav.pop(); };
   return html`<div ref=${ref} class=${cx("page", index > 0 || true ? "pushed" : "", page.popping && "popping", !isTop && "under", dx > 0 && "dragging")} style=${dx > 0 ? { transform: `translateX(${dx}px)` } : undefined}
@@ -113,7 +113,7 @@ function SheetLayer({ sheet }) {
 
 function CoverLayer({ cover }) {
   const route = routeFor(cover.name);
-  return html`<div class=${cx("cover", cover.closing && "closing")} role="dialog" aria-modal="true">${route ? html`<${route.Component} params=${cover.params} route=${cover} />` : null}</div>`;
+  return html`<div class=${cx("nav-cover", cover.closing && "closing")} role="dialog" aria-modal="true">${route ? html`<${route.Component} params=${cover.params} route=${cover} />` : null}</div>`;
 }
 
 function Toasts({ toasts }) {

@@ -193,9 +193,9 @@ export function SettingsToolbarButton({ tab = "General", source = "home" }) {
 }
 
 /** A full page: nav bar + scroll area with content padding. Root pages leave room for the tab bar. */
-export function Screen({ title, largeTitle, back, onBack, leading, trailing, subtitle, root = false, children, scrollRef, className, contentClass, onScroll, footer, style, noPad = false }) {
+export function Screen({ title, largeTitle, back, onBack, leading, trailing, subtitle, root = false, children, scrollRef, className, contentClass, onScroll, footer, style, noPad = false, noNav = false }) {
   return html`<div class=${cx("screen", className)} style=${style}>
-    <${NavBar} title=${title} back=${back} onBack=${onBack} leading=${leading} trailing=${trailing} subtitle=${subtitle} large=${!!largeTitle && !title} />
+    ${noNav ? html`<div style=${{ height: "var(--safe-top)", flex: "none" }} />` : html`<${NavBar} title=${title} back=${back} onBack=${onBack} leading=${leading} trailing=${trailing} subtitle=${subtitle} large=${!!largeTitle && !title} />`}
     <div class="scroll" ref=${scrollRef} onScroll=${onScroll}>
       <div class=${cx(!noPad && "content", !root && "no-tabbar", contentClass)}>
         ${largeTitle ? html`<h1 class="large-title">${largeTitle}</h1>` : null}
