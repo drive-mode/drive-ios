@@ -58,8 +58,8 @@ ShowcaseDemo.fromFriends = [
       { heading: "What it is", body: "Hold to talk, get a structured spec: sections, acceptance criteria, open questions." },
       { heading: "Try it", body: "Join a session and watch the plan beats assemble themselves." },
     ],
-    hasDemo: true, team: [member("Anna", "#7A3FD4", false), member("Cline", agentColor("coder"), true)], cheers: ["Harrison", "Sam"],
-    comments: [comment("c4", "Harrison", VIOLET, "ok the acceptance-criteria beat is genius", "1d", true)] }) },
+    hasDemo: true, team: [member("Anna", "#7A3FD4", false), member("Cline", agentColor("coder"), true)], cheers: ["You", "Sam"],
+    comments: [comment("c4", "You", VIOLET, "ok the acceptance-criteria beat is genius", "1d", true)] }) },
   { friend: ShowcaseDemo.friends[1], project: project({ id: "marco-graph", name: "Dep-graph screensaver", tagline: "Your build graph, but gorgeous", state: "BUILDING", coverA: "#5B8DEF", coverB: "#1D4ED8", owner: "Marco", ownerColor: "#5B8DEF",
     readme: [{ heading: "What it is", body: "Renders the module graph as a slow constellation. Zero utility, maximum joy." }],
     hasDemo: false, team: [member("Marco", "#5B8DEF", false)], cheers: [] }) },
@@ -134,7 +134,7 @@ export function ProjectShowcaseView({ params = {} }) {
   const [tab, setTab] = useState("README");
   const [comments, setComments] = useState(p.comments);
   const [newComment, setNewComment] = useState("");
-  const [cheered, setCheered] = useState(p.cheers.includes("Harrison"));
+  const [cheered, setCheered] = useState(p.cheers.includes("You"));
   const yours = ShowcaseDemo.isYours(p.id);
   const you = store.displayNameForUser();
 
@@ -154,7 +154,7 @@ export function ProjectShowcaseView({ params = {} }) {
       ctx.nav.toast("Copied — README & demo only, never source", { icon: "square.and.arrow.up" });
     } catch { /* cancelled */ }
   };
-  const cheerNames = p.cheers.filter((n) => n !== "Harrison");
+  const cheerNames = p.cheers.filter((n) => n !== "You");
   const cheerLine = cheered
     ? (cheerNames.length ? `You, ${cheerNames.join(" and ")} cheered` : "You cheered")
     : (cheerNames.length ? `${cheerNames.join(" and ")} cheered` : "Be the first to cheer");

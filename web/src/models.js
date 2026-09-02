@@ -129,7 +129,7 @@ export function resolveCallLaunch(preference, preset) {
 
 export const UPCOMING_SEED = {
   id: "up-seed-payments", title: "Payments refactor — plan review", project: "Payments refactor",
-  when: "Tomorrow · 10:00", people: ["Maya", "Harrison"], agendaCount: 2,
+  when: "Tomorrow · 10:00", people: ["Maya", "You"], agendaCount: 2,
   note: "Plan review, ~15 minutes. Join when you're ready.",
   participantIds: null, agendaTaskIds: null, scheduledAt: null,
 };
