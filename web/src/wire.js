@@ -110,16 +110,20 @@ const wire = {
       if (!result || typeof result.latestSeq !== "number") throw new Error(envelope?.error ?? "malformed envelope");
       this.wireLastPollAt = Date.now();
       this.wireLastError = null;
+      if (typeof result.logId === "string" && this.wireLogId && result.logId !== this.wireLogId) {
+        // A different logId is a different log: the writer restarted, and this
+        // cursor belongs to its previous incarnation. This catches what the
+        // latestSeq check below cannot: a fresh log that has already grown past
+        // the old cursor, where resuming would silently splice two histories.
+        this.wireLogId = result.logId;
+        this.resyncWire();
+        return;
+      }
+      this.wireLogId = typeof result.logId === "string" ? result.logId : this.wireLogId;
       if (result.latestSeq < this.wireSeq) {
-        // The writer restarted with a fresh log. Resync from the top.
-        this.wireSeq = -1;
-        for (const id of this.wireReminderScheduled) this.hooks.cancelSessionReminder(id);
-        this.wireSessions = {}; this.wireBeats = {}; this.wireBeatRelated = {}; this.wireBeatPrograms = {};
-        this.beats = [];
-        this.wireUpcomingSessions = []; this.wireActiveSession = null; this.wireActiveProgramId = null;
-        this.wireReminderScheduled = new Set();
-        this.titleGrantsByID = {}; this.titleEventLog = [];
-        this.commit();
+        // Fallback for writers that predate logId: the restarted log is still
+        // shorter than our strictly-after cursor. Resync from the top.
+        this.resyncWire();
         return;
       }
       let count = this.wireStatus.live ? this.wireStatus.events : 0;
@@ -135,6 +139,29 @@ const wire = {
       // a drop keeps the cursor/event count so WIRE diagnostics stay truthful.
       if (this.wireStatus.live) { this.wireStatus = { live: false, latestSeq: this.wireSeq, events: this.wireStatus.events }; this.wireDropped = true; this.commit(); }
     } finally { this.wirePolling = false; }
+  },
+
+  // Drop every wire-derived projection input and rewind the cursor: the log
+  // this client was following is gone, so the next poll rebuilds from the top.
+  // Anything left behind here would be folded together with the new
+  // incarnation's events by rebuildFromWire(), the exact history splice a
+  // resync exists to prevent, so this clears the full set applyWireEvent()
+  // writes (mirrors WriterClient.resyncWire()). Published arrays the rebuild
+  // guards behind non-empty wire data keep their last coherent view until the
+  // new log carries replacements; beats reset because a stale program would
+  // keep replaying.
+  resyncWire() {
+    this.wireSeq = -1;
+    for (const id of this.wireReminderScheduled) this.hooks.cancelSessionReminder(id);
+    this.wireSessions = {}; this.wireBeats = {}; this.wireBeatRelated = {}; this.wireBeatPrograms = {};
+    this.wireTasks = {}; this.wireTaskAt = {}; this.wireTaskOrder = [];
+    this.wireArtifacts = {}; this.wireArtifactOrder = [];
+    this.wireParticipants = {}; this.wireActorStatus = {}; this.wireEventTitles = {}; this.wireEventOrder = []; this.wireSkillUse = {};
+    this.beats = [];
+    this.wireUpcomingSessions = []; this.wireActiveSession = null; this.wireActiveProgramId = null;
+    this.wireReminderScheduled = new Set();
+    this.titleGrantsByID = {}; this.titleEventLog = [];
+    this.commit();
   },
 
   applyWireEvent(event) {
@@ -400,7 +427,7 @@ const wire = {
   /** Diagnostics for Settings → WIRE. */
   wireSnapshot() {
     return {
-      url: this.writerURL, discovered: this.discoveredWriter ?? null, status: this.wireStatus, dropped: this.wireDropped, seq: this.wireSeq,
+      url: this.writerURL, discovered: this.discoveredWriter ?? null, status: this.wireStatus, dropped: this.wireDropped, seq: this.wireSeq, logId: this.wireLogId,
       lastPollAt: this.wireLastPollAt, lastError: this.wireLastError, lastMutationError: this.wireLastMutationError ?? null, backoff: this.wireBackoff, interval: this.wireTimer != null ? this.wirePollIntervalPreview() : null,
       tasks: Object.keys(this.wireTasks).length, artifacts: Object.keys(this.wireArtifacts).length, beats: Object.keys(this.wireBeats).length,
       participants: Object.keys(this.wireParticipants).length, sessions: Object.keys(this.wireSessions).length, grants: Object.keys(this.titleGrantsByID).length,
