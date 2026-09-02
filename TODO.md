@@ -17,6 +17,18 @@ product. The backend connection sequence is planned in
 for the durable surfaces remain in [DATA-NEEDS.md](DATA-NEEDS.md); App Store
 readiness is planned in [docs/APP-STORE-REVIEW.md](docs/APP-STORE-REVIEW.md).
 
+## 0 · Local web build (any OS, no Xcode)
+
+- [x] **`web/` — a fully working local version of the app**: every Swift
+      surface ported one module per file onto vendored Preact (no build step,
+      no dependencies), the same store/wire fold/tokens/copy/gates, preview and
+      fail-closed production channels, `serve.py` writer discovery + proxy,
+      PWA install on a phone. Verified headless in dark, light and production,
+      and end to end against the `drivemode-mcp` writer running the demo
+      scenario (tasks, artifacts, beats, roster, Presenter grants fold live).
+      `node --test 'web/tests/**/*.test.mjs'` carries the core parity suite.
+      Keep it in step with `Sources/` surface by surface (`web/ARCHITECTURE.md`).
+
 ## 1 · Quick wins (small, high trust)
 
 - [x] **Persist per-agent approval toggles** (AppStorage per agent; verified on-disk) — `AgentDetailView` uses `@State`;
