@@ -625,6 +625,12 @@ final class AppStore: ObservableObject {
     /// the moment events flow again.
     @Published var wireDropped = false
     var wireSeq = -1
+    /// Identity of the writer log incarnation `wireSeq` belongs to. The
+    /// standalone writer is in-memory and restarts as a *different* log whose
+    /// seq also starts at 1, so a cursor is only meaningful next to the logId
+    /// that issued it; a changed logId forces a resync even when the fresh
+    /// log has already grown past the old cursor.
+    var wireLogId: String?
     var wireTask: Task<Void, Never>?
     var wireTasks: [String: TaskItem] = [:]
     var wireTaskAt: [String: Date] = [:]

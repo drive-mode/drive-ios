@@ -52,6 +52,8 @@ private struct WireEnvelope: Decodable {
 
 private struct WireResult: Decodable {
     let latestSeq: Int
+    /// Log-incarnation identity; absent on writers that predate it.
+    let logId: String?
     let events: [WireEntry]
 }
 
@@ -248,25 +250,23 @@ extension AppStore {
         do {
             let (data, _) = try await URLSession.shared.data(for: request)
             let result = try Self.decoder.decode(WireEnvelope.self, from: data).result
+            if let logId = result.logId, let known = wireLogId, logId != known {
+                // A different logId is a different log: the writer restarted,
+                // and this cursor belongs to its previous incarnation. This
+                // catches what the latestSeq check below cannot — a fresh log
+                // that has already grown past the old cursor, where resuming
+                // would silently splice two histories.
+                wireLogId = logId
+                resyncWire()
+                return
+            }
+            wireLogId = result.logId ?? wireLogId
             if result.latestSeq < wireSeq {
-                // The writer restarted with a fresh log — our strictly-after
-                // cursor would never see it. Resync from the top; events are
-                // keyed by id, so replays land idempotently.
-                wireSeq = -1
-                for sessionId in wireReminderScheduled {
-                    NotificationManager.shared.cancelSessionReminder(sessionId)
-                }
-                wireSessions.removeAll()
-                wireBeats.removeAll()
-                wireBeatRelated.removeAll()
-                wireBeatPrograms.removeAll()
-                beats = []
-                wireUpcomingSessions = []
-                wireActiveSession = nil
-                wireActiveProgramId = nil
-                wireReminderScheduled.removeAll()
-                titleGrantsByID.removeAll()
-                titleEventLog.removeAll()
+                // Fallback for writers that predate logId: the restarted log
+                // is still shorter than our strictly-after cursor, which
+                // would otherwise never see it. Resync from the top; events
+                // are keyed by id, so replays land idempotently.
+                resyncWire()
                 return
             }
             var eventCount = 0
@@ -290,6 +290,44 @@ extension AppStore {
                 wireDropped = true   // was live — surface the reconnect chip
             }
         }
+    }
+
+    /// Drop every wire-derived projection input and rewind the cursor: the
+    /// log this client was following is gone, so the next poll rebuilds from
+    /// the top. Anything left behind here gets folded together with the new
+    /// incarnation's events by `rebuildFromWire()` — the exact history splice
+    /// a resync exists to prevent — so this must clear the full set that
+    /// `apply(wireEvent:)` writes, matching the demo recreation's
+    /// `emptyState()`. Published arrays the rebuild guards behind non-empty
+    /// wire data (`tasks`, `artifacts`, `agents`) keep their last coherent
+    /// view until the new log carries replacements, like a dropped wire does;
+    /// `beats` reset immediately because a stale program would keep replaying.
+    private func resyncWire() {
+        wireSeq = -1
+        for sessionId in wireReminderScheduled {
+            NotificationManager.shared.cancelSessionReminder(sessionId)
+        }
+        wireTasks.removeAll()
+        wireTaskAt.removeAll()
+        wireTaskOrder.removeAll()
+        wireArtifacts.removeAll()
+        wireArtifactOrder.removeAll()
+        wireParticipants.removeAll()
+        wireActorStatus.removeAll()
+        wireEventTitles.removeAll()
+        wireEventOrder.removeAll()
+        wireSkillUse.removeAll()
+        wireSessions.removeAll()
+        wireBeats.removeAll()
+        wireBeatRelated.removeAll()
+        wireBeatPrograms.removeAll()
+        beats = []
+        wireUpcomingSessions = []
+        wireActiveSession = nil
+        wireActiveProgramId = nil
+        wireReminderScheduled.removeAll()
+        titleGrantsByID.removeAll()
+        titleEventLog.removeAll()
     }
 
     private func apply(wireEvent event: WireEvent) {

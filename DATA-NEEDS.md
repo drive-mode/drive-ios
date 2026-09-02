@@ -13,6 +13,19 @@ The standalone preview writer is in-memory and resets on restart, so these
 events are only cross-restart durable when a production Hub/persistence layer
 makes them so.
 
+**Cursor + log identity (landed 2026-08-30).** `seq` is the resume cursor, and
+the writer now names the log incarnation that issued it: `events_since`
+responses (plus `/health`, `/snapshot`, and the discovery file) carry a
+`logId`, minted per writer start. `WriterClient` compares it and resyncs on
+change — the old `latestSeq < cursor` heuristic alone missed a restarted
+writer whose fresh log had already grown past the cursor, silently splicing
+two histories. The heuristic stays as a fallback for writers that predate the
+field. Any future transport (production Hub included) must keep this contract:
+a cursor is only meaningful next to the log identity that issued it.
+`stage_publish_work` / `conversation_publish` also accept an `opId` retry key
+(recorded-response replay), which is the idempotency the managed-chat ask
+below already called for. Rationale: `drivemode-mcp/docs/DDIA-LESSONS.md`.
+
 | Surface | Runs on today (demo) | Needs from the wire |
 |---|---|---|
 | Directed Spotlight + replays | Scripted `Beat[]` (kind, title, director, caption, duration) | Existing `work.*` events **plus beat grouping**: program id + beat index + director ref + caption line (or a `stage.direct` annotation event). Replay = `events_since` over a session's program |

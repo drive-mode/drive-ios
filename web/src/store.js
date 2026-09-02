@@ -118,6 +118,8 @@ export class AppStore extends Observable {
     this.wireStatus = { live: false, latestSeq: -1, events: 0 };
     this.wireDropped = false;
     this.wireSeq = -1;
+    // Identity of the writer log incarnation wireSeq belongs to (see WriterClient.swift).
+    this.wireLogId = null;
     this.wireTimer = null;
     this.wirePolling = false;
     this.wireTasks = {};

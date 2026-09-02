@@ -313,3 +313,41 @@ test("intent recorder predicts the most frequent next surface", () => {
   r.record("home"); r.record("tasks"); r.record("home"); r.record("tasks"); r.record("home"); r.record("agents"); r.record("home");
   assert.equal(r.predict(1)[0].surface, "tasks");
 });
+
+test("a changed writer logId forces a resync even when the fresh log is longer than the cursor", async () => {
+  const s = preview();
+  let logId = "log-a";
+  let latestSeq = 5;
+  globalThis.fetch = async () => ({ ok: true, json: async () => ({ result: { logId, latestSeq, events: [] } }) });
+  try {
+    await s.pollWire();
+    assert.equal(s.wireLogId, "log-a");
+    assert.equal(s.wireSeq, 5);
+    s.wireTasks["t-old"] = { id: "t-old", title: "Old" }; // a projection input from the old log
+    s.wireParticipants["agent:atlas"] = { id: "agent:atlas" };
+    logId = "log-b"; latestSeq = 9;
+    await s.pollWire();
+    assert.equal(s.wireLogId, "log-b");
+    assert.equal(s.wireSeq, -1, "cursor rewound");
+    assert.deepEqual(s.wireTasks, {}, "the old log's tasks are dropped, not spliced");
+    assert.deepEqual(s.wireParticipants, {}, "so is its roster");
+    await s.pollWire();
+    assert.equal(s.wireSeq, 9);
+    await s.pollWire();
+    assert.equal(s.wireSeq, 9);
+  } finally { delete globalThis.fetch; }
+});
+
+test("a writer that predates logId still resyncs on a latestSeq regression", async () => {
+  const s = preview();
+  let latestSeq = 7;
+  globalThis.fetch = async () => ({ ok: true, json: async () => ({ result: { latestSeq, events: [] } }) });
+  try {
+    await s.pollWire();
+    assert.equal(s.wireSeq, 7);
+    assert.equal(s.wireLogId, null);
+    latestSeq = 2;
+    await s.pollWire();
+    assert.equal(s.wireSeq, -1, "regression falls back to a resync");
+  } finally { delete globalThis.fetch; }
+});
