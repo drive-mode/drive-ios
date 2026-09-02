@@ -9,7 +9,7 @@ Memory is **files with hooks**, scoped to what they're about:
 
 | Scope | Owner | Example |
 |---|---|---|
-| **Agent** | agent id | `harrison-preferences.md` — how Harrison likes edits proposed |
+| **Agent** | agent id | `host-preferences.md` — how the host likes edits proposed |
 | **Session** | agent id (+ session) | `session-2026-08-17-auth.md` — what landed, what's parked |
 | **Task** | task id | `webhook-blockers.md` — why w8 is blocked, what unblocks it |
 | **Project** | project name | `decisions.md` — standing calls, read before proposing |

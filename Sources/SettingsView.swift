@@ -113,9 +113,9 @@ final class SettingsDraftStore: ObservableObject {
             ? 8 * 60 : defaults.integer(forKey: "notify.quietTo")
         escalation = defaults.string(forKey: "notify.escalation") ?? "Do nothing"
         displayName = defaults.string(forKey: "profile.displayName")
-            ?? (configuration.previewContentEnabled ? "Harrison" : "")
+            ?? (configuration.previewContentEnabled ? "Preview" : "")
         email = defaults.string(forKey: "profile.email")
-            ?? (configuration.previewContentEnabled ? "harrison@quant-h2.com" : "")
+            ?? (configuration.previewContentEnabled ? "preview@example.com" : "")
         callLaunchBehavior = defaults.string(forKey: "call.launchBehavior") ?? "Configure each call"
         defaultCallPresetName = defaults.string(forKey: "call.defaultPreset")
             ?? (configuration.previewContentEnabled ? "Focused pair" : "No default preset")

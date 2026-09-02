@@ -80,6 +80,11 @@ xcrun simctl install booted build/Drive.app
 xcrun simctl launch booted ai.drivemode.drive.preview
 ```
 
+The local web build in `web/` (see `web/README.md`) runs the same app on any
+OS without Xcode: `cd web && python3 serve.py`. It is a port, not the App
+Store artifact — the Swift target remains the release candidate, and the two
+must be kept in step surface by surface (`web/ARCHITECTURE.md`).
+
 For a live local writer, run the writer using the repository's pinned toolchain.
 Debug has no magic port: identity is the printed URL, `DRIVEMODE_WRITER_URL`,
 or `~/.drivemode/writer.json`. Preview still allows loopback HTTP. Release has
