@@ -105,14 +105,14 @@ struct ProfileView: View {
     private var displayName: String {
         let value = profileName.trimmingCharacters(in: .whitespacesAndNewlines)
         if !value.isEmpty { return value }
-        return store.configuration.previewContentEnabled ? "Harrison" : "Drive account"
+        return store.configuration.previewContentEnabled ? "Preview" : "Drive account"
     }
 
     private var displayEmail: String {
         let value = profileEmail.trimmingCharacters(in: .whitespacesAndNewlines)
         if !value.isEmpty { return value }
         return store.configuration.previewContentEnabled
-            ? "harrison@quant-h2.com"
+            ? "preview@example.com"
             : "Account service not connected"
     }
 

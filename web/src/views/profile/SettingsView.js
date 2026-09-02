@@ -33,8 +33,8 @@ const FIELDS = [
   ["quietFrom", "notify.quietFrom", () => 22 * 60],
   ["quietTo", "notify.quietTo", () => 8 * 60],
   ["escalation", "notify.escalation", () => "Do nothing"],
-  ["displayName", "profile.displayName", (c) => (c.previewContentEnabled ? "Harrison" : "")],
-  ["email", "profile.email", (c) => (c.previewContentEnabled ? "harrison@quant-h2.com" : "")],
+  ["displayName", "profile.displayName", (c) => (c.previewContentEnabled ? "Preview" : "")],
+  ["email", "profile.email", (c) => (c.previewContentEnabled ? "preview@example.com" : "")],
   ["callLaunchBehavior", "call.launchBehavior", () => "Configure each call"],
   ["defaultCallPresetName", "call.defaultPreset", (c) => (c.previewContentEnabled ? "Focused pair" : "No default preset")],
 ];
@@ -305,7 +305,7 @@ function WireDiagnostics({ store }) {
 
 function ProfilePanel({ store, d }) {
   const preview = store.configuration.previewContentEnabled;
-  const name = d.displayName.trim() || (preview ? "Harrison" : "Drive account");
+  const name = d.displayName.trim() || (preview ? "Preview" : "Drive account");
   return html`<${Panel} intro="Your editable persona and account contact.">
     <${Card} pad=${false} className="pf-field-card">
       <div class="hstack" style=${{ gap: 12, padding: "14px 14px 10px" }}>

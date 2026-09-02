@@ -46,14 +46,14 @@ enum ShowcaseDemo {
         ShowProject(
             id: "auth", name: "Auth middleware", tagline: "JWT gate with a green suite",
             state: "LIVE NOW", coverA: Color(hex: 0x9F58FA), coverB: Color(hex: 0x6D28D9),
-            owner: "Harrison", ownerColor: DT.violet,
+            owner: "You", ownerColor: DT.violet,
             readme: [
                 ("What it is", "A refresh-route gate: every token passes verifyJwt before routing. Two lines in the hot path, zero regressions."),
                 ("Why it exists", "The refresh regression kept coming back. Now the suite pins it dead — 5/5 passing, 38ms p95 after the gate."),
                 ("Stack", "TypeScript · bun test · drive-mode/auth"),
             ],
             hasDemo: true,
-            team: [("Harrison", DT.violet, false), ("Cline", DemoData.coder, true), ("Maya", DemoData.maya, true), ("Scout", DemoData.scout, true)],
+            team: [("You", DT.violet, false), ("Cline", DemoData.coder, true), ("Maya", DemoData.maya, true), ("Scout", DemoData.scout, true)],
             comments: [
                 ShowComment(id: "c1", author: "Anna", color: Color(hex: 0x7A3FD4),
                             text: "the demo sold me — that decision beat is such a nice way to show a call being made", age: "2h"),
@@ -63,13 +63,13 @@ enum ShowcaseDemo {
         ShowProject(
             id: "exports", name: "Exports refactor", tagline: "22 tasks, one clean adapter",
             state: "BUILDING", coverA: Color(hex: 0x2DD4BF), coverB: Color(hex: 0x0E7490),
-            owner: "Harrison", ownerColor: DT.violet,
+            owner: "You", ownerColor: DT.violet,
             readme: [
                 ("What it is", "One adapter for every export target — the fixture backfill alone retired six special cases."),
                 ("Where it stands", "7 running, 4 in review. The dependency map is the honest status page."),
             ],
             hasDemo: false,
-            team: [("Harrison", DT.violet, false), ("Cline", DemoData.coder, true), ("Indexer", DemoData.indexer, true)],
+            team: [("You", DT.violet, false), ("Cline", DemoData.coder, true), ("Indexer", DemoData.indexer, true)],
             comments: [
                 ShowComment(id: "c3", author: "Jo", color: Color(hex: 0xE8A13C),
                             text: "the task map on this is beautiful — how do I get in?", age: "3d"),
@@ -77,22 +77,22 @@ enum ShowcaseDemo {
         ShowProject(
             id: "notify", name: "Ship notifications", tagline: "Quiet by default, loud when it matters",
             state: "SHIPPED", coverA: Color(hex: 0xF472B6), coverB: Color(hex: 0xBE185D),
-            owner: "Harrison", ownerColor: DT.violet,
+            owner: "You", ownerColor: DT.violet,
             readme: [
                 ("What it is", "Notification rules that respect quiet hours and escalate only unanswered blockers."),
             ],
             hasDemo: false,
-            team: [("Harrison", DT.violet, false), ("Maya", DemoData.maya, true)],
+            team: [("You", DT.violet, false), ("Maya", DemoData.maya, true)],
             comments: []),
         ShowProject(
             id: "quotas", name: "Quotas audit", tagline: "Limits, documented and enforced",
             state: "SHIPPED", coverA: Color(hex: 0xFFC55C), coverB: Color(hex: 0xB45309),
-            owner: "Harrison", ownerColor: DT.violet,
+            owner: "You", ownerColor: DT.violet,
             readme: [
                 ("What it is", "Findings plus limits for every tenant path — the doc is the artifact."),
             ],
             hasDemo: false,
-            team: [("Harrison", DT.violet, false), ("Scout", DemoData.scout, true)],
+            team: [("You", DT.violet, false), ("Scout", DemoData.scout, true)],
             comments: []),
     ]
 
@@ -109,7 +109,7 @@ enum ShowcaseDemo {
             hasDemo: true,
             team: [("Anna", Color(hex: 0x7A3FD4), false), ("Cline", DemoData.coder, true)],
             comments: [
-                ShowComment(id: "c4", author: "Harrison", color: DT.violet,
+                ShowComment(id: "c4", author: "You", color: DT.violet,
                             text: "ok the acceptance-criteria beat is genius", age: "1d", fromYou: true),
             ])),
         (friends[1], ShowProject(
@@ -199,9 +199,9 @@ struct ShowcaseView: View {
 
     private var header: some View {
         HStack(spacing: 12) {
-            AvatarChip(letter: "H", color: DT.violet, size: 44, human: true)
+            AvatarChip(letter: store.profileInitial, color: DT.violet, size: 44, human: true)
             VStack(alignment: .leading, spacing: 2) {
-                Text("Harrison's showcase")
+                Text("Your showcase")
                     .kerning(-0.4)
                     .scaledFont(20, .heavy)
                 HStack(spacing: 5) {

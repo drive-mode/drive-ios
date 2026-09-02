@@ -1,0 +1,28 @@
+Drive (drive-ios)
+Copyright 2026 Harrison Halperin
+
+Licensed under the Apache License, Version 2.0. See LICENSE.
+
+This product includes the following third-party components:
+
+  Preact and preact/hooks (web/vendor/preact.mjs, web/vendor/preact-hooks.mjs)
+    MIT License. Copyright (c) 2015-present Jason Miller.
+  htm (web/vendor/htm.mjs)
+    Apache License, Version 2.0.
+  Lucide Icons (web/src/icons.js)
+    ISC License. Copyright (c) Lucide Contributors.
+  Schibsted Grotesk (Fonts/, web/assets/fonts/)
+    SIL Open Font License, Version 1.1.
+    Copyright 2023 The Schibsted-Grotesk Project Authors.
+
+Full license texts: web/vendor/LICENSES.txt, Fonts/OFL.txt,
+web/assets/fonts/OFL.txt.
+
+Trademarks. "Cline" and the Cline bot mark (Sources/ClineBotShape.swift,
+converted from the Cline logo) are trademarks of Cline Bot Inc. and are not
+licensed under the Apache License. Theme.swift and web/theme.css mirror the
+brand variables of the Cline hub.
+
+The room protocol this app renders is defined by the Drive kernel in
+cline-drivecode (Apache License 2.0), which is built on Cline
+(Copyright Cline Bot Inc., Apache License 2.0).

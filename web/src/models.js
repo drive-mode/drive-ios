@@ -129,7 +129,7 @@ export function resolveCallLaunch(preference, preset) {
 
 export const UPCOMING_SEED = {
   id: "up-seed-payments", title: "Payments refactor — plan review", project: "Payments refactor",
-  when: "Tomorrow · 10:00", people: ["Maya", "Harrison"], agendaCount: 2,
+  when: "Tomorrow · 10:00", people: ["Maya", "You"], agendaCount: 2,
   note: "Plan review, ~15 minutes. Join when you're ready.",
   participantIds: null, agendaTaskIds: null, scheduledAt: null,
 };
@@ -474,7 +474,7 @@ export function relative(ms, now = Date.now()) {
   return `${Math.floor(s / 86_400)}d`;
 }
 
-/** Namespaced ids ("agent:atlas", "drive:harrison") read as their local part. */
+/** Namespaced ids ("agent:atlas", "drive:you") read as their local part. */
 export function localActorId(actorId) {
   return String(actorId ?? "").replace(/^(agent|drive|human|user):/, "");
 }

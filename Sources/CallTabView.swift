@@ -20,7 +20,7 @@ struct UpcomingSession: Codable, Identifiable, Equatable {
         title: "Payments refactor — plan review",
         project: "Payments refactor",
         when: "Tomorrow · 10:00",
-        people: ["Maya", "Harrison"],
+        people: ["Maya", "You"],
         agendaCount: 2,
         note: "Plan review, ~15 minutes. Join when you're ready.")
 
@@ -269,7 +269,7 @@ struct LiveSessionCard: View {
                             letter: String(name.prefix(1)),
                             color: agent?.color ?? DT.violet,
                             size: 26,
-                            human: name == "Harrison")
+                            human: name == "You")
                             .overlay(Circle().strokeBorder(DT.surface(scheme), lineWidth: 1.5))
                     }
                 }
@@ -675,10 +675,10 @@ struct SessionComposerSheet: View {
                                 title: title.trimmingCharacters(in: .whitespaces),
                                 project: project,
                                 when: when,
-                                people: ["Harrison"] + selectedNames,
+                                people: ["You"] + selectedNames,
                                 agendaCount: pickedAgenda.count,
                                 note: note,
-                                participantIds: ["harrison"] + inviteeIds,
+                                participantIds: ["you"] + inviteeIds,
                                 agendaTaskIds: pickedAgenda.sorted(),
                                 scheduledAt: scheduledAt)
                             Task {

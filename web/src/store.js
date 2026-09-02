@@ -46,7 +46,7 @@ export function createConfiguration({ search = window.location.search } = {}) {
   return c;
 }
 
-const SESSION_DUMMY_ID = "harrison";
+const SESSION_DUMMY_ID = "you";
 
 export class AppStore extends Observable {
   constructor(configuration) {
@@ -435,7 +435,7 @@ export class AppStore extends Observable {
   }
   get hasLiveProgramBeats() { return this.usesWireSessionRegistry ? Object.keys(this.wireBeats).length > 0 && this.beats.length > 0 : this.beats.length > 0; }
 
-  displayNameForUser() { return prefs.get("profile.displayName", null) || (this.configuration.previewContentEnabled ? "Harrison" : "You"); }
+  displayNameForUser() { return prefs.get("profile.displayName", null) || (this.configuration.previewContentEnabled ? "Preview" : "You"); }
 
   async planSession(session, inviteeIds) {
     this.lastSessionError = null;

@@ -18,34 +18,34 @@ const project = (p) => ({ comments: [], ...p });
 export const ShowcaseDemo = {
   friends: [friend("anna", "Anna", "#7A3FD4"), friend("marco", "Marco", "#5B8DEF"), friend("jo", "Jo", "#E8A13C"), friend("sam", "Sam", "#2DD4BF")],
   you: [
-    project({ id: "auth", name: "Auth middleware", tagline: "JWT gate with a green suite", state: "LIVE NOW", coverA: "#9F58FA", coverB: "#6D28D9", owner: "Harrison", ownerColor: VIOLET,
+    project({ id: "auth", name: "Auth middleware", tagline: "JWT gate with a green suite", state: "LIVE NOW", coverA: "#9F58FA", coverB: "#6D28D9", owner: "You", ownerColor: VIOLET,
       readme: [
         { heading: "What it is", body: "A refresh-route gate: every token passes verifyJwt before routing. Two lines in the hot path, zero regressions." },
         { heading: "Why it exists", body: "The refresh regression kept coming back. Now the suite pins it dead — 5/5 passing, 38ms p95 after the gate." },
         { heading: "Stack", body: "TypeScript · bun test · drive-mode/auth" },
       ],
       hasDemo: true,
-      team: [member("Harrison", VIOLET, false), member("Cline", agentColor("coder"), true), member("Maya", agentColor("maya"), true), member("Scout", agentColor("scout"), true)],
+      team: [member("You", VIOLET, false), member("Cline", agentColor("coder"), true), member("Maya", agentColor("maya"), true), member("Scout", agentColor("scout"), true)],
       cheers: ["Anna", "Marco"],
       comments: [
         comment("c1", "Anna", "#7A3FD4", "the demo sold me — that decision beat is such a nice way to show a call being made", "2h"),
         comment("c2", "Marco", "#5B8DEF", "stealing the early-return pattern for our gateway 🔥", "1h"),
       ] }),
-    project({ id: "exports", name: "Exports refactor", tagline: "22 tasks, one clean adapter", state: "BUILDING", coverA: "#2DD4BF", coverB: "#0E7490", owner: "Harrison", ownerColor: VIOLET,
+    project({ id: "exports", name: "Exports refactor", tagline: "22 tasks, one clean adapter", state: "BUILDING", coverA: "#2DD4BF", coverB: "#0E7490", owner: "You", ownerColor: VIOLET,
       readme: [
         { heading: "What it is", body: "One adapter for every export target — the fixture backfill alone retired six special cases." },
         { heading: "Where it stands", body: "7 running, 4 in review. The dependency map is the honest status page." },
       ],
       hasDemo: false,
-      team: [member("Harrison", VIOLET, false), member("Cline", agentColor("coder"), true), member("Indexer", agentColor("indexer"), true)],
+      team: [member("You", VIOLET, false), member("Cline", agentColor("coder"), true), member("Indexer", agentColor("indexer"), true)],
       cheers: ["Jo"],
       comments: [comment("c3", "Jo", "#E8A13C", "the task map on this is beautiful — how do I get in?", "3d")] }),
-    project({ id: "notify", name: "Ship notifications", tagline: "Quiet by default, loud when it matters", state: "SHIPPED", coverA: "#F472B6", coverB: "#BE185D", owner: "Harrison", ownerColor: VIOLET,
+    project({ id: "notify", name: "Ship notifications", tagline: "Quiet by default, loud when it matters", state: "SHIPPED", coverA: "#F472B6", coverB: "#BE185D", owner: "You", ownerColor: VIOLET,
       readme: [{ heading: "What it is", body: "Notification rules that respect quiet hours and escalate only unanswered blockers." }],
-      hasDemo: false, team: [member("Harrison", VIOLET, false), member("Maya", agentColor("maya"), true)], cheers: [] }),
-    project({ id: "quotas", name: "Quotas audit", tagline: "Limits, documented and enforced", state: "SHIPPED", coverA: "#FFC55C", coverB: "#B45309", owner: "Harrison", ownerColor: VIOLET,
+      hasDemo: false, team: [member("You", VIOLET, false), member("Maya", agentColor("maya"), true)], cheers: [] }),
+    project({ id: "quotas", name: "Quotas audit", tagline: "Limits, documented and enforced", state: "SHIPPED", coverA: "#FFC55C", coverB: "#B45309", owner: "You", ownerColor: VIOLET,
       readme: [{ heading: "What it is", body: "Findings plus limits for every tenant path — the doc is the artifact." }],
-      hasDemo: false, team: [member("Harrison", VIOLET, false), member("Scout", agentColor("scout"), true)], cheers: [] }),
+      hasDemo: false, team: [member("You", VIOLET, false), member("Scout", agentColor("scout"), true)], cheers: [] }),
   ],
   /** Friends' squares for the Home rail — inspiration, one swipe deep. */
   fromFriends: [],
@@ -58,8 +58,8 @@ ShowcaseDemo.fromFriends = [
       { heading: "What it is", body: "Hold to talk, get a structured spec: sections, acceptance criteria, open questions." },
       { heading: "Try it", body: "Join a session and watch the plan beats assemble themselves." },
     ],
-    hasDemo: true, team: [member("Anna", "#7A3FD4", false), member("Cline", agentColor("coder"), true)], cheers: ["Harrison", "Sam"],
-    comments: [comment("c4", "Harrison", VIOLET, "ok the acceptance-criteria beat is genius", "1d", true)] }) },
+    hasDemo: true, team: [member("Anna", "#7A3FD4", false), member("Cline", agentColor("coder"), true)], cheers: ["You", "Sam"],
+    comments: [comment("c4", "You", VIOLET, "ok the acceptance-criteria beat is genius", "1d", true)] }) },
   { friend: ShowcaseDemo.friends[1], project: project({ id: "marco-graph", name: "Dep-graph screensaver", tagline: "Your build graph, but gorgeous", state: "BUILDING", coverA: "#5B8DEF", coverB: "#1D4ED8", owner: "Marco", ownerColor: "#5B8DEF",
     readme: [{ heading: "What it is", body: "Renders the module graph as a slow constellation. Zero utility, maximum joy." }],
     hasDemo: false, team: [member("Marco", "#5B8DEF", false)], cheers: [] }) },
@@ -134,7 +134,7 @@ export function ProjectShowcaseView({ params = {} }) {
   const [tab, setTab] = useState("README");
   const [comments, setComments] = useState(p.comments);
   const [newComment, setNewComment] = useState("");
-  const [cheered, setCheered] = useState(p.cheers.includes("Harrison"));
+  const [cheered, setCheered] = useState(p.cheers.includes("You"));
   const yours = ShowcaseDemo.isYours(p.id);
   const you = store.displayNameForUser();
 
@@ -154,7 +154,7 @@ export function ProjectShowcaseView({ params = {} }) {
       ctx.nav.toast("Copied — README & demo only, never source", { icon: "square.and.arrow.up" });
     } catch { /* cancelled */ }
   };
-  const cheerNames = p.cheers.filter((n) => n !== "Harrison");
+  const cheerNames = p.cheers.filter((n) => n !== "You");
   const cheerLine = cheered
     ? (cheerNames.length ? `You, ${cheerNames.join(" and ")} cheered` : "You cheered")
     : (cheerNames.length ? `${cheerNames.join(" and ")} cheered` : "Be the first to cheer");

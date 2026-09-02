@@ -43,7 +43,7 @@ final class DriveUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Account service not connected"].exists)
         XCTAssertFalse(app.staticTexts["Your showcase"].exists)
         XCTAssertFalse(app.buttons["Billing & payments"].exists)
-        XCTAssertFalse(app.staticTexts["harrison@quant-h2.com"].exists)
+        XCTAssertFalse(app.staticTexts["preview@example.com"].exists)
     }
 
     func testProductionHomeAndWorkPassCoreAccessibilityAudit() throws {

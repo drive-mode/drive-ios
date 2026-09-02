@@ -68,8 +68,8 @@ enum MemorySeeds {
     static let files: [MemoryFile] = [
         // Agent memory — durable, who-they-work-with knowledge.
         MemoryFile(id: "m1", scope: .agent, owner: "coder", ownerLabel: "Cline",
-                   name: "harrison-preferences.md",
-                   hook: "How Harrison likes edits proposed",
+                   name: "host-preferences.md",
+                   hook: "How the host likes edits proposed",
                    body: "Small, scoped asks — one decision per approval. Diff summaries must be honest (+12 −3 means +12 −3). Branch names follow drive/<topic>. Never batch a rename into a feature diff. Prefers the suite green before the ask, not after.",
                    updated: "2d", pinned: true),
         MemoryFile(id: "m2", scope: .agent, owner: "coder", ownerLabel: "Cline",
@@ -80,12 +80,12 @@ enum MemorySeeds {
         MemoryFile(id: "m3", scope: .agent, owner: "maya", ownerLabel: "Maya",
                    name: "decision-style.md",
                    hook: "How this room makes calls",
-                   body: "Two options max, named plainly. Harrison decides fast when the suite covers the risk — lead with coverage. Gate-now beat flag-later has won three times running.",
+                   body: "Two options max, named plainly. The host decides fast when the suite covers the risk — lead with coverage. Gate-now beat flag-later has won three times running.",
                    updated: "6h"),
         MemoryFile(id: "m4", scope: .agent, owner: "scout", ownerLabel: "Scout",
                    name: "staging-map.md",
                    hook: "Where staging secrets actually live",
-                   body: "DATABASE_URL: env in staging, vault in prod — asked once, answered by Harrison 2026-08-17. WEBHOOK_SECRET still undecided (blocked ask w8 open). Never read prod vault without an approval.",
+                   body: "DATABASE_URL: env in staging, vault in prod — asked once, answered by the host 2026-08-17. WEBHOOK_SECRET still undecided (blocked ask w8 open). Never read prod vault without an approval.",
                    updated: "31m"),
 
         // Session memory — one working session, what happened and why.
@@ -128,7 +128,7 @@ enum MemorySeeds {
         MemoryFile(id: "m11", scope: .plan, owner: "payments-plan", ownerLabel: "Payments refactor plan",
                    name: "payments-plan-notes.md",
                    hook: "Open questions the plan must answer",
-                   body: "5 steps, touches 14 files. Open: idempotency keys per provider or shared? Maya leans shared with provider salt. Review parked until Harrison opens it — nothing moves before that.",
+                   body: "5 steps, touches 14 files. Open: idempotency keys per provider or shared? Maya leans shared with provider salt. Review parked until the host opens it — nothing moves before that.",
                    updated: "1d"),
     ]
 }
