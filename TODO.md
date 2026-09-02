@@ -166,7 +166,7 @@ webhooks) → Slack interrupts + deep links → **Connections settings surface**
 - Mic default (muted vs hold-hot) — variant card staged
 - PWA install posture
 - Slack inline-approve vs deep-link-only (integrations decision #3)
-- Inbox "rename" intent — custom filter names? (question back to Harrison)
+- Inbox "rename" intent — custom filter names? (question back to the maintainer)
 - Showcase naming: "Drivemode by Cline" vs "Drive Showcase" (SOCIAL.md)
 - Showcase comment identity: name only vs avatar+name
 
