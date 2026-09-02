@@ -18,7 +18,7 @@ export function ProfileView() {
 
   const nameRaw = String(prefs.get("profile.displayName", "") ?? "").trim();
   const emailRaw = String(prefs.get("profile.email", "") ?? "").trim();
-  const displayName = nameRaw || (preview ? "Harrison" : "Drive account");
+  const displayName = nameRaw || (preview ? "Preview" : "Drive account");
   const displayEmail = emailRaw || (preview ? "preview@example.com" : "Account service not connected");
   const initial = displayName.charAt(0).toUpperCase();
 

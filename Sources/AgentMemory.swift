@@ -80,7 +80,7 @@ enum MemorySeeds {
         MemoryFile(id: "m3", scope: .agent, owner: "maya", ownerLabel: "Maya",
                    name: "decision-style.md",
                    hook: "How this room makes calls",
-                   body: "Two options max, named plainly. Harrison decides fast when the suite covers the risk — lead with coverage. Gate-now beat flag-later has won three times running.",
+                   body: "Two options max, named plainly. The host decides fast when the suite covers the risk — lead with coverage. Gate-now beat flag-later has won three times running.",
                    updated: "6h"),
         MemoryFile(id: "m4", scope: .agent, owner: "scout", ownerLabel: "Scout",
                    name: "staging-map.md",

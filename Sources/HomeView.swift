@@ -466,7 +466,7 @@ struct LiveHeroCard: View {
                             letter: String(name.prefix(1)),
                             color: agent?.color ?? DT.violet,
                             size: 28,
-                            human: name == "Harrison")
+                            human: name == "You")
                             .overlay(Circle().strokeBorder(.white.opacity(0.9), lineWidth: 2))
                     }
                 }
