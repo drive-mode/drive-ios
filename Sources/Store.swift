@@ -467,6 +467,20 @@ final class AppStore: ObservableObject {
         return ["You"] + agents.map(\.name)
     }
 
+    /// The name shown for the local user: the saved profile name, else the
+    /// preview account label, else the honest disconnected label.
+    var profileDisplayName: String {
+        let saved = UserDefaults.standard.string(forKey: "profile.displayName")?
+            .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        if !saved.isEmpty { return saved }
+        return configuration.previewContentEnabled ? "Preview" : "Drive account"
+    }
+
+    /// One letter for avatar chips, derived from `profileDisplayName`.
+    var profileInitial: String {
+        String(profileDisplayName.prefix(1)).uppercased()
+    }
+
     var hasLiveProgramBeats: Bool {
         usesWireSessionRegistry ? !wireBeats.isEmpty && !beats.isEmpty : !beats.isEmpty
     }

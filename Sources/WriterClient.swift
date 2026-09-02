@@ -516,7 +516,7 @@ extension AppStore {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = try? JSONSerialization.data(withJSONObject: [
             "tool": "conversation_publish",
-            "args": ["text": text, "actorId": "host"],
+            "args": ["text": text, "actorId": "you"],
         ])
         Task { _ = try? await URLSession.shared.data(for: request) }
     }
@@ -528,7 +528,7 @@ extension AppStore {
         guard wireStatus.isLive else {
             throw WireMutationFailure.rejected("writer offline")
         }
-        let organizerId = "host"
+        let organizerId = "you"
         let participantIds = session.participantIds ?? [organizerId] + inviteeIds
         let agendaTaskIds = session.agendaTaskIds ?? []
         let scheduledAt = session.scheduledAt ?? UpcomingSession.scheduledDate(for: session.when)
@@ -577,7 +577,7 @@ extension AppStore {
         let ended = try await performWireMutation(tool: "session_end", args: [
             "sessionId": sessionId,
             "outcome": "cancelled",
-            "actorId": "host",
+            "actorId": "you",
         ])
         apply(wireEvent: ended)
         rebuildFromWire()
@@ -605,7 +605,7 @@ extension AppStore {
         let event = try await performWireMutation(tool: "title_revoke", args: [
             "grantId": grant.id,
             "reason": reason,
-            "actorId": "host",
+            "actorId": "you",
         ])
         apply(wireEvent: event)
     }
@@ -622,7 +622,7 @@ extension AppStore {
             "delegatedAgentIds": grant.delegatedAgentIds,
             "permissions": grant.permissions.map(\.rawValue),
             "expiresAt": Self.isoString(grant.expiresAt),
-            "actorId": "host",
+            "actorId": "you",
         ]
     }
 
@@ -813,7 +813,7 @@ extension AppStore {
     }
 
     private static func isLocalUser(_ actorId: String) -> Bool {
-        actorId == "host" || actorId == "drive:human"
+        actorId == "you" || actorId == "drive:human"
     }
 
     private static let isoParser: ISO8601DateFormatter = {

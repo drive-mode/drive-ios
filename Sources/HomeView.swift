@@ -130,7 +130,7 @@ struct HomeView: View {
                         .accessibilityLabel("Inbox, \(store.unreadInboxCount) unread")
                         .accessibilityHint("Asks, invitations, and product news")
                         NavigationLink { ProfileView() } label: {
-                            AvatarChip(letter: "H", color: DT.violet, size: 34, human: true)
+                            AvatarChip(letter: store.profileInitial, color: DT.violet, size: 34, human: true)
                         }
                         .accessibilityLabel("Profile")
                         .accessibilityHint("Usage stats and settings")

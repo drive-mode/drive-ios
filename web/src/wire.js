@@ -11,7 +11,7 @@ const TASK_CAP = 3000;
 const ARTIFACT_CAP = 800;
 const BEAT_CAP = 64;
 const EVENT_TITLE_CAP = 4000;
-const LOCAL_USER = "host";
+const LOCAL_USER = "you";
 const BEAT_KINDS = { plan: "PLAN", diagram: "DIAGRAM", edit: "EDIT", run: "RUN", tests: "TESTS", decision: "DECISION", result: "RESULT" };
 const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : s);
 const parseIso = (raw) => { if (!raw) return null; const t = Date.parse(raw); return Number.isNaN(t) ? null : t; };

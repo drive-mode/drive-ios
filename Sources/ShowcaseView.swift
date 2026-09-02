@@ -199,7 +199,7 @@ struct ShowcaseView: View {
 
     private var header: some View {
         HStack(spacing: 12) {
-            AvatarChip(letter: "H", color: DT.violet, size: 44, human: true)
+            AvatarChip(letter: store.profileInitial, color: DT.violet, size: 44, human: true)
             VStack(alignment: .leading, spacing: 2) {
                 Text("Your showcase")
                     .kerning(-0.4)

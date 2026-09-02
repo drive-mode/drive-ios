@@ -237,7 +237,7 @@ test("wire title events fold into the same grant table as local ones", () => {
 test("session lifecycle events rebuild the registry; a resync clears it", () => {
   const s = preview();
   const at = new Date().toISOString();
-  s.applyWireEvent({ type: "control.session_created", at, sessionId: "s1", organizerId: "host", title: "Plan review", project: "Auth", participantIds: ["host", "maya"], agendaTaskIds: ["t1"] });
+  s.applyWireEvent({ type: "control.session_created", at, sessionId: "s1", organizerId: "you", title: "Plan review", project: "Auth", participantIds: ["you", "maya"], agendaTaskIds: ["t1"] });
   s.applyWireEvent({ type: "control.session_scheduled", at, sessionId: "s1", scheduledFor: new Date(Date.now() + 3600e3).toISOString() });
   s.rebuildFromWire();
   assert.equal(s.wireUpcomingSessions.length, 1);
@@ -300,7 +300,7 @@ test("display names strip namespaces before the Cline alias", () => {
   assert.equal(models.displayName("coder"), "Cline");
   assert.equal(models.displayName("agent:coder"), "Cline");
   assert.equal(models.displayName("agent:atlas"), "Atlas");
-  assert.equal(models.displayName("drive:host"), "Host");
+  assert.equal(models.displayName("drive:you"), "You");
   const s = preview();
   assert.equal(s.nameFor("agent:coder"), "Cline");
   s.applyWireEvent({ type: "control.join", at: new Date().toISOString(), participant: { id: "agent:beacon", kind: "agent", displayName: "Beacon", role: "partner" } });

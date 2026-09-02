@@ -678,7 +678,7 @@ struct SessionComposerSheet: View {
                                 people: ["You"] + selectedNames,
                                 agendaCount: pickedAgenda.count,
                                 note: note,
-                                participantIds: ["host"] + inviteeIds,
+                                participantIds: ["you"] + inviteeIds,
                                 agendaTaskIds: pickedAgenda.sorted(),
                                 scheduledAt: scheduledAt)
                             Task {
