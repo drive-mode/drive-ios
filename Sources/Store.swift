@@ -464,7 +464,7 @@ final class AppStore: ObservableObject {
 
     var liveSessionPeople: [String] {
         if usesWireSessionRegistry { return wireActiveSession?.people ?? [] }
-        return ["Harrison"] + agents.map(\.name)
+        return ["You"] + agents.map(\.name)
     }
 
     var hasLiveProgramBeats: Bool {

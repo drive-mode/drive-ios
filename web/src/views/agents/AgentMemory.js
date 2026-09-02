@@ -32,9 +32,9 @@ export const MemorySeeds = {
     file("m2", "Agent", "coder", "Cline", "auth-conventions.md", "Auth stack conventions that keep landing",
       "verifyJwt gates every refresh route — early return, no soft-fail. Middleware lives in auth.ts; helpers get named exports. Tests pin regressions by name (refresh-regression stays dead).", "1d"),
     file("m3", "Agent", "maya", "Maya", "decision-style.md", "How this room makes calls",
-      "Two options max, named plainly. Harrison decides fast when the suite covers the risk — lead with coverage. Gate-now beat flag-later has won three times running.", "6h"),
+      "Two options max, named plainly. The host decides fast when the suite covers the risk — lead with coverage. Gate-now beat flag-later has won three times running.", "6h"),
     file("m4", "Agent", "scout", "Scout", "staging-map.md", "Where staging secrets actually live",
-      "DATABASE_URL: env in staging, vault in prod — asked once, answered by Harrison 2026-08-17. WEBHOOK_SECRET still undecided (blocked ask w8 open). Never read prod vault without an approval.", "31m"),
+      "DATABASE_URL: env in staging, vault in prod — asked once, answered by the host 2026-08-17. WEBHOOK_SECRET still undecided (blocked ask w8 open). Never read prod vault without an approval.", "31m"),
     // Session memory — one working session, what happened and why.
     file("m5", "Session", "coder", "Cline · Auth middleware", "session-2026-08-17-auth.md", "The auth-gate session: what landed, what's parked",
       "Landed requireAuth behind the approval (+12 −3). Suite went 5/5, 38ms p95 after the gate. Maya called gate-now-no-flag; decision beat is in the replay. Parked: webhook signature verification (w8) pending the secret-store answer.", "1h", true),
@@ -52,7 +52,7 @@ export const MemorySeeds = {
       "Every export target goes through the adapter — no special cases. Fixture backfill retired six; new targets add a config, not a code path.", "3d"),
     // Plan memory — the thinking a plan carries between sessions.
     file("m11", "Plan", "payments-plan", "Payments refactor plan", "payments-plan-notes.md", "Open questions the plan must answer",
-      "5 steps, touches 14 files. Open: idempotency keys per provider or shared? Maya leans shared with provider salt. Review parked until Harrison opens it — nothing moves before that.", "1d"),
+      "5 steps, touches 14 files. Open: idempotency keys per provider or shared? Maya leans shared with provider salt. Review parked until the host opens it — nothing moves before that.", "1d"),
   ],
 };
 

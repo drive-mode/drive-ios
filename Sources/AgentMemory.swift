@@ -85,7 +85,7 @@ enum MemorySeeds {
         MemoryFile(id: "m4", scope: .agent, owner: "scout", ownerLabel: "Scout",
                    name: "staging-map.md",
                    hook: "Where staging secrets actually live",
-                   body: "DATABASE_URL: env in staging, vault in prod — asked once, answered by Harrison 2026-08-17. WEBHOOK_SECRET still undecided (blocked ask w8 open). Never read prod vault without an approval.",
+                   body: "DATABASE_URL: env in staging, vault in prod — asked once, answered by the host 2026-08-17. WEBHOOK_SECRET still undecided (blocked ask w8 open). Never read prod vault without an approval.",
                    updated: "31m"),
 
         // Session memory — one working session, what happened and why.
@@ -128,7 +128,7 @@ enum MemorySeeds {
         MemoryFile(id: "m11", scope: .plan, owner: "payments-plan", ownerLabel: "Payments refactor plan",
                    name: "payments-plan-notes.md",
                    hook: "Open questions the plan must answer",
-                   body: "5 steps, touches 14 files. Open: idempotency keys per provider or shared? Maya leans shared with provider salt. Review parked until Harrison opens it — nothing moves before that.",
+                   body: "5 steps, touches 14 files. Open: idempotency keys per provider or shared? Maya leans shared with provider salt. Review parked until the host opens it — nothing moves before that.",
                    updated: "1d"),
     ]
 }
