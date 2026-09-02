@@ -19,7 +19,7 @@ export function ProfileView() {
   const nameRaw = String(prefs.get("profile.displayName", "") ?? "").trim();
   const emailRaw = String(prefs.get("profile.email", "") ?? "").trim();
   const displayName = nameRaw || (preview ? "Harrison" : "Drive account");
-  const displayEmail = emailRaw || (preview ? "harrison@quant-h2.com" : "Account service not connected");
+  const displayEmail = emailRaw || (preview ? "preview@example.com" : "Account service not connected");
   const initial = displayName.charAt(0).toUpperCase();
 
   // The feedback bubble rides Home (HomeView.swift) — the Home cluster mounts its own; Profile stays quiet.

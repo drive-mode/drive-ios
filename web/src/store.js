@@ -46,7 +46,7 @@ export function createConfiguration({ search = window.location.search } = {}) {
   return c;
 }
 
-const SESSION_DUMMY_ID = "harrison";
+const SESSION_DUMMY_ID = "host";
 
 export class AppStore extends Observable {
   constructor(configuration) {

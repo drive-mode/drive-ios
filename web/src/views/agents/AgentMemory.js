@@ -27,7 +27,7 @@ const file = (id, scope, owner, ownerLabel, name, hook, body, updated, pinned = 
 export const MemorySeeds = {
   files: [
     // Agent memory — durable, who-they-work-with knowledge.
-    file("m1", "Agent", "coder", "Cline", "harrison-preferences.md", "How Harrison likes edits proposed",
+    file("m1", "Agent", "coder", "Cline", "host-preferences.md", "How the host likes edits proposed",
       "Small, scoped asks — one decision per approval. Diff summaries must be honest (+12 −3 means +12 −3). Branch names follow drive/<topic>. Never batch a rename into a feature diff. Prefers the suite green before the ask, not after.", "2d", true),
     file("m2", "Agent", "coder", "Cline", "auth-conventions.md", "Auth stack conventions that keep landing",
       "verifyJwt gates every refresh route — early return, no soft-fail. Middleware lives in auth.ts; helpers get named exports. Tests pin regressions by name (refresh-regression stays dead).", "1d"),

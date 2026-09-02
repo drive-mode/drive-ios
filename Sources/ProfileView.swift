@@ -112,7 +112,7 @@ struct ProfileView: View {
         let value = profileEmail.trimmingCharacters(in: .whitespacesAndNewlines)
         if !value.isEmpty { return value }
         return store.configuration.previewContentEnabled
-            ? "harrison@quant-h2.com"
+            ? "preview@example.com"
             : "Account service not connected"
     }
 

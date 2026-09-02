@@ -474,7 +474,7 @@ export function relative(ms, now = Date.now()) {
   return `${Math.floor(s / 86_400)}d`;
 }
 
-/** Namespaced ids ("agent:atlas", "drive:harrison") read as their local part. */
+/** Namespaced ids ("agent:atlas", "drive:host") read as their local part. */
 export function localActorId(actorId) {
   return String(actorId ?? "").replace(/^(agent|drive|human|user):/, "");
 }

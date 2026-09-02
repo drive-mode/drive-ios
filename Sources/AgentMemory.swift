@@ -68,8 +68,8 @@ enum MemorySeeds {
     static let files: [MemoryFile] = [
         // Agent memory — durable, who-they-work-with knowledge.
         MemoryFile(id: "m1", scope: .agent, owner: "coder", ownerLabel: "Cline",
-                   name: "harrison-preferences.md",
-                   hook: "How Harrison likes edits proposed",
+                   name: "host-preferences.md",
+                   hook: "How the host likes edits proposed",
                    body: "Small, scoped asks — one decision per approval. Diff summaries must be honest (+12 −3 means +12 −3). Branch names follow drive/<topic>. Never batch a rename into a feature diff. Prefers the suite green before the ask, not after.",
                    updated: "2d", pinned: true),
         MemoryFile(id: "m2", scope: .agent, owner: "coder", ownerLabel: "Cline",

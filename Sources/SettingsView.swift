@@ -115,7 +115,7 @@ final class SettingsDraftStore: ObservableObject {
         displayName = defaults.string(forKey: "profile.displayName")
             ?? (configuration.previewContentEnabled ? "Harrison" : "")
         email = defaults.string(forKey: "profile.email")
-            ?? (configuration.previewContentEnabled ? "harrison@quant-h2.com" : "")
+            ?? (configuration.previewContentEnabled ? "preview@example.com" : "")
         callLaunchBehavior = defaults.string(forKey: "call.launchBehavior") ?? "Configure each call"
         defaultCallPresetName = defaults.string(forKey: "call.defaultPreset")
             ?? (configuration.previewContentEnabled ? "Focused pair" : "No default preset")

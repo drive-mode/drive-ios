@@ -34,7 +34,7 @@ const FIELDS = [
   ["quietTo", "notify.quietTo", () => 8 * 60],
   ["escalation", "notify.escalation", () => "Do nothing"],
   ["displayName", "profile.displayName", (c) => (c.previewContentEnabled ? "Harrison" : "")],
-  ["email", "profile.email", (c) => (c.previewContentEnabled ? "harrison@quant-h2.com" : "")],
+  ["email", "profile.email", (c) => (c.previewContentEnabled ? "preview@example.com" : "")],
   ["callLaunchBehavior", "call.launchBehavior", () => "Configure each call"],
   ["defaultCallPresetName", "call.defaultPreset", (c) => (c.previewContentEnabled ? "Focused pair" : "No default preset")],
 ];
